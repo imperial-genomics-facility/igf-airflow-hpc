@@ -3,10 +3,14 @@ import redis
 def fetch_queue_list_from_redis_server(url):
   try:
     queue_list = list()
+    print(url)
+    print(redis.__version__)
     r = redis.from_url(url)
     for i in r.keys():
-      queue = i.decode() 
-      if not queue.startswith('_'):
+      queue = i.decode()
+      if not queue.startswith('_') and \
+         not queue.startswith('unacked'):
+        print(queue)
         q_len = r.llen(queue)
         queue_list.append({queue:q_len})
     return queue_list
