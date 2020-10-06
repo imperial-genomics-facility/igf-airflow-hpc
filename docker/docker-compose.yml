@@ -6,7 +6,7 @@ services:
     airflow_db:
         image: postgres:latest
         env_file:
-               - /home/igf/airflow_test/airflow_test/secrets/airflow_db_env
+               - /home/igf/airflow_test/secrets/airflow_db_env
         ports:
                - "5433:5432"
         restart: always
@@ -18,7 +18,7 @@ services:
     airflow_results_db:
         image: postgres:latest
         env_file:
-               - /home/igf/airflow_test/airflow_test/secrets/airflow_results_db_env
+               - /home/igf/airflow_test/secrets/airflow_results_db_env
         ports:
                - "5434:5432"
         restart: always
@@ -33,7 +33,7 @@ services:
               - "6379:6379"
         restart: always
         volumes:
-               - /home/igf/airflow_test/redis_conf/redis.conf:/usr/local/etc/redis/redis.conf:ro
+               - /home/igf/airflow_test/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
                - /home/igf/airflow_test/redis_airflow_data:/data:rw
         container_name: redis-server
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
@@ -42,7 +42,7 @@ services:
     airflow_webserver:
         image: apache/airflow:1.10.12
         env_file:
-                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -50,9 +50,9 @@ services:
         ports:
                 - "8083:8080"
         volumes:
-                - /home/igf/airflow_test/airflow/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
                 
@@ -69,7 +69,7 @@ services:
     airflow_scheduler:
         image: apache/airflow:1.10.12
         env_file:
-                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -80,9 +80,9 @@ services:
                 - airflow_webserver
                 - redis-server
         volumes:
-                - /home/igf/airflow_test/airflow/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
         restart: always
@@ -93,7 +93,7 @@ services:
     airflow_worker:
         image: apache/airflow:1.10.12
         env_file:
-                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -105,9 +105,9 @@ services:
                 - redis-server
                 - airflow_scheduler
         volumes:
-                - /home/igf/airflow_test/airflow/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
         command: worker -q igf-lims --skip_serve_logs --celery_hostname igf-lims
@@ -131,7 +131,7 @@ services:
     airflow_flower:
         image: apache/airflow:1.10.12
         env_file:
-                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -145,9 +145,9 @@ services:
                 - redis-server
                 - airflow_scheduler
         volumes:
-                - /home/igf/airflow_test/airflow/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
         restart: always
         command: flower
         container_name: airflow_flower
