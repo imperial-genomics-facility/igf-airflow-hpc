@@ -1,0 +1,154 @@
+version: '2.2'
+networks:
+    airflow_network:
+        driver: bridge
+services:
+    airflow_db:
+        image: postgres:latest
+        env_file:
+               - airflow_db_env
+        ports:
+               - "5433:5432"
+        restart: always
+        volumes:
+                - /home/igf/airflow_test/postgres_airflow_db:/var/lib/postgresql/data:rw
+        container_name: airflow_db
+        networks:
+               - airflow_network
+    airflow_results_db:
+        image: postgres:latest
+        env_file:
+               - airflow_results_db_env
+        ports:
+               - "5434:5432"
+        restart: always
+        volumes:
+                - /home/igf/airflow_test/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+        container_name: airflow_results_db
+        networks:
+               - airflow_network
+    redis-server:
+        image: redis:latest
+        ports:
+              - "6379:6379"
+        restart: always
+        volumes:
+               - /home/igf/airflow_test/redis_conf/redis.conf:/usr/local/etc/redis/redis.conf:ro
+               - /home/igf/airflow_test/redis_airflow_data:/data:rw
+        container_name: redis-server
+        command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
+        networks:
+               - airflow_network
+    airflow_webserver:
+        image: apache/airflow:1.10.12
+        env_file:
+                - airflow_env
+        links:
+                - airflow_db
+                - airflow_results_db
+                - redis-server
+        ports:
+                - "8083:8080"
+        volumes:
+                - /home/igf/airflow_test/airflow/logs:/opt/airflow/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc/dags:/opt/airflow/dags:rw
+                - /home/igf/airflow_test/airflow_test/secrets:/opt/airflow/secrets:rw
+                - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+                - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
+                - /home/igf/airflow_test/github/igf-airflow-hpc:/codes/igf-airflow-hpc:ro
+                - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+        depends_on:
+                - airflow_db
+                - airflow_results_db
+                - redis-server
+        restart: always
+        command: webserver
+        container_name: airflow_webserver
+        networks:
+               - airflow_network
+    airflow_scheduler:
+        image: apache/airflow:1.10.12
+        env_file:
+                - airflow_env
+        links:
+                - airflow_db
+                - airflow_results_db
+                - redis-server
+        depends_on:
+                - airflow_db
+                - airflow_results_db
+                - airflow_webserver
+                - redis-server
+        volumes:
+                - /home/igf/airflow_test/airflow/logs:/opt/airflow/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc/dags:/opt/airflow/dags:rw
+                - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+                - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
+        restart: always
+        command: scheduler
+        container_name: airflow_scheduler
+        networks:
+               - airflow_network
+    airflow_worker:
+        image: apache/airflow:1.10.12
+        env_file:
+                - airflow_env
+        links:
+                - airflow_db
+                - airflow_results_db
+                - redis-server
+        depends_on:
+                - airflow_db
+                - airflow_results_db
+                - airflow_webserver
+                - redis-server
+                - airflow_scheduler
+        volumes:
+                - /home/igf/airflow_test/airflow/logs:/opt/airflow/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc/dags:/opt/airflow/dags:rw
+                - /home/igf/airflow_test/airflow_test/secrets:/opt/airflow/secrets:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc:/codes/igf-airflow-hpc:ro
+                - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+        restart: always
+        command: worker -q igf-lims --skip_serve_logs --celery_hostname igf-lims
+        container_name: airflow_worker
+        networks:
+               - airflow_network
+    adminer:
+        image: adminer:latest
+        ports:
+                - "8081:8080"
+        depends_on:
+                - airflow_db
+                - airflow_results_db
+        links:
+                - airflow_db
+                - airflow_results_db
+        restart: always
+        container_name: adminer
+        networks:
+               - airflow_network
+    airflow_flower:
+        image: apache/airflow:1.10.12
+        env_file:
+                - airflow_env
+        links:
+                - airflow_db
+                - airflow_results_db
+                - redis-server
+        ports:
+                - "5555:5555"
+        depends_on:
+                - airflow_db
+                - airflow_results_db
+                - airflow_webserver
+                - redis-server
+                - airflow_scheduler
+        volumes:
+                - /home/igf/airflow_test/airflow/logs:/opt/airflow/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc/dags:/opt/airflow/dags:rw
+        restart: always
+        command: flower
+        container_name: airflow_flower
+        networks:
+               - airflow_network
