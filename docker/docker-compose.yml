@@ -6,7 +6,7 @@ services:
     airflow_db:
         image: postgres:latest
         env_file:
-               - airflow_db_env
+               - /home/igf/airflow_test/airflow_test/secrets/airflow_db_env
         ports:
                - "5433:5432"
         restart: always
@@ -18,7 +18,7 @@ services:
     airflow_results_db:
         image: postgres:latest
         env_file:
-               - airflow_results_db_env
+               - /home/igf/airflow_test/airflow_test/secrets/airflow_results_db_env
         ports:
                - "5434:5432"
         restart: always
@@ -42,7 +42,7 @@ services:
     airflow_webserver:
         image: apache/airflow:1.10.12
         env_file:
-                - airflow_env
+                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -69,7 +69,7 @@ services:
     airflow_scheduler:
         image: apache/airflow:1.10.12
         env_file:
-                - airflow_env
+                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -93,7 +93,7 @@ services:
     airflow_worker:
         image: apache/airflow:1.10.12
         env_file:
-                - airflow_env
+                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -131,7 +131,7 @@ services:
     airflow_flower:
         image: apache/airflow:1.10.12
         env_file:
-                - airflow_env
+                - /home/igf/airflow_test/airflow_test/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
