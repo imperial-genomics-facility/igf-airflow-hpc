@@ -1,0 +1,1 @@
+openssl req -x509 -newkey rsa:4096 -nodes -out airflow.cert -keyout airflow.key -x509 -days 365

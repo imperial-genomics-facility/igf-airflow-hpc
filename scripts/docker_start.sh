@@ -1,0 +1,1 @@
+docker-compost -f /home/igf/airflow_test/github/igf-airflow-hpc/docker/docker-compose.yml -p airflow-test up -d
