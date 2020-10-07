@@ -120,7 +120,7 @@ services:
     airflow_adminer:
         image: adminer:latest
         ports:
-                - "8081:8080"
+                - "8085:8080"
         depends_on:
                 - airflow_db
                 - airflow_results_db
