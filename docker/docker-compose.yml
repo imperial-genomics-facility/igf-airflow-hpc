@@ -117,7 +117,7 @@ services:
         container_name: airflow_worker
         networks:
                - airflow_network
-    adminer:
+    airflow_adminer:
         image: adminer:latest
         ports:
                 - "8081:8080"
@@ -128,7 +128,7 @@ services:
                 - airflow_db
                 - airflow_results_db
         restart: always
-        container_name: adminer
+        container_name: airflow_adminer
         networks:
                - airflow_network
     airflow_flower:
