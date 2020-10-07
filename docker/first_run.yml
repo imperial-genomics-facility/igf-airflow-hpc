@@ -9,7 +9,6 @@ services:
                - /home/igf/airflow_test/secrets/airflow_db_env
         ports:
                - "5433:5432"
-        restart: never
         volumes:
                 - /home/igf/airflow_test/postgres_airflow_db:/var/lib/postgresql/data:rw
         container_name: airflow_db
@@ -21,7 +20,6 @@ services:
                - /home/igf/airflow_test/secrets/airflow_results_db_env
         ports:
                - "5434:5432"
-        restart: never
         volumes:
                 - /home/igf/airflow_test/postgres_airflow_results_db:/var/lib/postgresql/data:rw
         container_name: airflow_results_db
@@ -31,7 +29,6 @@ services:
         image: redis:latest
         ports:
               - "6379:6379"
-        restart: never
         volumes:
                - /home/igf/airflow_test/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
                - /home/igf/airflow_test/redis_airflow_data:/data:rw
@@ -55,7 +52,6 @@ services:
                 - airflow_db
                 - airflow_results_db
                 - redis-server
-        restart: never
         command: initdb
         container_name: airflow_initdb
         networks:
@@ -77,7 +73,6 @@ services:
                 - airflow_db
                 - airflow_results_db
                 - redis-server
-        restart: never
         command: create_user --username $USERNAME --firstname $FIRSTNAME --lastname $LASTNAME --role Admin --email $EMAIL --password $PASSWORD
         container_name: airflow_create_user
         networks:
