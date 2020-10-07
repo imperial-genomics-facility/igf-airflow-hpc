@@ -1,0 +1,7 @@
+{
+  "redis_conn_file":"/rds/general/user/igf/home/data2/airflow_test/secrets/redis_conn.json",
+  "hpc_host":"login.hpc.ic.ac.uk",
+  "hpc_user":"igf",
+  "igf_lims_ssh_key_file":"/SSH/id_rsa",
+  "hpc_ssh_key_file":"/home/igf/.ssh/id_rsa"
+}
