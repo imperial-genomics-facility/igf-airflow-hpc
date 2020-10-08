@@ -14,12 +14,12 @@ args = {
     'provide_context': True,
 }
 
-hpc_hook = SSHHook(
-      remote_host=Variable.get('hpc_host'),
-      username=Variable.get('hpc_user'),
-      key_file=Variable.get('igf_lims_ssh_key_file')
-    )
-
+#hpc_hook = SSHHook(
+#      remote_host=Variable.get('hpc_host'),
+#      username=Variable.get('hpc_user'),
+#      key_file=Variable.get('igf_lims_ssh_key_file')
+#    )
+hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
