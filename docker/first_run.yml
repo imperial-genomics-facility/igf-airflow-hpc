@@ -56,24 +56,3 @@ services:
         container_name: airflow_initdb
         networks:
                - airflow_network
-    airflow_create_user:
-        image: apache/airflow:1.10.12
-        env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
-                - /home/igf/airflow_test/secrets/airflow_first_run_env
-        links:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
-        volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
-        depends_on:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
-        command: create_user --username $USERNAME --firstname $FIRSTNAME --lastname $LASTNAME --role Admin --email $EMAIL --password $PASSWORD
-        container_name: airflow_create_user
-        networks:
-               - airflow_network
