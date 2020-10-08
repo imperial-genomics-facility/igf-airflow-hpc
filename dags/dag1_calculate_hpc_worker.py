@@ -65,10 +65,10 @@ with dag:
 
   check_hpc_queue = \
     SSHOperator(
-      task_id='fetch_active_jobs_from_hpc',
+      task_id='check_hpc_queue',
       ssh_hook=hpc_hook,
       dag=dag,
-      command='qstat',
+      command='source /etc/bashrc;qstat',
       queue='igf-lims'
     )
 
