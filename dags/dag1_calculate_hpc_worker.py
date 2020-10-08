@@ -59,7 +59,7 @@ with dag:
       task_id='fetch_queue_list_from_redis',
       dag=dag,
       python_callable=airflow_utils_for_redis,
-      op_kwargs={"redis_conf_file":Variable.get('redis_conf_file')},
+      op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
       queue='igf-lims'
     )
 
