@@ -77,7 +77,7 @@ with dag:
       task_id='fetch_active_jobs_from_hpc',
       ssh_hook=hpc_hook,
       dag=dag,
-      command='bash /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/hpc_job_count_runner.sh',
+      command='bash /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/hpc_job_count_runner.sh ',
       do_xcom_push=True,
       queue='igf-lims'
     )
