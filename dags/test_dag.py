@@ -22,7 +22,7 @@ with dag:
       dag=dag,
       bash_command='hostname -A',
       queue='hpc_4G',
-      do_xcom_push=True
+      xcom_push=True
     )
   task2 = \
     BashOperator(
@@ -30,6 +30,6 @@ with dag:
       dag=dag,
       bash_command='hostname -A',
       queue='hpc_1G',
-      do_xcom_push=True
+      xcom_push=True
     )
   task1 >> task2
