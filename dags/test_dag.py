@@ -20,14 +20,16 @@ with dag:
     BashOperator(
       task_id='task1',
       dag=dag,
-      bash_command='echo "Test1"',
-      queue='hpc_4G'
+      bash_command='hostname -A',
+      queue='hpc_4G',
+      do_xcom_push=True
     )
   task2 = \
     BashOperator(
       task_id='task2',
       dag=dag,
-      bash_command='echo "Test2"',
-      queue='hpc_1G'
+      bash_command='hostname -A',
+      queue='hpc_1G',
+      do_xcom_push=True
     )
   task1 >> task2
