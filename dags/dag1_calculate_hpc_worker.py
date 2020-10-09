@@ -39,6 +39,8 @@ def get_new_workers(**kwargs):
         active_jobs_dict=active_tasks)
     for key,value in worker_to_submit.items():
       ti.xcom_push(key=key,value=value)
+    unique_queue_list = \
+      [q for q in unique_queue_list if q.startswith('hpc')]
     return unique_queue_list
   except Exception as e:
     raise ValueError('Failed to get new workers, error: {0}'.format(e))
