@@ -1,3 +1,5 @@
+source /etc/bashrc
+
 module load anaconda3/personal
 source activate airflow1.10.12
 
