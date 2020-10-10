@@ -36,6 +36,7 @@ with dag:
       task_id = 'check_orwell_disk',
       dag = dag,
       ssh_hook = orwell_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/igf_code/IGF-cron-scripts/orwell/orwell_disk_usage.sh '
     )
 
@@ -44,6 +45,7 @@ with dag:
       task_id = 'check_eliot_disk',
       dag = dag,
       ssh_hook = eliot_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/git_repos/IGF-cron-scripts/eliot/eliot_disk_usage.sh '
     )
 
@@ -52,6 +54,7 @@ with dag:
       task_id = 'check_woolf_disk',
       dag = dag,
       ssh_hook = woolf_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/git_repos/IGF-cron-scripts/woolf/woolf_disk_usage.sh '
     )
 
@@ -60,6 +63,7 @@ with dag:
       task_id = 'check_igf_lims_disk',
       dag = dag,
       ssh_hook = igf_lims_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/github/IGF-cron-scripts/igf_lims/igf_lims_disk_usage.sh '
     )
 
@@ -68,6 +72,7 @@ with dag:
       task_id = 'merge_disk_usage',
       dag = dag,
       ssh_hook = eliot_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/git_repos/IGF-cron-scripts/eliot/merge_disk_usage.sh '
     )
 
@@ -76,6 +81,7 @@ with dag:
       task_id = 'internal_usage',
       dag = dag,
       ssh_hook = eliot_ssh_hook,
+      queue='hpc_4G',
       command = 'bash /home/igf/git_repos/IGF-cron-scripts/eliot/internal_usage.sh '
     )
 
