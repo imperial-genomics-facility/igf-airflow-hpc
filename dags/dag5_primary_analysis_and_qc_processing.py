@@ -37,7 +37,7 @@ with dag:
       task_id = 'find_new_exp_for_analysis',
       dag = dag,
       queue='hpc_4G',
-      command = 'bash /home/igf/igf_code/IGF-cron-scripts/orwell/find_new_exp_for_analysis.sh '
+      bash_command = 'bash /home/igf/igf_code/IGF-cron-scripts/orwell/find_new_exp_for_analysis.sh '
     )
 
   seed_analysis_pipeline = \

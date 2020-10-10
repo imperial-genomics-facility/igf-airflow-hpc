@@ -32,4 +32,4 @@ with dag:
       bash_command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/lims_metadata/fetch_lims_metadata_qsub.sh '
     )
 
-    submit_metadata_fetch_job
+  submit_metadata_fetch_job
