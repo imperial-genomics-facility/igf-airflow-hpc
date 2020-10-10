@@ -26,7 +26,7 @@ hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 dag = \
   DAG(
     dag_id='dag5_primary_analysis_and_qc_processing',
-    schedule_interval=None,
+    schedule_interval="@hourly",
     max_active_runs=1,
     tags=['hpc','orwell'],
     default_args=default_args)

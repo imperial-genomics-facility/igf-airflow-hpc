@@ -43,7 +43,7 @@ igf_lims_ssh_hook = \
 dag = \
   DAG(
     dag_id='dag2_disk_usage',
-    schedule_interval=None,
+    schedule_interval="@hourly",
     max_active_runs=1,
     tags=['igf-lims','hpc','eliot','woolf','orwell'],
     default_args=default_args)

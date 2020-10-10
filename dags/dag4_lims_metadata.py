@@ -18,7 +18,7 @@ dag = \
   DAG(
     dag_id='dag4_lims_metadata',
     catchup=False,
-    schedule_interval=None,
+    schedule_interval='@daily',
     max_active_runs=1,
     tags=['hpc'],
     default_args=default_args)

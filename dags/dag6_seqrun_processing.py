@@ -20,7 +20,7 @@ dag = \
   DAG(
     dag_id='dag6_seqrun_processing',
     catchup=False,
-    schedule_interval=None,
+    schedule_interval="@hourly",
     max_active_runs=1,
     tags=['hpc','orwell'],
     default_args=default_args)

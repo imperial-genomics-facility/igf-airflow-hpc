@@ -18,7 +18,7 @@ dag = \
   DAG(
     dag_id='dag3_hpc_pipelines',
     catchup=False,
-    schedule_interval=None,
+    schedule_interval="*/5 * * * *",
     max_active_runs=1,
     tags=['hpc'],
     default_args=default_args)
