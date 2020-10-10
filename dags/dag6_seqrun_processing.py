@@ -20,7 +20,7 @@ dag = \
   DAG(
     dag_id='dag6_seqrun_processing',
     catchup=False,
-    schedule_interval="None",
+    schedule_interval=None,
     max_active_runs=1,
     default_args=default_args)
 
@@ -29,6 +29,7 @@ orwell_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host='orwell.hh.med.ic.ac.uk')
+
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 with dag:
