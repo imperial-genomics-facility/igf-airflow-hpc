@@ -16,6 +16,12 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
+orwell_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host='orwell.hh.med.ic.ac.uk')
+
 dag = \
   DAG(
     dag_id='dag5_primary_analysis_and_qc_processing',
@@ -33,11 +39,12 @@ with dag:
     )
 
   find_new_exp_for_analysis = \
-    BashOperator(
+    SSHOperator(
       task_id = 'find_new_exp_for_analysis',
       dag = dag,
+      ssh_hook = orwell_ssh_hook,
       queue='hpc_4G',
-      bash_command = 'bash /home/igf/igf_code/IGF-cron-scripts/orwell/find_new_exp_for_analysis.sh '
+      command = 'bash /home/igf/igf_code/IGF-cron-scripts/orwell/find_new_exp_for_analysis.sh '
     )
 
   seed_analysis_pipeline = \
@@ -45,7 +52,7 @@ with dag:
       task_id = 'seed_analysis_pipeline',
       dag = dag,
       queue='hpc_4G',
-      bash_command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_analysis_pipeline.sh'
+      bash_command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_analysis_pipeline.sh '
     )
 
   update_exp_metadata >> find_new_exp_for_analysis >> seed_analysis_pipeline
