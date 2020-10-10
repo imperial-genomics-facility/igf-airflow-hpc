@@ -24,7 +24,7 @@ igf_lims_ssh_hook = SSHHook(ssh_conn_id='igf_lims_ssh_conn')
 
 dag = \
   DAG(
-    dag_id='dag2_disk_usage_check',
+    dag_id='dag2_disk_usage',
     catchup=False,
     schedule_interval=None,
     max_active_runs=1,
