@@ -10,7 +10,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': days_ago(2),
-    'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
@@ -27,7 +26,7 @@ woolf_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='wolf.med.ic.ac.uk')
+    remote_host='woolf.med.ic.ac.uk')
 
 eliot_ssh_hook = \
   SSHHook(
@@ -44,7 +43,6 @@ igf_lims_ssh_hook = \
 dag = \
   DAG(
     dag_id='dag2_disk_usage',
-    catchup=False,
     schedule_interval=None,
     max_active_runs=1,
     default_args=default_args)

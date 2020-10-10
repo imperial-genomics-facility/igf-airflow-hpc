@@ -31,6 +31,6 @@ export AIRFLOW__CELERY__RESULT_BACKEND=''
 export AIRFLOW__CELERY__FLOWER_BASIC_AUTH=''
 export AIRFLOW__CELERY__BROKER_TRANSPORT_OPTIONS__VISIBILITY_TIMEOUT=86400
 export AIRFLOW__SECRETS__BACKEND=airflow.secrets.local_filesystem.LocalFilesystemBackend
-export AIRFLOW__SECRETS__BACKEND_KWARGS={"variables_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/var.json","connections_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/conn.json"}
+export AIRFLOW__SECRETS__BACKEND_KWARGS='{"variables_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/var.json","connections_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/conn.json"}'
 export FERNET_KEY=''
 export PYTHONPATH=/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:$PYTHONPATH
