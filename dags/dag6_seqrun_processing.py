@@ -87,4 +87,4 @@ with dag:
     )
 
   switch_off_project_barcode >> change_samplesheet_for_run >> restart_seqrun_processing
-  restart_seqrun_processing >> register_project_metadata >> find_new_seqrun
+  restart_seqrun_processing >> register_project_metadata >> find_new_seqrun >> seed_demultiplexing_pipe
