@@ -22,6 +22,7 @@ dag = \
     catchup=False,
     schedule_interval=None,
     max_active_runs=1,
+    tags=['hpc','orwell'],
     default_args=default_args)
 
 orwell_ssh_hook = \

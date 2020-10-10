@@ -20,6 +20,7 @@ dag = \
     catchup=False,
     schedule_interval=None,
     max_active_runs=1,
+    tags=['hpc'],
     default_args=default_args)
 
 with dag:
