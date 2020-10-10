@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import airflow
-from airflow import DAG
+from airflow import DAG,Variable
 from airflow.operators.bash_operator import BashOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
@@ -17,10 +17,29 @@ default_args = {
     'retry_delay': timedelta(minutes=5)
 }
 
-orwell_ssh_hook = SSHHook(ssh_conn_id='orwell_ssh_conn')
-woolf_ssh_hook = SSHHook(ssh_conn_id='woolf_ssh_conn')
-eliot_ssh_hook = SSHHook(ssh_conn_id='eliot_ssh_conn')
-igf_lims_ssh_hook = SSHHook(ssh_conn_id='igf_lims_ssh_conn')
+orwell_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host='orwell.hh.med.ic.ac.uk')
+
+woolf_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host='wolf.med.ic.ac.uk')
+
+eliot_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host='eliot.med.ic.ac.uk')
+
+igf_lims_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host='igf-lims.cc.ic.ac.uk')
 
 dag = \
   DAG(
