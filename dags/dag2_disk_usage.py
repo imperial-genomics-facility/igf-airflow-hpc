@@ -1,7 +1,6 @@
 from datetime import timedelta
 
-import airflow
-from airflow import DAG,Variable
+from airflow.models import DAG,Variable
 from airflow.operators.bash_operator import BashOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
