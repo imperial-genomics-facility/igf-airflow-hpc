@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from airflow.models import DAG,Variable
+from airflow.utils.dates import days_ago
 from airflow.operators.bash_operator import BashOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
@@ -8,7 +9,7 @@ from airflow.contrib.hooks.ssh_hook import SSHHook
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': airflow.utils.dates.days_ago(2),
+    'start_date': days_ago(2),
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
