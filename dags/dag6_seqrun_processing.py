@@ -29,6 +29,7 @@ orwell_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host='orwell.hh.med.ic.ac.uk')
+hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 with dag:
   switch_off_project_barcode = \
@@ -77,11 +78,12 @@ with dag:
     )
 
   seed_demultiplexing_pipe = \
-    BashOperator(
+    SSHOperator(
       task_id = 'seed_demultiplexing_pipe',
       dag = dag,
+      ssh_hook=hpc_hook,
       queue='hpc_4G',
-      bash_command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_demultiplexing_pipeline.sh '
+      command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_demultiplexing_pipeline.sh '
     )
 
   switch_off_project_barcode >> change_samplesheet_for_run >> restart_seqrun_processing
