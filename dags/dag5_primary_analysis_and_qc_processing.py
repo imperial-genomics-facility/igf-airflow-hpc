@@ -21,6 +21,7 @@ orwell_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host='orwell.hh.med.ic.ac.uk')
+hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 dag = \
   DAG(
@@ -48,11 +49,12 @@ with dag:
     )
 
   seed_analysis_pipeline = \
-    BashOperator(
+    SSHOperator(
       task_id = 'seed_analysis_pipeline',
       dag = dag,
+      ssh_hook=hpc_hook,
       queue='hpc_4G',
-      bash_command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_analysis_pipeline.sh '
+      command = 'bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/seed_analysis_pipeline.sh '
     )
 
   update_exp_metadata >> find_new_exp_for_analysis >> seed_analysis_pipeline
