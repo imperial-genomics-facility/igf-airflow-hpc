@@ -27,6 +27,7 @@ with dag:
     BashOperator(
       task_id='run_demultiplexing_pipeline',
       dag=dag,
+      queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_demultiplexing_pipeline.sh '
     )
 
@@ -34,6 +35,7 @@ with dag:
     BashOperator(
       task_id='run_primary_analysis_pipeline',
       dag=dag,
+      queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_primary_analysis_pipeline.sh '
     )
 
