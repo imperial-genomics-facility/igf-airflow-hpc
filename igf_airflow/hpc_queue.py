@@ -15,7 +15,7 @@ def get_pbspro_job_count(job_name_prefix=''):
     with TemporaryFile() as tmp_file:
       subprocess.\
         check_call(
-          ['qstat','-f','-F','json'],
+          ['qstat','-t','-f','-F','json'],
           stdout=tmp_file)
       tmp_file.seek(0)
       json_data = tmp_file.read()
