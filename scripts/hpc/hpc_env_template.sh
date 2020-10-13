@@ -8,6 +8,7 @@ export AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE='Europe/London'
 export AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT=/SSL/airflow.cert
 export AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY=/SSL/airflow.key
 export AIRFLOW__WEBSERVER__DAG_ORIENTATION=TB
+export AIRFLOW__SCHEDULER__RUN_DURATION=3600
 export AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY=/rds/general/user/igf/home/data2/airflow_test/logs/scheduler
 export AIRFLOW__CORE__BASE_LOG_FOLDER=/rds/general/user/igf/home/data2/airflow_test/logs
 export AIRFLOW__CORE__DAG_PROCESSOR_MANAGER_LOG_LOCATION=/rds/general/user/igf/home/data2/airflow_test/logs/dag_processor_manager/dag_processor_manager.log
