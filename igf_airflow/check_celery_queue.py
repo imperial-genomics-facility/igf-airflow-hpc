@@ -60,10 +60,12 @@ def calculate_new_workers(queue_list,active_jobs_dict,max_workers_per_queue=10,m
     if isinstance(queue_list,list) and \
        len(queue_list) > 0 and \
        total_active_jobs < max_total_workers:
-      for entry in queue_list:                         # this list should be unique
+      for entry in queue_list:                                                  # this list should be unique
         for queue_name,waiting_jobs in entry.items():
           if waiting_jobs > max_workers_per_queue:
             waiting_jobs = max_workers_per_queue
+          if int(waiting_jobs/2) > 1:
+            waiting_jobs = int(waiting_jobs/2)                                  #submit half of the workers
           active_job = active_jobs_dict.get(queue_name)
           total_running_for_queue = 0
           active_queued_job = 0
