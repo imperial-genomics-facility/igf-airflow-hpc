@@ -64,7 +64,9 @@ def calculate_new_workers(queue_list,active_jobs_dict,max_workers_per_queue=10,m
         for queue_name,waiting_jobs in entry.items():
           if waiting_jobs > max_workers_per_queue:
             waiting_jobs = max_workers_per_queue
-          if int(waiting_jobs/2) > 1:
+          if waiting_jobs is not None and \
+             waiting_jobs > 0 and \
+             int(waiting_jobs/2) >= 1:
             waiting_jobs = int(waiting_jobs/2)                                  #submit half of the workers
           active_job = active_jobs_dict.get(queue_name)
           total_running_for_queue = 0
