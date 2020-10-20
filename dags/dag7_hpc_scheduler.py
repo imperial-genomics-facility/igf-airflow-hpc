@@ -20,9 +20,9 @@ dag = \
   DAG(
     dag_id='dag7_hpc_scheduler',
     catchup=False,
-    schedule_interval=None,
+    schedule_interval="30 * * * *",
     max_active_runs=1,
-    tags=['hpc','igf-lims'],
+    tags=['igf-lims'],
     default_args=default_args)
 
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
