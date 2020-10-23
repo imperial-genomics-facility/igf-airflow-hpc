@@ -18,7 +18,7 @@ hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
-        schedule_interval="*/10 * * * *",
+        schedule_interval="*/15 * * * *",
         default_args=args,
         tags=['igf-lims',]
       )
