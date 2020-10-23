@@ -77,19 +77,11 @@ def calculate_new_workers(queue_list,active_jobs_dict,max_workers_per_queue=10,m
           if active_queued_job < 1:
             if total_running_for_queue==0 and \
                (total_active_jobs + waiting_jobs) < max_total_workers:
-              if waiting_jobs is not None and \
-                 waiting_jobs > 0 and \
-                 int(waiting_jobs/2) > 1:
-                waiting_jobs = int(waiting_jobs/2)
               worker_to_submit.\
                 update({queue_name : waiting_jobs})
             if total_running_for_queue > 0:
               if waiting_jobs > total_running_for_queue:
                   waiting_jobs = waiting_jobs - total_running_for_queue
-              if waiting_jobs is not None and \
-                 waiting_jobs > 0 and \
-                 int(waiting_jobs/2) > 1:
-                waiting_jobs = int(waiting_jobs/2)
               if (total_active_jobs + waiting_jobs) < max_total_workers:
                 worker_to_submit.\
                   update({queue_name : waiting_jobs})
