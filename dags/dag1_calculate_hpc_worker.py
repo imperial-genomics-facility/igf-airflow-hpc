@@ -18,7 +18,7 @@ hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
-        schedule_interval="10,25,40,55 * * * *",
+        schedule_interval="*/10 * * * *",
         default_args=args,
         tags=['igf-lims',]
       )
@@ -36,7 +36,9 @@ def get_new_workers(**kwargs):
     worker_to_submit,unique_queue_list = \
       calculate_new_workers(
         queue_list=queued_tasks,
-        active_jobs_dict=active_tasks)
+        active_jobs_dict=active_tasks,
+        max_workers_per_queue=6,
+        max_total_workers=70)
     for key,value in worker_to_submit.items():
       ti.xcom_push(key=key,value=value)
     unique_queue_list = \
