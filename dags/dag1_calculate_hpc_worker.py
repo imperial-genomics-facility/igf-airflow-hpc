@@ -38,7 +38,7 @@ def get_new_workers(**kwargs):
         queue_list=queued_tasks,
         active_jobs_dict=active_tasks,
         max_workers_per_queue=3,
-        max_total_workers=70)
+        max_total_workers=10)
     for key,value in worker_to_submit.items():
       ti.xcom_push(key=key,value=value)
     unique_queue_list = \
