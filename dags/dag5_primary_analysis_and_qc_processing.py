@@ -28,6 +28,7 @@ dag = \
     dag_id='dag5_primary_analysis_and_qc_processing',
     schedule_interval="@hourly",
     max_active_runs=1,
+    catchup=False,
     tags=['hpc','orwell'],
     default_args=default_args)
 
