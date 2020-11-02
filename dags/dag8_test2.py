@@ -44,7 +44,7 @@ with dag:
     BranchPythonOperator(
       task_id='calculate_new_worker_size_and_branch',
       dag=dag,
-      python_callable=lambda: ['copy_files_to_hpc1','copy_files_to_hpc2'],
+      python_callable=lambda: ['copy_files_to_hpc1',],
       queue='hpc_4G')
   copy_files_to_hpc1 = \
     BashOperator(
