@@ -4,6 +4,12 @@
   "hpc_user":"igf",
   "igf_lims_ssh_key_file":"/SSH/id_rsa",
   "hpc_ssh_key_file":"/home/igf/.ssh/id_rsa",
+  "seqrun_server":"",
+  "seqrun_base_path":"",
+  "database_config_file":"",
+  "slack_conf":"",
+  "ms_teams_conf":"",
+  "hpc_seqrun_path":"",
   "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=01:00:00",

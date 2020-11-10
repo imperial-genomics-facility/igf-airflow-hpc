@@ -40,7 +40,7 @@ dag = \
     catchup=False,
     schedule_interval="0 */2 * * *",
     max_active_runs=1,
-    tags=['orwell','hpc'],
+    tags=['hpc'],
     default_args=default_args)
 
 
