@@ -206,15 +206,23 @@ def copy_seqrun_chunk(**context):
     if finish_index > len(file_data) - 1:
       finish_index = len(file_data) - 1
     local_seqrun_path = \
-      os.path.join(local_seqrun_path,seqrun_id)
+      os.path.join(
+        local_seqrun_path,
+        seqrun_id)
+    remote_seqrun_path = \
+      os.path.join(
+        seqrun_base_path,
+        seqrun_id)
     remote_address = \
-      '{0}@{1}'.format(seqrun_server_user,seqrun_server)
+      '{0}@{1}'.format(
+        seqrun_server_user,
+        seqrun_server)
     for entry in file_data[start_index:finish_index]:
       file_path = entry.get('file_path')
       file_size = entry.get('file_size')
       remote_path = \
         os.path.join(
-          seqrun_base_path,
+          remote_seqrun_path,
           file_path)
       local_path = \
         os.path.join(
