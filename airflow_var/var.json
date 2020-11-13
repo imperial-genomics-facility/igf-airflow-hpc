@@ -6,6 +6,7 @@
   "hpc_ssh_key_file":"/home/igf/.ssh/id_rsa",
   "seqrun_server":"",
   "seqrun_base_path":"",
+  "seqrun_server_user":"",
   "database_config_file":"",
   "slack_conf":"",
   "asana_conf":"",
