@@ -217,20 +217,22 @@ def copy_seqrun_chunk(context):
       reaction='fail')
 
 
-## TASKS
 with dag:
+  ## TASK
   generate_seqrun_list = \
     BranchPythonOperator(
       task_id='generate_seqrun_list',
       dag=dag,
       queue='hpc_4G',
       python_callable=get_ongoing_seqrun_list)
+  ## TASK
   no_ongoing_seqrun = \
     DummyOperator(
       task_id='no_ongoing_seqrun',
       dag=dag,
       queue='hpc_4G',
       on_success_callback=log_sleep)
+  ## TASK
   tasks = list()
   for i in range(5):
     t1 = \
@@ -243,7 +245,14 @@ with dag:
         params={'source_task_id':'generate_seqrun_list',
                 'pull_key':'ongoing_seqruns',
                 'index_number':i},
-        command='python /path/script1.py --run_id {{ ti.xcom_pull(key=params.pull_key,task_ids=params.source_task_id)[ params.index_number ] }}')
+        command="""
+          source /home/igf/igf_code/airflow/env.sh; \
+          python /home/igf/igf_code/airflow/data-management-python/scripts/seqrun_processing/create_file_list_for_ongoing_seqrun.py \
+            --seqrun_base_dir /home/igf/seqrun/illumina \
+            --output_path /home/igf/ongoing_run_tracking \
+            --seqrun_id {{ ti.xcom_pull(key=params.pull_key,task_ids=params.source_task_id)[ params.index_number ] }}
+          """)
+    ## TASK
     t2 = \
       PythonOperator(
         task_id='copy_seqrun_file_list_{0}'.format(i),
@@ -253,6 +262,7 @@ with dag:
         params={'xcom_pull_task_ids':'generate_seqrun_file_list_{0}'.format(i),
                 'seqrun_server':Variable.get('seqrun_server')},
         python_callable=copy_seqrun_manifest_file)
+    ## TASK
     t3 = \
       BranchPythonOperator(
         task_id='decide_copy_branch_{0}'.format(i),
@@ -263,6 +273,7 @@ with dag:
                 'seqrun_chunk_size_key':'seqrun_chunk_size',
                 'child_task_prefix':'copy_file_run_{0}_chunk_'.format(i)},
         python_callable=get_seqrun_chunks)
+    ## TASK
     t4 = list()
     for j in range(10):
       t4j = \

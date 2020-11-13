@@ -1,12 +1,12 @@
-import json
+import json,logging
 from airflow.models import DAG,Variable
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator,BranchPythonOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
 from airflow.utils.dates import days_ago
-from igf_airflow.check_celery_queue import fetch_queue_list_from_redis_server
-from igf_airflow.check_celery_queue import calculate_new_workers
+from igf_airflow.celery.check_celery_queue import fetch_queue_list_from_redis_server
+from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 args = {
     'owner':'airflow',
@@ -44,7 +44,8 @@ def airflow_utils_for_redis(**kwargs):
     queue_list = fetch_queue_list_from_redis_server(url=url)
     return queue_list
   except Exception as e:
-    raise ValueError('Failed to run, error:{0}'.format(e))
+    logging.error('Failed to run, error:{0}'.format(e))
+    raise
 
 
 def get_new_workers(**kwargs):
@@ -68,50 +69,47 @@ def get_new_workers(**kwargs):
       [q for q in unique_queue_list if q.startswith('hpc')]
     return unique_queue_list
   except Exception as e:
-    raise ValueError('Failed to get new workers, error: {0}'.format(e))
-
+    logging.error('Failed to get new workers, error: {0}'.format(e))
+    raise
 
 
 with dag:
+  ## TASK
   fetch_queue_list_from_redis = \
     PythonOperator(
       task_id='fetch_queue_list_from_redis',
       dag=dag,
       python_callable=airflow_utils_for_redis,
       op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
-      queue='igf-lims'
-    )
-
+      queue='igf-lims')
+  ## TASK
   check_hpc_queue = \
     SSHOperator(
       task_id='check_hpc_queue',
       ssh_hook=hpc_hook,
       dag=dag,
       command='source /etc/bashrc;qstat',
-      queue='igf-lims'
-    )
-
+      queue='igf-lims')
+  ## TASK
   fetch_active_jobs_from_hpc = \
     SSHOperator(
       task_id='fetch_active_jobs_from_hpc',
       ssh_hook=hpc_hook,
       dag=dag,
-      command='source /etc/bashrc;bash /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/hpc_job_count_runner.sh ',
+      command="""
+        source /etc/bashrc;\
+        bash /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/hpc_job_count_runner.sh """,
       do_xcom_push=True,
-      queue='igf-lims'
-    )
-
+      queue='igf-lims')
+  ## TASK
   calculate_new_worker_size_and_branch = \
     BranchPythonOperator(
       task_id='calculate_new_worker_size_and_branch',
       dag=dag,
       python_callable=get_new_workers,
-      queue='igf-lims',
-    )
-
-  check_hpc_queue >> fetch_active_jobs_from_hpc
-  calculate_new_worker_size_and_branch << [fetch_queue_list_from_redis,fetch_active_jobs_from_hpc]
-
+      queue='igf-lims')
+  ## TASK
+  queue_tasks = list()
   hpc_queue_list = Variable.get('hpc_queue_list')
   for q,data in hpc_queue_list.items():
     pbs_resource = data.get('pbs_resource')
@@ -123,11 +121,33 @@ with dag:
       queue='igf-lims',
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
-        source /etc/bashrc;qsub -o /dev/null -e /dev/null -k n -m n -N {{ params.job_name }} -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+        source /etc/bashrc; \
+        qsub \
+          -o /dev/null \
+          -e /dev/null \
+          -k n -m n \
+          -N {{ params.job_name }} \
+          -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
+            /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% else %}
-        source /etc/bashrc;qsub -o /dev/null -e /dev/null -k n -m n -N {{ params.job_name }} {{ params.pbs_resource }} -- /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+        source /etc/bashrc;\
+        qsub \
+          -o /dev/null \
+          -e /dev/null \
+          -k n -m n \
+          -N {{ params.job_name }} {{ params.pbs_resource }} -- \
+            /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% endif %}
       """,
-      params={'pbs_resource':pbs_resource,'airflow_queue':airflow_queue,'job_name':q}
-    )
-    calculate_new_worker_size_and_branch >> t
+      params={'pbs_resource':pbs_resource,
+              'airflow_queue':airflow_queue,
+              'job_name':q})
+    queue_tasks.\
+      append(t)
+
+  ## PIPELINE
+  check_hpc_queue >> fetch_active_jobs_from_hpc
+  calculate_new_worker_size_and_branch << \
+    [fetch_queue_list_from_redis,
+     fetch_active_jobs_from_hpc]
+  calculate_new_worker_size_and_branch >> queue_tasks

@@ -4,6 +4,7 @@ from airflow.models import DAG,Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.bash_operator import BashOperator
 
+## ARGS
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -14,6 +15,7 @@ default_args = {
     'retry_delay': timedelta(minutes=2),
 }
 
+## DAG
 dag = \
   DAG(
     dag_id='dag3_hpc_pipelines',
@@ -24,20 +26,20 @@ dag = \
     default_args=default_args)
 
 with dag:
+  ## TASK
   run_demultiplexing_pipeline = \
     BashOperator(
       task_id='run_demultiplexing_pipeline',
       dag=dag,
       queue='hpc_4G',
-      bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_demultiplexing_pipeline.sh '
-    )
-
+      bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_demultiplexing_pipeline.sh ')
+  ## TASK
   run_primary_analysis_pipeline = \
     BashOperator(
       task_id='run_primary_analysis_pipeline',
       dag=dag,
       queue='hpc_4G',
-      bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_primary_analysis_pipeline.sh '
-    )
+      bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_primary_analysis_pipeline.sh ')
 
+  ## PIPELINE
   run_demultiplexing_pipeline >> run_primary_analysis_pipeline
