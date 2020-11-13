@@ -279,7 +279,7 @@ with dag:
         params={'xcom_pull_task_ids':'copy_seqrun_file_list_{0}'.format(i),
                 'worker_size':10,
                 'seqrun_chunk_size_key':'seqrun_chunk_size',
-                'child_task_prefix':'copy_file_run_{0}_chunk_'.format(i)},
+                'child_task_prefix':'copy_file_run_{0}_chunk'.format(i)},
         python_callable=get_seqrun_chunks)
     ## TASK
     t4 = list()
