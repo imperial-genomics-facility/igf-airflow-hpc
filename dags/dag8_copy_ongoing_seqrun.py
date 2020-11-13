@@ -42,7 +42,7 @@ dag = \
     max_active_runs=1,
     tags=['hpc'],
     default_args=default_args,
-    default_view='LR')
+    orientation='LR')
 
 
 ## FUNCTIONS
