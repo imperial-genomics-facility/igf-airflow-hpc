@@ -25,7 +25,7 @@ default_args = {
 }
 
 
-## CONN HOOKS
+## SSH HOOKS
 orwell_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
@@ -241,6 +241,7 @@ with dag:
         task_id='generate_seqrun_file_list_{0}'.format(i),
         dag=dag,
         pool='orwell_exe_pool',
+        ssh_hook=orwell_ssh_hook,
         do_xcom_push=True,
         queue='hpc_4G',
         params={'source_task_id':'generate_seqrun_list',
