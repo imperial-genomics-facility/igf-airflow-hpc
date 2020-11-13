@@ -292,8 +292,9 @@ with dag:
                   'local_seqrun_path':Variable.get('hpc_seqrun_path')},
           python_callable=copy_seqrun_chunk)
       t4.append(t4j)
-    tasks.append([ t1 >> t2 >> t3 >> t4 ])
+    #tasks.append([ t1 >> t2 >> t3 >> t4 ])
+    generate_seqrun_list >> t1 >> t2 >> t3 >> t4
 
   ## PIPELINE
   generate_seqrun_list >> no_ongoing_seqrun
-  generate_seqrun_list >> tasks
+  #generate_seqrun_list >> tasks
