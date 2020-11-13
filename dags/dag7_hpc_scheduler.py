@@ -37,7 +37,9 @@ with dag:
       dag = dag,
       ssh_hook = hpc_hook,
       queue='igf-lims',
-      command = 'source /etc/bashrc;qsub /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/run_hpc_scheduler.sh ')
+      command = """
+        source /etc/bashrc; \
+        qsub /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
 
   ## PIPELNE
   run_hpc_scheduler

@@ -98,7 +98,7 @@ with dag:
       dag=dag,
       command="""
         source /etc/bashrc;\
-        bash /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/hpc_job_count_runner.sh """,
+        bash /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       queue='igf-lims')
   ## TASK
@@ -128,7 +128,7 @@ with dag:
           -k n -m n \
           -N {{ params.job_name }} \
           -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% else %}
         source /etc/bashrc;\
         qsub \
@@ -136,7 +136,7 @@ with dag:
           -e /dev/null \
           -k n -m n \
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_test/github/igf-airflow-hpc/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% endif %}
       """,
       params={'pbs_resource':pbs_resource,
