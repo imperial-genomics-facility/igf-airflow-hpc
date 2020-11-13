@@ -98,7 +98,8 @@ with dag:
       dag=dag,
       command="""
         source /etc/bashrc;\
-        bash /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
+        source /project/tgu/data2/airflow_test/secrets/hpc_env.sh;\
+        python /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       queue='igf-lims')
   ## TASK
