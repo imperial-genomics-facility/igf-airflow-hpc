@@ -41,7 +41,8 @@ dag = \
     schedule_interval="0 */2 * * *",
     max_active_runs=1,
     tags=['hpc'],
-    default_args=default_args)
+    default_args=default_args,
+    default_view='LR')
 
 
 ## FUNCTIONS
