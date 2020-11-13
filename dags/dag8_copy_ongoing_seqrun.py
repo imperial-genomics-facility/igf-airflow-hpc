@@ -95,6 +95,9 @@ def copy_seqrun_manifest_file(**context):
     xcom_pull_task_ids = context['params'].get('xcom_pull_task_ids')
     ti = context.get('ti')
     remote_file_path = ti.xcom_pull(task_ids=xcom_pull_task_ids)
+    if remote_file_path is not None and \
+       not isinstance(remote_file_path,str):
+      remote_file_path = remote_file_path.decode()
     tmp_work_dir = get_temp_dir(use_ephemeral_space=True)
     local_file_path = \
       os.path.join(
@@ -127,6 +130,9 @@ def get_seqrun_chunks(**context):
     seqrun_chunk_size_key = context['params'].get('seqrun_chunk_size_key')
     xcom_pull_task_ids = context['params'].get('xcom_pull_task_ids')
     file_path = ti.xcom_pull(task_ids=xcom_pull_task_ids)
+    if file_path is not None and \
+       not isinstance(file_path,str):
+      file_path = file_path.decode()
     check_file_path(file_path)
     file_data = read_json_data(file_path)
     chunk_size = None
