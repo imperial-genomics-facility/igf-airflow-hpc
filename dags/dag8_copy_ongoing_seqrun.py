@@ -95,7 +95,7 @@ def copy_seqrun_manifest_file(**context):
     xcom_pull_task_ids = context['params'].get('xcom_pull_task_ids')
     ti = context.get('ti')
     remote_file_path = ti.xcom_pull(task_ids=xcom_pull_task_ids)
-    tmp_work_dir = get_temp_dir(use_ephemeral=True)
+    tmp_work_dir = get_temp_dir(use_ephemeral_space=True)
     local_file_path = \
       os.path.join(
         tmp_work_dir,
