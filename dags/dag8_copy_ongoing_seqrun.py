@@ -46,7 +46,7 @@ dag = \
 
 
 ## FUNCTIONS
-def get_ongoing_seqrun_list(context):
+def get_ongoing_seqrun_list(**context):
   """
   A function for fetching ongoing sequencing run ids
   """
@@ -85,7 +85,7 @@ def get_ongoing_seqrun_list(context):
       reaction='fail')
 
 
-def copy_seqrun_manifest_file(context):
+def copy_seqrun_manifest_file(**context):
   """
   A function for copying filesize manifest for ongoing sequencing runs to hpc 
   """
@@ -116,7 +116,7 @@ def copy_seqrun_manifest_file(context):
       reaction='fail')
 
 
-def get_seqrun_chunks(context):
+def get_seqrun_chunks(**context):
   """
   A function for setting file chunk size for seqrun files copy
   """
@@ -160,7 +160,7 @@ def get_seqrun_chunks(context):
       reaction='fail')
 
 
-def copy_seqrun_chunk(context):
+def copy_seqrun_chunk(**context):
   """
   A function for copying seqrun chunks
   """
