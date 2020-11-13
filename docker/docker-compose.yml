@@ -52,6 +52,7 @@ services:
         volumes:
                 - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
@@ -83,6 +84,7 @@ services:
         volumes:
                 - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
@@ -111,6 +113,7 @@ services:
         volumes:
                 - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
@@ -152,6 +155,7 @@ services:
         volumes:
                 - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
         restart: always

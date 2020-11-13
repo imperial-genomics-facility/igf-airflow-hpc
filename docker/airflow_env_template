@@ -30,4 +30,4 @@ AIRFLOW__CELERY__BROKER_TRANSPORT_OPTIONS__VISIBILITY_TIMEOUT=86400
 AIRFLOW__SECRETS__BACKEND=airflow.secrets.local_filesystem.LocalFilesystemBackend
 AIRFLOW__SECRETS__BACKEND_KWARGS={"variables_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/var.json","connections_file_path":"/rds/general/user/igf/home/data2/airflow_test/secrets/conn.json"}
 FERNET_KEY=''
-PYTHONPATH=/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:$PYTHONPATH
+PYTHONPATH=/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:$PYTHONPATH
