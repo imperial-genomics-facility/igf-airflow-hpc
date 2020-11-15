@@ -359,7 +359,7 @@ with dag:
     ## TASK
     copy_seqrun_files = list()
     for j in range(10):
-      copy_seqrun_chunk = \
+      copy_file_chunk = \
         PythonOperator(
           task_id='copy_file_run_{0}_chunk_{1}'.format(i,j),
           dag=dag,
@@ -374,7 +374,7 @@ with dag:
                   'seqrun_id_pull_task_ids':'generate_seqrun_list',
                   'local_seqrun_path':Variable.get('hpc_seqrun_path')},
           python_callable=copy_seqrun_chunk)
-      copy_seqrun_files.append(copy_seqrun_chunk)
+      copy_seqrun_files.append(copy_file_chunk)
     generate_seqrun_list >> generate_seqrun_file_list >> copy_seqrun_file_list >> compare_seqrun_files >> decide_copy_branch
     decide_copy_branch >> no_copy_seqrun
     decide_copy_branch >> copy_seqrun_files
