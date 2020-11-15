@@ -327,7 +327,7 @@ with dag:
         params={'xcom_pull_task_ids':'generate_seqrun_file_list_{0}'.format(i)},
         python_callable=copy_seqrun_manifest_file)
     ## TASK
-    compare_existing_seqrun_files = \
+    compare_seqrun_files = \
       PythonOperator(
         task_id='compare_existing_seqrun_files_{0}'.format(i),
         dag=dag,
@@ -337,7 +337,7 @@ with dag:
                 'run_index_number':i,
                 'seqrun_id_pull_task_ids':'generate_seqrun_list',
                 'local_seqrun_path':Variable.get('hpc_seqrun_path')},
-        python_callable=check_and_reset_manifest_file) ## TODO
+        python_callable=check_and_reset_manifest_file)
     ## TASK
     decide_copy_branch = \
       BranchPythonOperator(
@@ -375,7 +375,7 @@ with dag:
                   'local_seqrun_path':Variable.get('hpc_seqrun_path')},
           python_callable=copy_seqrun_chunk)
       copy_seqrun_files.append(copy_seqrun_chunk)
-    generate_seqrun_list >> generate_seqrun_file_list >> copy_seqrun_file_list >> compare_existing_seqrun_files >> decide_copy_branch
+    generate_seqrun_list >> generate_seqrun_file_list >> copy_seqrun_file_list >> compare_seqrun_files >> decide_copy_branch
     decide_copy_branch >> no_copy_seqrun
     decide_copy_branch >> copy_seqrun_files
 
