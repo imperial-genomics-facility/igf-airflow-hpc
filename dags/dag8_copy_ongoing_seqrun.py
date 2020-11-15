@@ -126,7 +126,7 @@ def copy_seqrun_manifest_file(**context):
     raise
 
 
-def check_and_reset_manifest_file(**context):
+def reset_manifest_file(**context):
   """
   A function for checking existing files and resetting the manifest json with new files
   """
@@ -337,7 +337,7 @@ with dag:
                 'run_index_number':i,
                 'seqrun_id_pull_task_ids':'generate_seqrun_list',
                 'local_seqrun_path':Variable.get('hpc_seqrun_path')},
-        python_callable=check_and_reset_manifest_file)
+        python_callable=reset_manifest_file)
     ## TASK
     decide_copy_branch = \
       BranchPythonOperator(
