@@ -329,7 +329,7 @@ with dag:
     ## TASK
     compare_seqrun_files = \
       PythonOperator(
-        task_id='compare_existing_seqrun_files_{0}'.format(i),
+        task_id='compare_seqrun_files_{0}'.format(i),
         dag=dag,
         queue='hpc_4G',
         params={'xcom_pull_task_ids':'copy_seqrun_file_list_{0}'.format(i),
