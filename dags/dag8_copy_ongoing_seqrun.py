@@ -350,7 +350,7 @@ def check_progress_for_run_func(**context):
         runinfo_file=runinfo_path)
     comment = \
       'current cycle: {0}, index cycle: {1}, read format: {2}'.\
-        format(current_cycle,index_cycle_statusread_format)
+        format(current_cycle,index_cycle_status,read_format)
     send_log_to_channels(
       slack_conf=Variable.get('slack_conf'),
       ms_teams_conf=Variable.get('ms_teams_conf'),
