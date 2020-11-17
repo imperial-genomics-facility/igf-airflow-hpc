@@ -13,6 +13,7 @@
   "asana_demult_project":"",
   "ms_teams_conf":"",
   "hpc_seqrun_path":"",
+  "interop_dumptext_exe":"",
   "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
