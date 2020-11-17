@@ -500,7 +500,8 @@ with dag:
                 'seqrun_id_pull_task_ids':'generate_seqrun_list',
                 'interop_dump_pull_task':'create_interop_dump_run_{0}'.format(i)},
         python_callable=check_progress_for_run_func)
-
+    ## PIPELINE
+    create_interop_dump >> check_progress_for_run
 
   ## PIPELINE
   generate_seqrun_list >> no_ongoing_seqrun
