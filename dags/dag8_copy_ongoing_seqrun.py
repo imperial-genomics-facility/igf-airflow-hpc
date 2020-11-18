@@ -349,8 +349,8 @@ def check_progress_for_run_func(**context):
         interop_dump=interop_dump_path,
         runinfo_file=runinfo_path)
     comment = \
-      'current cycle: {0}, index cycle: {1}, read format: {2}'.\
-        format(current_cycle,index_cycle_status,read_format)
+      'seqrun: {0}, current cycle: {1}, index cycle: {2}, read format: {3}'.\
+        format(seqrun_id,current_cycle,index_cycle_status,read_format)
     send_log_to_channels(
       slack_conf=Variable.get('slack_conf'),
       ms_teams_conf=Variable.get('ms_teams_conf'),
