@@ -14,6 +14,9 @@
   "ms_teams_conf":"",
   "hpc_seqrun_path":"",
   "interop_dumptext_exe":"",
+  "box_dir_prefix_for_seqrun_report":"",
+  "box_username":"",
+  "box_config_file":"",
   "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
