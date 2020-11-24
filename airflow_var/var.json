@@ -4,7 +4,6 @@
   "hpc_user":"igf",
   "igf_lims_ssh_key_file":"/SSH/id_rsa",
   "hpc_ssh_key_file":"/home/igf/.ssh/id_rsa",
-  "seqrun_server":"seqrun_server",
   "seqrun_base_path":"",
   "seqrun_server_user":"",
   "database_config_file":"",
@@ -20,6 +19,12 @@
   "bcl2fastq_image_path":"",
   "pandoc_image_path":"",
   "singlecell_barcode_json":"",
+  "samplesheet_validation_json":"",
+  "seqrun_server":"orwell.hh.med.ic.ac.uk",
+  "orwell_server_hostname":"orwell.hh.med.ic.ac.uk",
+  "woolf_server_hostname":"woolf.med.ic.ac.uk",
+  "eliot_server_hostname":"eliot.med.ic.ac.uk",
+  "igf_lims_server_hostname":"igf-lims.cc.ic.ac.uk",
   "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
