@@ -21,7 +21,7 @@ orwell_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='orwell.hh.med.ic.ac.uk')
+    remote_host=Variable.get('orwell_server_hostname'))
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 ## DAG

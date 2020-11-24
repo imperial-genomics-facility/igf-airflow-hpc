@@ -21,25 +21,25 @@ orwell_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='orwell.hh.med.ic.ac.uk')
+    remote_host=Variable.get('orwell_server_hostname'))
 
 woolf_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='woolf.med.ic.ac.uk')
+    remote_host=Variable.get('woolf_server_hostname'))
 
 eliot_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='eliot.med.ic.ac.uk')
+    remote_host=Variable.get('eliot_server_hostname'))
 
 igf_lims_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host='igf-lims.cc.ic.ac.uk')
+    remote_host=Variable.get('igf_lims_server_hostname'))
 
 ## DAG
 dag = \
