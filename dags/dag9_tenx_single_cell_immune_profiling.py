@@ -52,7 +52,7 @@ with dag:
         task_id=analysis_name,
         dag=dag)
     run_trim_list = []
-    for run_id in range(1,33):
+    for run_id in range(0,32):
       ## TASK
       t = \
         DummyOperator(
