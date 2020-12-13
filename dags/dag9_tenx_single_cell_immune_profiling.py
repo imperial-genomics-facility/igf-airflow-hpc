@@ -39,19 +39,23 @@ with dag:
     BranchPythonOperator(
       task_id='fetch_analysis_info',
       dag=dag,
+      queue='hpc_4g',
+      params={'no_analysis_task':'no_analysis'},
       python_callable=fetch_analysis_info_and_branch_func)
   ## TASK
   configure_cellranger_run = \
-    DummyOperator(
+    PythonOperator(
       task_id='configure_cellranger_run',
-      dag=dag)
+      dag=dag,
+      queue='hpc_4g',
+      python_callable=configure_cellranger_run_func)
   for analysis_name in FEATURE_TYPE_LIST:
     ## TASK
     task_branch = \
       DummyOperator(
         task_id=analysis_name,
         dag=dag)
-    run_trim_list = []
+    run_trim_list = list()
     for run_id in range(0,32):
       ## TASK
       t = \
