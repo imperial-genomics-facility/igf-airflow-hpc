@@ -40,7 +40,9 @@ with dag:
       task_id='fetch_analysis_info',
       dag=dag,
       queue='hpc_4g',
-      params={'no_analysis_task':'no_analysis'},
+      params={'no_analysis_task':'no_analysis',
+              'analysis_description_xcom_key':'analysis_description',
+              'analysis_info_xcom_key':'analysis_info'},
       python_callable=fetch_analysis_info_and_branch_func)
   ## TASK
   configure_cellranger_run = \
@@ -48,6 +50,10 @@ with dag:
       task_id='configure_cellranger_run',
       dag=dag,
       queue='hpc_4g',
+      params={'xcom_pull_task_id':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_key':'analysis_description',
+              'analysis_info_xcom_key':'analysis_info',
+              'library_csv_xcom_key':'cellranger_library_csv'},
       python_callable=configure_cellranger_run_func)
   for analysis_name in FEATURE_TYPE_LIST:
     ## TASK
