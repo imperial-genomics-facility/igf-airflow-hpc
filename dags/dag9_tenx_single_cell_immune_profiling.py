@@ -13,6 +13,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_c
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import decide_analysis_branch_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_cellranger_result_to_db_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import ftp_files_upload_for_analysis
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import irods_files_upload_for_analysis
 
 ## ARGS
 default_args = {
@@ -166,12 +167,17 @@ with dag:
     DummyOperator(
       task_id='upload_report_to_box',
       dag=dag,
-      params=None)
+      params={'xcom_pull_task':'load_cellranger_result_to_db',
+              'xcom_pull_files_key':'html_report_file'})
   upload_results_to_irods = \
-    DummyOperator(
+    PythonOperator(
       task_id='upload_results_to_irods',
       dag=dag,
-      params=None)
+      python_callable=irods_files_upload_for_analysis,
+      params={'xcom_pull_task':'load_cellranger_result_to_db',
+              'xcom_pull_files_key':'loaded_output_files',
+              'collection_name_key':'sample_igf_id',
+              'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> load_cellranger_result_to_db
   load_cellranger_result_to_db >> upload_report_to_ftp
