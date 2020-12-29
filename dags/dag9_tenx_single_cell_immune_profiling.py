@@ -12,6 +12,8 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_s
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_cellranger_tool
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import decide_analysis_branch_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_cellranger_result_to_db_func
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import ftp_files_upload_for_analysis
+
 ## ARGS
 default_args = {
     'owner': 'airflow',
@@ -143,15 +145,23 @@ with dag:
               'cellranger_xcom_pull_task':'run_cellranger',
               'collection_type':'CELLRANGER_MULTI',
               'collection_table':'sample',
+              'xcom_collection_name_key':'sample_igf_id',
               'genome_column':'genome_build',
               'analysis_name':'cellranger_multi',
-              'output_xcom_key':'loaded_output_files'})
+              'output_xcom_key':'loaded_output_files',
+              'html_xcom_key':'html_report_file',
+              'html_report_file_name':'web_summary.html'})
   upload_report_to_ftp = \
     PythonOperator(
       task_id='upload_report_to_ftp',
       dag=dag,
-      python_callable=None,
-      params={})
+      python_callable=ftp_files_upload_for_analysis,
+      params={'xcom_pull_task':'load_cellranger_result_to_db',
+              'xcom_pull_files_key':'html_report_file',
+              'collection_name_key':'sample_igf_id',
+              'collection_type':'FTP_CELLRANGER_MULTI',
+              'collection_table':'sample',
+              'collect_remote_file':True})
   upload_report_to_box = \
     DummyOperator(
       task_id='upload_report_to_box',
