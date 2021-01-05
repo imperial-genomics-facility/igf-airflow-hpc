@@ -17,6 +17,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import irods
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_scanpy_for_sc_5p_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_singlecell_notebook_wrapper_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_analysis_files_func
+
 ## ARGS
 default_args = {
     'owner': 'airflow',
@@ -48,7 +49,7 @@ with dag:
     BranchPythonOperator(
       task_id='fetch_analysis_info',
       dag=dag,
-      queue='hpc_4g',
+      queue='hpc_4G',
       params={'no_analysis_task':'no_analysis',
               'analysis_description_xcom_key':'analysis_description',
               'analysis_info_xcom_key':'analysis_info'},
@@ -58,7 +59,7 @@ with dag:
     PythonOperator(
       task_id='configure_cellranger_run',
       dag=dag,
-      queue='hpc_4g',
+      queue='hpc_4G',
       params={'xcom_pull_task_id':'fetch_analysis_info_and_branch',
               'analysis_description_xcom_key':'analysis_description',
               'analysis_info_xcom_key':'analysis_info',
@@ -77,6 +78,7 @@ with dag:
         PythonOperator(
           task_id='run_trim_{0}_{1}'.format(analysis_name,run_id),
           dag=dag,
+          queue='hpc_4G',
           params={'xcom_pull_task_id':'fetch_analysis_info_and_branch',
                   'analysis_info_xcom_key':'analysis_info',
                   'analysis_name':analysis_name,
@@ -109,6 +111,7 @@ with dag:
     PythonOperator(
       task_id='run_cellranger',
       dag=dag,
+      queue='hpc_64G16t24hr',
       params={'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
               'analysis_description_xcom_key':'analysis_description',
               'library_csv_xcom_key':'cellranger_library_csv',
@@ -123,6 +126,7 @@ with dag:
     BranchPythonOperator(
       task_id='decide_analysis_branch',
       dag=dag,
+      queue='hpc_4G',
       python_callable=decide_analysis_branch_func,
       params={'load_cellranger_result_to_db_task':'load_cellranger_result_to_db',
               'run_scanpy_for_sc_5p_task':'run_scanpy_for_sc_5p',
@@ -141,6 +145,7 @@ with dag:
     PythonOperator(
       task_id='load_cellranger_result_to_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_cellranger_result_to_db_func,
       params={'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
               'analysis_description_xcom_key':'analysis_description',
@@ -158,6 +163,7 @@ with dag:
     PythonOperator(
       task_id='upload_report_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_cellranger_result_to_db',
               'xcom_pull_files_key':'html_report_file',
@@ -170,12 +176,14 @@ with dag:
     DummyOperator(
       task_id='upload_report_to_box',
       dag=dag,
+      queue='hpc_4G',
       params={'xcom_pull_task':'load_cellranger_result_to_db',
               'xcom_pull_files_key':'html_report_file'})
   upload_results_to_irods = \
     PythonOperator(
       task_id='upload_results_to_irods',
       dag=dag,
+      queue='hpc_4G',
       python_callable=irods_files_upload_for_analysis,
       params={'xcom_pull_task':'load_cellranger_result_to_db',
               'xcom_pull_files_key':'loaded_output_files',
@@ -191,6 +199,7 @@ with dag:
     PythonOperator(
       task_id='run_scanpy_for_sc_5p',
       dag=dag,
+      queue='hpc_4G',
       python_callable=run_scanpy_for_sc_5p_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -204,6 +213,7 @@ with dag:
     PythonOperator(
       task_id='load_scanpy_report_for_sc_5p_to_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_analysis_files_func,
       params={'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -217,6 +227,7 @@ with dag:
     PythonOperator(
       task_id='upload_scanpy_report_for_sc_5p_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_scanpy_report_for_sc_5p_to_db',
               'xcom_pull_files_key':'output_db_files',
@@ -233,6 +244,7 @@ with dag:
     DummyOperator(
       task_id='upload_cellbrowser_for_sc_5p_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'run_scanpy_for_sc_5p',
               'xcom_pull_files_key':'cellbrowser_dirs',
@@ -252,6 +264,7 @@ with dag:
     PythonOperator(
       task_id='run_scirpy_for_vdj',
       dag=dag,
+      queue='hpc_4G',
       python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -270,6 +283,7 @@ with dag:
     PythonOperator(
       task_id='load_scanpy_report_for_vdj_to_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_analysis_files_func,
       params={'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -283,6 +297,7 @@ with dag:
     PythonOperator(
       task_id='upload_scanpy_report_for_vdj_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_scanpy_report_for_vdj_to_db',
               'xcom_pull_files_key':'output_db_files',
@@ -305,6 +320,7 @@ with dag:
     DummyOperator(
       task_id='run_scirpy_for_vdj_b',
       dag=dag,
+      queue='hpc_4G',
       python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -323,6 +339,7 @@ with dag:
     PythonOperator(
       task_id='load_scanpy_report_for_vdj_b_to_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_analysis_files_func,
       params={'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -336,6 +353,7 @@ with dag:
     PythonOperator(
       task_id='upload_scanpy_report_for_vdj_b_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_scanpy_report_for_vdj_b_to_db',
               'xcom_pull_files_key':'output_db_files',
@@ -358,6 +376,7 @@ with dag:
     DummyOperator(
       task_id='run_scirpy_for_vdj_t',
       dag=dag,
+      queue='hpc_4G',
       python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -376,6 +395,7 @@ with dag:
     PythonOperator(
       task_id='load_scanpy_report_for_vdj_t_to_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_analysis_files_func,
       params={'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -389,6 +409,7 @@ with dag:
     PythonOperator(
       task_id='upload_scanpy_report_for_vdj_t_to_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_scanpy_report_for_vdj_t_to_db',
               'xcom_pull_files_key':'output_db_files',
@@ -411,6 +432,7 @@ with dag:
     PythonOperator(
       task_id='run_seurat_for_sc_5p',
       dag=dag,
+      queue='hpc_4G',
       python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -429,6 +451,7 @@ with dag:
     PythonOperator(
       task_id='load_seurat_report_for_sc_5p_db',
       dag=dag,
+      queue='hpc_4G',
       python_callable=load_analysis_files_func,
       params={'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -442,6 +465,7 @@ with dag:
     DummyOperator(
       task_id='upload_seurat_report_for_sc_5p_ftp',
       dag=dag,
+      queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
       params={'xcom_pull_task':'load_seurat_report_for_sc_5p_db',
               'xcom_pull_files_key':'output_db_files',
