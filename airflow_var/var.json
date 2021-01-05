@@ -35,12 +35,16 @@
     "crisper_guide_capture"],
   "scanpy_single_sample_template":"",
   "scanpy_notebook_image":"",
+  "scirpy_single_sample_template":"",
+  "scirpy_notebook_image":"",
+  "seurat_single_sample_template":"",
+  "seurat_notebook_image":"",
   "hpc_queue_list":{
   "irods_exe_dir":"",
   "ftp_hostname":"",
   "ftp_username":"",
   "ftp_project_path":"",
-  "cell_marker_list":"",
+  "all_cell_marker_list":"",
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
       "airflow_queue":"hpc_1G"},
