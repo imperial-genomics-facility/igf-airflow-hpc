@@ -51,10 +51,6 @@ dag = \
     default_args=default_args,
     orientation='LR')
 
-'''
-## FUNCTIONS
-
-'''
 
 with dag:
   ## TASK
