@@ -20,7 +20,7 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
-        schedule_interval="*/10 * * * *",
+        schedule_interval="*/15 * * * *",
         default_args=args,
         tags=['igf-lims',]
       )
@@ -61,8 +61,8 @@ def get_new_workers(**kwargs):
       calculate_new_workers(
         queue_list=queued_tasks,
         active_jobs_dict=active_tasks,
-        max_workers_per_queue=3,
-        max_total_workers=20)
+        max_workers_per_queue=Variable.get('hpc_max_workers_per_queue'),
+        max_total_workers=Variable.get('hpc_max_total_workers'))
     for key,value in worker_to_submit.items():
       ti.xcom_push(key=key,value=value)
     unique_queue_list = \

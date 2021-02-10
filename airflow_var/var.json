@@ -4,6 +4,8 @@
   "hpc_user":"igf",
   "igf_lims_ssh_key_file":"/SSH/id_rsa",
   "hpc_ssh_key_file":"/home/igf/.ssh/id_rsa",
+  "hpc_max_workers_per_queue":2,
+  "hpc_max_total_workers":20,
   "seqrun_base_path":"",
   "seqrun_server_user":"",
   "database_config_file":"",
