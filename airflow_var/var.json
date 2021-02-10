@@ -20,6 +20,7 @@
   "bcl2fastq_image_path":"",
   "pandoc_image_path":"",
   "singlecell_barcode_json":"",
+  "singlecell_dual_barcode_json":"",
   "samplesheet_validation_json":"",
   "seqrun_server":"orwell.hh.med.ic.ac.uk",
   "orwell_server_hostname":"orwell.hh.med.ic.ac.uk",
