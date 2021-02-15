@@ -43,12 +43,17 @@
   "scirpy_notebook_image":"",
   "seurat_single_sample_template":"",
   "seurat_notebook_image":"",
-  "hpc_queue_list":{
   "irods_exe_dir":"",
   "ftp_hostname":"eliot.med.ic.ac.uk",
   "ftp_username":"igf",
   "ftp_project_path":"",
   "all_cell_marker_list":"",
+  "cellranger_exe":"",
+  "cellranger_job_timeout":259200,
+  "cutadapt_singularity_image":"",
+  "multiqc_singularity_image":"",
+  "picard_singularity_image":"",
+  "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
       "airflow_queue":"hpc_1G"},
