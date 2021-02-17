@@ -57,4 +57,4 @@ with dag:
       command="docker restart airflow_flower")
 
   ## PIPELNE
-  run_hpc_scheduler > restart_flower_server
+  run_hpc_scheduler >> restart_flower_server
