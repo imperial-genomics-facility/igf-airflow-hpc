@@ -71,7 +71,7 @@ with dag:
         task_id=analysis_name,
         dag=dag)
     run_trim_list = list()
-    for run_id in range(0,32):
+    for run_id in range(0,2):
       ## TASK
       t = \
         PythonOperator(
