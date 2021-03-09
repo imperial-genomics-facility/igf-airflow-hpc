@@ -21,6 +21,8 @@
   "bcl2fastq_image_path":"",
   "interop_dumptext_exe":"",
   "interop_notebook_image_path":"",
+  "seqrun_ml_notebook_template":"",
+  "seqrun_training_data_csv":"",
   "interop_notebook_template":"",
   "pandoc_image_path":"",
   "singlecell_barcode_json":"",
