@@ -59,7 +59,7 @@ with dag:
       task_id='configure_cellranger_run',
       dag=dag,
       queue='hpc_4G',
-      params={'xcom_pull_task_id':'fetch_analysis_info_and_branch',
+      params={'xcom_pull_task_id':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'analysis_info_xcom_key':'analysis_info',
               'library_csv_xcom_key':'cellranger_library_csv'},
@@ -78,7 +78,7 @@ with dag:
           task_id='run_trim_{0}_{1}'.format(analysis_name,run_id),
           dag=dag,
           queue='hpc_4G',
-          params={'xcom_pull_task_id':'fetch_analysis_info_and_branch',
+          params={'xcom_pull_task_id':'fetch_analysis_info',
                   'analysis_info_xcom_key':'analysis_info',
                   'analysis_description_xcom_key':'analysis_description',
                   'analysis_name':analysis_name,
@@ -112,7 +112,7 @@ with dag:
       task_id='run_cellranger',
       dag=dag,
       queue='hpc_64G16t24hr',
-      params={'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+      params={'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'library_csv_xcom_key':'cellranger_library_csv',
               'library_csv_xcom_pull_task':'configure_cellranger_run',
@@ -147,7 +147,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=load_cellranger_result_to_db_func,
-      params={'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+      params={'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
@@ -207,7 +207,7 @@ with dag:
               'allow_errors':False,
               'output_notebook_key':'scanpy_notebook',
               'output_cellbrowser_key':'cellbrowser_dirs',
-              'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
   load_scanpy_report_for_sc_5p_to_db = \
     PythonOperator(
@@ -275,7 +275,7 @@ with dag:
               'count_dir':'count',
               'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
-              'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
@@ -331,7 +331,7 @@ with dag:
               'count_dir':'count',
               'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
-              'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
@@ -387,7 +387,7 @@ with dag:
               'count_dir':'count',
               'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
-              'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
@@ -443,7 +443,7 @@ with dag:
               'count_dir':'count',
               'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'seurat_notebook',
-              'analysis_description_xcom_pull_task':'fetch_analysis_info_and_branch',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('seurat_single_sample_template'),
               'singularity_image_path':Variable.get('seurat_notebook_image')})
