@@ -99,6 +99,7 @@ with dag:
     collect_trimmed_files = \
       DummyOperator(
         task_id='collect_trimmed_files_{0}'.format(analysis_name),
+        trigger_rule='none_failed_or_skipped',
         dag=dag)
     ## PIPELINE
     fetch_analysis_info_and_branch >> task_branch
