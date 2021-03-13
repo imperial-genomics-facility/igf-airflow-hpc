@@ -125,7 +125,7 @@ with dag:
               'library_csv_xcom_key':'cellranger_library_csv',
               'library_csv_xcom_pull_task':'configure_cellranger_run',
               'cellranger_xcom_key':'cellranger_output',
-              'cellranger_options':['--localcores 8','--localmem 64']},
+              'cellranger_options':['--localcores 16','--localmem 64']},
       python_callable=run_cellranger_tool)
   ## PIPELINE
   configure_cellranger_run >> run_cellranger
