@@ -574,7 +574,8 @@ with dag:
   update_analysis_and_status = \
     DummyOperator(
       task_id='update_analysis_and_status',
-      dag=dag)
+      dag=dag,
+      trigger_rule='none_failed_or_skipped')
   ## PIPELINE
   upload_multiqc_to_ftp >> update_analysis_and_status
   upload_scanpy_report_for_sc_5p_to_ftp >> update_analysis_and_status
