@@ -140,7 +140,7 @@ with dag:
               'run_scanpy_for_sc_5p_task':'run_scanpy_for_sc_5p',
               'run_scirpy_for_vdj_task':'run_scirpy_for_vdj',
               'run_scirpy_for_vdj_b_task':'run_scirpy_for_vdj_b',
-              'run_scirpy_vdj_t_task':'run_scirpy_vdj_t',
+              'run_scirpy_vdj_t_task':'run_scirpy_for_vdj_t',
               'run_seurat_for_sc_5p_task':'run_seurat_for_sc_5p',
               'run_picard_alignment_summary_task':'run_picard_alignment_summary',
               'convert_bam_to_cram_task':'convert_bam_to_cram',
