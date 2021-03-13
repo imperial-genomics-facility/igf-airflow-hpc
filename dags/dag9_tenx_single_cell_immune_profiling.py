@@ -59,6 +59,7 @@ with dag:
       task_id='configure_cellranger_run',
       dag=dag,
       queue='hpc_4G',
+      trigger_rule='none_failed_or_skipped',
       params={'xcom_pull_task_id':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description',
               'analysis_info_xcom_key':'analysis_info',
