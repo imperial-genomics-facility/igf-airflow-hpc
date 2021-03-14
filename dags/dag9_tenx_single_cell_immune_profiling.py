@@ -207,6 +207,7 @@ with dag:
     PythonOperator(
       task_id='run_scanpy_for_sc_5p',
       dag=dag,
+      retries=0,
       queue='hpc_4G',
       python_callable=run_scanpy_for_sc_5p_func,
       params={'cellranger_xcom_key':'cellranger_output',
