@@ -208,13 +208,14 @@ with dag:
     PythonOperator(
       task_id='run_scanpy_for_sc_5p',
       dag=dag,
-      retries=0,
       queue='hpc_4G',
-      python_callable=run_scanpy_for_sc_5p_func,
+      python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
               'scanpy_timeout':1200,
               'allow_errors':False,
+              'kernel_name':'python3',
+              'count_dir':'count',
               'output_notebook_key':'scanpy_notebook',
               'output_cellbrowser_key':'cellbrowser_dirs',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
@@ -285,12 +286,9 @@ with dag:
               'kernel_name':'python3',
               'vdj_dir':'vdj',
               'count_dir':'count',
-              'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
-              'analysis_description_xcom_key':'analysis_description',
-              'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
-              'singularity_image_path':Variable.get('scirpy_notebook_image')})
+              'analysis_description_xcom_key':'analysis_description'})
   load_scirpy_report_for_vdj_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_to_db',
@@ -343,12 +341,9 @@ with dag:
               'kernel_name':'python3',
               'vdj_dir':'vdj_b',
               'count_dir':'count',
-              'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
-              'analysis_description_xcom_key':'analysis_description',
-              'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
-              'singularity_image_path':Variable.get('scirpy_notebook_image')})
+              'analysis_description_xcom_key':'analysis_description'})
   load_scirpy_report_for_vdj_b_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_b_to_db',
@@ -401,12 +396,9 @@ with dag:
               'kernel_name':'python3',
               'vdj_dir':'vdj_t',
               'count_dir':'count',
-              'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
-              'analysis_description_xcom_key':'analysis_description',
-              'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
-              'singularity_image_path':Variable.get('scirpy_notebook_image')})
+              'analysis_description_xcom_key':'analysis_description'})
   load_scirpy_report_for_vdj_t_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_t_to_db',
