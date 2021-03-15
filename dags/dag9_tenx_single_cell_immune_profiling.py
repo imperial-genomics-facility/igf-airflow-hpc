@@ -167,9 +167,9 @@ with dag:
               'output_xcom_key':'loaded_output_files',
               'html_xcom_key':'html_report_file',
               'html_report_file_name':'web_summary.html'})
-  upload_report_to_ftp = \
+  upload_cellranger_report_to_ftp = \
     PythonOperator(
-      task_id='upload_report_to_ftp',
+      task_id='upload_cellranger_report_to_ftp',
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
@@ -180,14 +180,14 @@ with dag:
               'collection_type':'FTP_CELLRANGER_MULTI',
               'collection_table':'sample',
               'collect_remote_file':True})
-  upload_report_to_box = \
+  upload_cellranger_report_to_box = \
     DummyOperator(
-      task_id='upload_report_to_box',
+      task_id='upload_cellranger_report_to_box',
       dag=dag,
       queue='hpc_4G',
       params={'xcom_pull_task':'load_cellranger_result_to_db',
               'xcom_pull_files_key':'html_report_file'})
-  upload_results_to_irods = \
+  upload_cellranger_results_to_irods = \
     PythonOperator(
       task_id='upload_results_to_irods',
       dag=dag,
@@ -199,9 +199,9 @@ with dag:
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> load_cellranger_result_to_db
-  load_cellranger_result_to_db >> upload_report_to_ftp
-  load_cellranger_result_to_db >> upload_report_to_box
-  load_cellranger_result_to_db >> upload_results_to_irods
+  load_cellranger_result_to_db >> upload_cellranger_report_to_ftp
+  load_cellranger_result_to_db >> upload_cellranger_report_to_box
+  load_cellranger_result_to_db >> upload_cellranger_results_to_irods
   ## TASK
   run_scanpy_for_sc_5p = \
     PythonOperator(
@@ -288,9 +288,9 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
-  load_scanpy_report_for_vdj_to_db = \
+  load_scirpy_report_for_vdj_to_db = \
     PythonOperator(
-      task_id='load_scanpy_report_for_vdj_to_db',
+      task_id='load_scirpy_report_for_vdj_to_db',
       dag=dag,
       queue='hpc_4G',
       python_callable=load_analysis_files_func,
@@ -302,9 +302,9 @@ with dag:
               'collection_type':'SCIRPY_VDJ_HTML',
               'collection_table':'sample',
               'output_files_key':'output_db_files'})
-  upload_scanpy_report_for_vdj_to_ftp = \
+  upload_scirpy_report_for_vdj_to_ftp = \
     PythonOperator(
-      task_id='upload_scanpy_report_for_vdj_to_ftp',
+      task_id='upload_scirpy_report_for_vdj_to_ftp',
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
@@ -315,15 +315,15 @@ with dag:
               'collection_type':'FTP_SCIRPY_VDJ_HTML',
               'collection_table':'sample',
               'collect_remote_file':True})
-  upload_scanpy_report_for_vdj_to_box = \
+  upload_scirpy_report_for_vdj_to_box = \
     DummyOperator(
-      task_id='upload_scanpy_report_for_vdj_to_box',
+      task_id='upload_scirpy_report_for_vdj_to_box',
       dag=dag)
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj
-  run_scirpy_for_vdj >> load_scanpy_report_for_vdj_to_db
-  load_scanpy_report_for_vdj_to_db >> upload_scanpy_report_for_vdj_to_ftp
-  load_scanpy_report_for_vdj_to_db >> upload_scanpy_report_for_vdj_to_box
+  run_scirpy_for_vdj >> load_scirpy_report_for_vdj_to_db
+  load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_ftp
+  load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_box
   ## TASK
   run_scirpy_for_vdj_b = \
     DummyOperator(
@@ -332,7 +332,7 @@ with dag:
       queue='hpc_4G',
       python_callable=run_singlecell_notebook_wrapper_func,
       params={'cellranger_xcom_key':'cellranger_output',
-              'cellranger_xcom_pull_task':'run_cellranger',
+              ' cellranger_xcom_pull_task':'run_cellranger',
               'scanpy_timeout':1200,
               'allow_errors':False,
               'kernel_name':'python3',
@@ -344,9 +344,9 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
-  load_scanpy_report_for_vdj_b_to_db = \
+  load_scirpy_report_for_vdj_b_to_db = \
     PythonOperator(
-      task_id='load_scanpy_report_for_vdj_b_to_db',
+      task_id='load_scirpy_report_for_vdj_b_to_db',
       dag=dag,
       queue='hpc_4G',
       python_callable=load_analysis_files_func,
@@ -358,9 +358,9 @@ with dag:
               'collection_type':'SCIRPY_VDJ_B_HTML',
               'collection_table':'sample',
               'output_files_key':'output_db_files'})
-  upload_scanpy_report_for_vdj_b_to_ftp = \
+  upload_scirpy_report_for_vdj_b_to_ftp = \
     PythonOperator(
-      task_id='upload_scanpy_report_for_vdj_b_to_ftp',
+      task_id='upload_scirpy_report_for_vdj_b_to_ftp',
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
@@ -371,15 +371,15 @@ with dag:
               'collection_type':'FTP_SCIRPY_VDJ_B_HTML',
               'collection_table':'sample',
               'collect_remote_file':True})
-  upload_scanpy_report_for_vdj_b_to_box = \
+  upload_scirpy_report_for_vdj_b_to_box = \
     DummyOperator(
       task_id='upload_scanpy_report_for_vdj_b_to_box',
       dag=dag)
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_b
-  run_scirpy_for_vdj_b >> load_scanpy_report_for_vdj_b_to_db
-  load_scanpy_report_for_vdj_b_to_db >> upload_scanpy_report_for_vdj_b_to_ftp
-  load_scanpy_report_for_vdj_b_to_db >> upload_scanpy_report_for_vdj_b_to_box
+  run_scirpy_for_vdj_b >> load_scirpy_report_for_vdj_b_to_db
+  load_scirpy_report_for_vdj_b_to_db >> upload_scirpy_report_for_vdj_b_to_ftp
+  load_scirpy_report_for_vdj_b_to_db >> upload_scirpy_report_for_vdj_b_to_box
   ## TASK
   run_scirpy_for_vdj_t = \
     DummyOperator(
@@ -400,9 +400,9 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'template_ipynb_path':Variable.get('scirpy_single_sample_template'),
               'singularity_image_path':Variable.get('scirpy_notebook_image')})
-  load_scanpy_report_for_vdj_t_to_db = \
+  load_scirpy_report_for_vdj_t_to_db = \
     PythonOperator(
-      task_id='load_scanpy_report_for_vdj_t_to_db',
+      task_id='load_scirpy_report_for_vdj_t_to_db',
       dag=dag,
       queue='hpc_4G',
       python_callable=load_analysis_files_func,
@@ -414,9 +414,9 @@ with dag:
               'collection_type':'SCIRPY_VDJ_T_HTML',
               'collection_table':'sample',
               'output_files_key':'output_db_files'})
-  upload_scanpy_report_for_vdj_t_to_ftp = \
+  upload_scirpy_report_for_vdj_t_to_ftp = \
     PythonOperator(
-      task_id='upload_scanpy_report_for_vdj_t_to_ftp',
+      task_id='upload_scirpy_report_for_vdj_t_to_ftp',
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
@@ -427,15 +427,15 @@ with dag:
               'collection_type':'FTP_SCIRPY_VDJ_T_HTML',
               'collection_table':'sample',
               'collect_remote_file':True})
-  upload_scanpy_report_for_vdj_t_to_box = \
+  upload_scirpy_report_for_vdj_t_to_box = \
     DummyOperator(
-      task_id='upload_scanpy_report_for_vdj_t_to_box',
+      task_id='upload_scirpy_report_for_vdj_t_to_box',
       dag=dag)
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_t
-  run_scirpy_for_vdj_t >> load_scanpy_report_for_vdj_t_to_db
-  load_scanpy_report_for_vdj_t_to_db >> upload_scanpy_report_for_vdj_t_to_ftp
-  load_scanpy_report_for_vdj_t_to_db >> upload_scanpy_report_for_vdj_t_to_box
+  run_scirpy_for_vdj_t >> load_scirpy_report_for_vdj_t_to_db
+  load_scirpy_report_for_vdj_t_to_db >> upload_scirpy_report_for_vdj_t_to_ftp
+  load_scirpy_report_for_vdj_t_to_db >> upload_scirpy_report_for_vdj_t_to_box
   ## TASK
   run_seurat_for_sc_5p = \
     PythonOperator(
