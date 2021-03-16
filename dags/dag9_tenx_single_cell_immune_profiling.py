@@ -17,6 +17,8 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_s
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_singlecell_notebook_wrapper_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_analysis_files_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import task_branch_function
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import upload_analysis_file_to_box
+
 ## ARGS
 default_args = {
     'owner': 'airflow',
@@ -253,7 +255,10 @@ with dag:
       task_id='upload_scanpy_report_for_sc_5p_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_scanpy_report_for_sc_5p_to_db',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'scanpy_single_sample_report'})
   upload_cellbrowser_for_sc_5p_to_ftp = \
     PythonOperator(
       task_id='upload_cellbrowser_for_sc_5p_to_ftp',
@@ -323,7 +328,10 @@ with dag:
       task_id='upload_scirpy_report_for_vdj_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_scanpy_report_for_vdj_to_db',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'scirpy_vdj_single_sample_report'})
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj
   run_scirpy_for_vdj >> load_scirpy_report_for_vdj_to_db
@@ -379,7 +387,10 @@ with dag:
       task_id='upload_scanpy_report_for_vdj_b_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_scanpy_report_for_vdj_b_to_db',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'scirpy_vdj_b_single_sample_report'})
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_b
   run_scirpy_for_vdj_b >> load_scirpy_report_for_vdj_b_to_db
@@ -435,7 +446,10 @@ with dag:
       task_id='upload_scirpy_report_for_vdj_t_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_scanpy_report_for_vdj_t_to_db',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'scirpy_vdj_t_single_sample_report'})
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_t
   run_scirpy_for_vdj_t >> load_scirpy_report_for_vdj_t_to_db
@@ -456,12 +470,9 @@ with dag:
               'analysis_name':'seurat',
               'vdj_dir':'vdj',
               'count_dir':'count',
-              'cell_marker_list':Variable.get('all_cell_marker_list'),
               'output_notebook_key':'seurat_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
-              'analysis_description_xcom_key':'analysis_description',
-              'template_ipynb_path':Variable.get('seurat_single_sample_template'),
-              'singularity_image_path':Variable.get('seurat_notebook_image')})
+              'analysis_description_xcom_key':'analysis_description'})
   load_seurat_report_for_sc_5p_db = \
     PythonOperator(
       task_id='load_seurat_report_for_sc_5p_db',
@@ -494,7 +505,10 @@ with dag:
       task_id='upload_seurat_report_for_sc_5p_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_seurat_report_for_sc_5p_db',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'seurat_single_sample_report'})
   ## PIPELINE
   decide_analysis_branch >> run_seurat_for_sc_5p
   run_seurat_for_sc_5p >> load_seurat_report_for_sc_5p_db
