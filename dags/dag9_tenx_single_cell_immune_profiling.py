@@ -18,6 +18,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_s
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_analysis_files_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import task_branch_function
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import upload_analysis_file_to_box
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import convert_bam_to_cram_func
 
 ## ARGS
 default_args = {
@@ -520,15 +521,19 @@ with dag:
       task_id='convert_bam_to_cram',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None,
-      params={'cellranger_xcom_key':'cellranger_output',
-              'cellranger_xcom_pull_task':'run_cellranger'})
+      python_callable=convert_bam_to_cram_func,
+      params={'xcom_pull_files_key':'cellranger_output',
+              'xcom_pull_task':'run_cellranger'})
   upload_cram_to_irods = \
     PythonOperator(
       task_id='upload_cram_to_irods',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=irods_files_upload_for_analysis,
+      params={'xcom_pull_task':'',
+              'xcom_pull_files_key':'',
+              'collection_name_key':'',
+              'analysis_name':''})
   ## PIPELINE
   decide_analysis_branch >> convert_bam_to_cram
   convert_bam_to_cram >> upload_cram_to_irods
