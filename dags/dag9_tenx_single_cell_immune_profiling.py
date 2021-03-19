@@ -520,10 +520,18 @@ with dag:
     PythonOperator(
       task_id='convert_bam_to_cram',
       dag=dag,
-      queue='hpc_4G',
+      queue='hpc_4G4t',
       python_callable=convert_bam_to_cram_func,
       params={'xcom_pull_files_key':'cellranger_output',
-              'xcom_pull_task':'run_cellranger'})
+              'xcom_pull_task':'run_cellranger',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
+              'analysis_description_xcom_key':'analysis_description',
+              'use_ephemeral_space':True,
+              'threads':4,
+              'analysis_name':'cellranger',
+              'collection_type':'ALIGNED_CRAM',
+              'collection_table':'sample',
+              'cram_files_xcom_key':'cram_files'})
   upload_cram_to_irods = \
     PythonOperator(
       task_id='upload_cram_to_irods',
