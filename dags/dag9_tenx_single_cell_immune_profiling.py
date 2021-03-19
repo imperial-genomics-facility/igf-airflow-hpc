@@ -518,7 +518,7 @@ with dag:
   ## TASK
   convert_bam_to_cram = \
     PythonOperator(
-      task_id='convert_bam_to_cram',
+      task_id='convert_cellranger_bam_to_cram',
       dag=dag,
       queue='hpc_4G4t',
       python_callable=convert_bam_to_cram_func,
@@ -538,10 +538,10 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=irods_files_upload_for_analysis,
-      params={'xcom_pull_task':'',
-              'xcom_pull_files_key':'',
-              'collection_name_key':'',
-              'analysis_name':''})
+      params={'xcom_pull_task':'convert_cellranger_bam_to_cram',
+              'xcom_pull_files_key':'cram_files',
+              'collection_name_key':'sample_igf_id',
+              'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> convert_bam_to_cram
   convert_bam_to_cram >> upload_cram_to_irods
