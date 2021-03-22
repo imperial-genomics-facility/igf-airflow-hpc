@@ -21,7 +21,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import uploa
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import convert_bam_to_cram_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_picard_for_cellranger
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_samtools_for_cellranger
-
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_multiqc_for_cellranger
 
 ## ARGS
 default_args = {
@@ -629,9 +629,9 @@ with dag:
   ## PIPELINE
   run_picard_rna_summary >> run_picard_gc_summary
   ## TASK
-  picard_base_dist_summary = \
+  run_picard_base_dist_summary = \
     PythonOperator(
-      task_id='run_picard_gc_summary',
+      task_id='run_picard_base_dist_summary',
       dag=dag,
       queue='hpc_4G',
       python_callable=run_picard_for_cellranger,
@@ -647,7 +647,7 @@ with dag:
               'analysis_files_xcom_key':'picard_base_summary',
               'bam_files_xcom_key':None})
   ## PIPELINE
-  run_picard_gc_summary >> picard_base_dist_summary
+  run_picard_gc_summary >> run_picard_base_dist_summary
   ## TASK
   run_samtools_stats = \
     PythonOperator(
@@ -690,7 +690,23 @@ with dag:
       task_id='run_multiqc',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=run_multiqc_for_cellranger,
+      params={
+        'list_of_analysis_xcoms_and_tasks':{
+          'run_cellranger':'cellranger_output',
+          'run_picard_alignment_summary':'picard_alignment_summary',
+          'run_picard_qual_summary':'picard_qual_summary',
+          'run_picard_rna_summary':'picard_rna_summary',
+          'run_picard_gc_summary':'picard_gc_summary',
+          'run_picard_base_dist_summary':'picard_base_summary',
+          'run_samtools_stats':'samtools_stats',
+          'run_samtools_idxstats':'samtools_idxstats'},
+        'analysis_description_xcom_pull_task':'fetch_analysis_info',
+        'analysis_description_xcom_key':'analysis_description',
+        'use_ephemeral_space':True,
+        'multiqc_html_file_xcom_key':'multiqc_html',
+        'multiqc_data_file_xcom_key':'multiqc_data',
+        'tool_order_list':['picad','samtools']})
   ## PIPELINE
   run_samtools_idxstats >> run_multiqc
   ## TASK
