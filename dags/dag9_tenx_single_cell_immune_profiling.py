@@ -20,6 +20,8 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import task_
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import upload_analysis_file_to_box
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import convert_bam_to_cram_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_picard_for_cellranger
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_samtools_for_cellranger
+
 
 ## ARGS
 default_args = {
@@ -559,7 +561,6 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'use_ephemeral_space':True,
               'load_metrics_to_cram':True,
-              'output_prefix':None,
               'java_param':'-Xmx4g',
               'picard_command':'CollectAlignmentSummaryMetrics',
               'picard_option':{},
@@ -580,7 +581,6 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'use_ephemeral_space':True,
               'load_metrics_to_cram':True,
-              'output_prefix':None,
               'java_param':'-Xmx4g',
               'picard_command':'QualityScoreDistribution',
               'picard_option':{},
@@ -601,7 +601,6 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'use_ephemeral_space':True,
               'load_metrics_to_cram':True,
-              'output_prefix':None,
               'java_param':'-Xmx4g',
               'picard_command':'CollectRnaSeqMetrics',
               'picard_option':{},
@@ -622,7 +621,6 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'use_ephemeral_space':True,
               'load_metrics_to_cram':True,
-              'output_prefix':None,
               'java_param':'-Xmx4g',
               'picard_command':'CollectGcBiasMetrics',
               'picard_option':{},
@@ -643,7 +641,6 @@ with dag:
               'analysis_description_xcom_key':'analysis_description',
               'use_ephemeral_space':True,
               'load_metrics_to_cram':True,
-              'output_prefix':None,
               'java_param':'-Xmx4g',
               'picard_command':'CollectBaseDistributionByCycle',
               'picard_option':{},
@@ -656,8 +653,17 @@ with dag:
     PythonOperator(
       task_id='run_samtools_stats',
       dag=dag,
-      queue='hpc_4G',
-      python_callable=None)
+      queue='hpc_4G4t',
+      python_callable=run_samtools_for_cellranger,
+      params={'xcom_pull_files_key':'cellranger_output',
+              'xcom_pull_task':'run_cellranger',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
+              'analysis_description_xcom_key':'analysis_description',
+              'use_ephemeral_space':True,
+              'load_metrics_to_cram':True,
+              'samtools_command':'stats',
+              'threads':4,
+              'analysis_files_xcom_key':'samtools_stats'})
   ## PIPELINE
   run_picard_gc_summary >> run_samtools_stats
   ## TASK
@@ -665,8 +671,17 @@ with dag:
     PythonOperator(
       task_id='run_samtools_idxstats',
       dag=dag,
-      queue='hpc_4G',
-      python_callable=None)
+      queue='hpc_4G4t',
+      python_callable=run_samtools_for_cellranger,
+      params={'xcom_pull_files_key':'cellranger_output',
+              'xcom_pull_task':'run_cellranger',
+              'analysis_description_xcom_pull_task':'fetch_analysis_info',
+              'analysis_description_xcom_key':'analysis_description',
+              'use_ephemeral_space':True,
+              'load_metrics_to_cram':True,
+              'samtools_command':'idxstats',
+              'threads':4,
+              'analysis_files_xcom_key':'samtools_idxstats'})
   ## PIPELINE
   run_samtools_stats >> run_samtools_idxstats
   ## TASK
