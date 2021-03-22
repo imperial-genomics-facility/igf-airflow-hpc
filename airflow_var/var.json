@@ -49,6 +49,7 @@
   "cellranger_job_timeout":259200,
   "cutadapt_singularity_image":"",
   "multiqc_singularity_image":"",
+  "multiqc_template_file":"",
   "picard_singularity_image":"",
   "hpc_queue_list":{
     "hpc_1G": {
