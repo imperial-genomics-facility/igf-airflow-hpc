@@ -74,7 +74,7 @@ with dag:
               'analysis_info_xcom_key':'analysis_info',
               'library_csv_xcom_key':'cellranger_library_csv'},
       python_callable=configure_cellranger_run_func)
-  for analysis_name in FEATURE_TYPE_LIST:
+  for analysis_name in FEATURE_TYPE_LIST.keys():
     ## TASK
     task_branch = \
       BranchPythonOperator(
