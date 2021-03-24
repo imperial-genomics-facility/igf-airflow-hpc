@@ -19,9 +19,9 @@ default_args = {
 ## SSH HOOK
 orwell_ssh_hook = \
   SSHHook(
-    key_file=Variable.get('hpc_ssh_key_file'),
-    username=Variable.get('hpc_user'),
-    remote_host=Variable.get('orwell_server_hostname'))
+    key_file=Variable.get('hpc_ssh_key_file',default_var=None),
+    username=Variable.get('hpc_user',default_var=None),
+    remote_host=Variable.get('orwell_server_hostname',default_var=None))
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 ## DAG

@@ -39,7 +39,7 @@ default_args = {
 }
 
 FEATURE_TYPE_LIST = \
-  Variable.get('tenx_single_cell_immune_profiling_feature_types')#.split(',')
+  Variable.get('tenx_single_cell_immune_profiling_feature_types',default_var={})#.split(',')
 
 ## DAG
 dag = \
@@ -193,9 +193,10 @@ with dag:
       task_id='upload_cellranger_report_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None,
+      python_callable=upload_analysis_file_to_box,
       params={'xcom_pull_task':'load_cellranger_result_to_db',
-              'xcom_pull_files_key':'html_report_file'})
+              'xcom_pull_files_key':'html_report_file',
+              'analysis_tag':'cellranger_multi'})
   upload_cellranger_results_to_irods = \
     PythonOperator(
       task_id='upload_cellranger_results_to_irods',
