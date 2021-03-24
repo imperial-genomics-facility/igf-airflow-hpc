@@ -40,7 +40,7 @@ default_args = {
 }
 
 FEATURE_TYPE_LIST = \
-  Variable.get('tenx_single_cell_immune_profiling_feature_types',deserialize_json=True)#.split(',')
+  Variable.get('tenx_single_cell_immune_profiling_feature_types')#.split(',')
 
 ## DAG
 dag = \
