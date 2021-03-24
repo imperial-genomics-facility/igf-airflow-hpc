@@ -737,23 +737,50 @@ with dag:
   run_picard_base_dist_summary >> run_multiqc
   run_samtools_idxstats >> run_multiqc
   ## TASK
+  load_multiqc_html = \
+    PythonOperator(
+      task_id='load_multiqc_html',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_analysis_files_func,
+      params={'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'file_name_task':'run_multiqc',
+              'file_name_key':'multiqc_html',
+              'analysis_name':'multiqc',
+              'collection_type':'MULTIQC_HTML',
+              'collection_table':'sample',
+              'output_files_key':'output_db_files'})
+  ## PIPELINE
+  run_multiqc >> load_multiqc_html
+  ## TASK
   upload_multiqc_to_ftp = \
     PythonOperator(
       task_id='upload_multiqc_to_ftp',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=ftp_files_upload_for_analysis,
+      params={'xcom_pull_task':'load_multiqc_html',
+              'xcom_pull_files_key':'output_db_files',
+              'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'collection_type':'FTP_MULTIQC_HTML',
+              'collection_table':'sample',
+              'collect_remote_file':True})
   ## PIPELINE
-  run_multiqc >> upload_multiqc_to_ftp
+  load_multiqc_html >> upload_multiqc_to_ftp
   ## TASK
   upload_multiqc_to_box = \
     PythonOperator(
       task_id='upload_multiqc_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None)
+      python_callable=upload_analysis_file_to_box,
+      params={'xcom_pull_task':'load_multiqc_html',
+              'xcom_pull_files_key':'output_db_files',
+              'analysis_tag':'multiqc_report'})
   ## PIPELINE
-  run_multiqc >> upload_multiqc_to_box
+  load_multiqc_html >> upload_multiqc_to_box
   ## TASK
   update_analysis_and_status = \
     PythonOperator(
