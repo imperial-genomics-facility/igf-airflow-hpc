@@ -23,7 +23,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_p
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_samtools_for_cellranger
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_multiqc_for_cellranger
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import index_and_copy_bam_for_parallel_analysis
-
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import change_pipeline_status
 
 ## ARGS
 default_args = {
@@ -788,8 +788,10 @@ with dag:
       task_id='update_analysis_and_status',
       dag=dag,
       queue='hpc_4G',
-      python_callable=None,
-      trigger_rule='none_failed_or_skipped')
+      python_callable=change_pipeline_status,
+      trigger_rule='none_failed_or_skipped',
+      params={'new_status':'FINISHED',
+              'no_change_status':'SEEDED'})
   ## PIPELINE
   upload_multiqc_to_ftp >> update_analysis_and_status
   upload_scanpy_report_for_sc_5p_to_ftp >> update_analysis_and_status
