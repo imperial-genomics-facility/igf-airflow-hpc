@@ -101,6 +101,7 @@ with dag:
                   'r1_length':0,
                   'r2_length':0,
                   'fastq_input_dir_tag':'fastq_dir',
+                  'use_ephemeral_space':True,
                   'fastq_output_dir_tag':'output_path'},
           python_callable=run_sc_read_trimmming_func)
       run_trim_list.append(t)
