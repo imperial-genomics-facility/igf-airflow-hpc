@@ -33,7 +33,7 @@
   "woolf_server_hostname":"woolf.med.ic.ac.uk",
   "eliot_server_hostname":"eliot.med.ic.ac.uk",
   "igf_lims_server_hostname":"igf-lims.cc.ic.ac.uk",
-  "tenx_single_cell_immune_profiling_feature_types": "gene_expression,vdj,vdj-t,vdj-b,antibody_capture,antigen_capture,crisper_guide_capture",
+  "tenx_single_cell_immune_profiling_feature_types": ["gene_expression","vdj","vdj-t","vdj-b","antibody_capture","antigen_capture","crisper_guide_capture"],
   "scanpy_single_sample_template":"",
   "scanpy_notebook_image":"",
   "scirpy_single_sample_template":"",
