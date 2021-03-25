@@ -151,8 +151,7 @@ with dag:
               'run_scirpy_for_vdj_b_task':'run_scirpy_for_vdj_b',
               'run_scirpy_vdj_t_task':'run_scirpy_for_vdj_t',
               'run_seurat_for_sc_5p_task':'run_seurat_for_sc_5p',
-              'run_picard_alignment_summary_task':'run_picard_alignment_summary',
-              'convert_bam_to_cram_task':'convert_bam_to_cram',
+              'copy_bam_for_parallel_runs_task':'copy_bam_for_parallel_runs',
               'library_csv_xcom_key':'cellranger_library_csv',
               'library_csv_xcom_pull_task':'configure_cellranger_run'})
   ## PIPELINE
@@ -541,7 +540,7 @@ with dag:
                 'run_samtools_stats']
             })
   ## TASK
-  convert_bam_to_cram = \
+  convert_cellranger_bam_to_cram = \
     PythonOperator(
       task_id='convert_cellranger_bam_to_cram',
       dag=dag,
@@ -569,8 +568,8 @@ with dag:
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> copy_bam_for_parallel_runs
-  copy_bam_for_parallel_runs >> convert_bam_to_cram
-  convert_bam_to_cram >> upload_cram_to_irods
+  copy_bam_for_parallel_runs >> convert_cellranger_bam_to_cram
+  convert_cellranger_bam_to_cram >> upload_cram_to_irods
   ## TASK
   run_picard_alignment_summary = \
     PythonOperator(
