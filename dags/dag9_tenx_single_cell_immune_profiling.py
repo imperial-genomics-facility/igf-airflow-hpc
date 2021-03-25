@@ -474,7 +474,7 @@ with dag:
               'cellranger_xcom_pull_task':'run_cellranger',
               'scanpy_timeout':1200,
               'allow_errors':False,
-              'kernel_name':'R',
+              'kernel_name':'ir',
               'analysis_name':'seurat',
               'vdj_dir':'vdj',
               'count_dir':'count',
