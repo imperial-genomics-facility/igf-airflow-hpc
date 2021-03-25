@@ -324,7 +324,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_to_db',
               'xcom_pull_files_key':'output_db_files',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -337,7 +337,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=upload_analysis_file_to_box,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_to_db',
               'xcom_pull_files_key':'output_db_files',
               'analysis_tag':'scirpy_vdj_single_sample_report'})
   ## PIPELINE
@@ -383,7 +383,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_b_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_b_to_db',
               'xcom_pull_files_key':'output_db_files',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -396,7 +396,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=upload_analysis_file_to_box,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_b_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_b_to_db',
               'xcom_pull_files_key':'output_db_files',
               'analysis_tag':'scirpy_vdj_b_single_sample_report'})
   ## PIPELINE
@@ -442,7 +442,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=ftp_files_upload_for_analysis,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_t_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_t_to_db',
               'xcom_pull_files_key':'output_db_files',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
@@ -455,7 +455,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=upload_analysis_file_to_box,
-      params={'xcom_pull_task':'load_scanpy_report_for_vdj_t_to_db',
+      params={'xcom_pull_task':'load_scirpy_report_for_vdj_t_to_db',
               'xcom_pull_files_key':'output_db_files',
               'analysis_tag':'scirpy_vdj_t_single_sample_report'})
   ## PIPELINE
