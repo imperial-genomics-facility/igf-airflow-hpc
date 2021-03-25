@@ -206,6 +206,7 @@ with dag:
       params={'xcom_pull_task':'load_cellranger_result_to_db',
               'xcom_pull_files_key':'loaded_output_files',
               'collection_name_key':'sample_igf_id',
+              'collection_name_task':'load_cellranger_result_to_db',
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> load_cellranger_result_to_db
@@ -565,6 +566,7 @@ with dag:
       params={'xcom_pull_task':'convert_cellranger_bam_to_cram',
               'xcom_pull_files_key':'cram_files',
               'collection_name_key':'sample_igf_id',
+              'collection_name_task':'load_cellranger_result_to_db',
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> convert_cellranger_bam_to_cram
