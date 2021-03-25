@@ -567,7 +567,7 @@ with dag:
               'collection_name_key':'sample_igf_id',
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
-  decide_analysis_branch >> copy_bam_for_parallel_runs
+  decide_analysis_branch >> convert_cellranger_bam_to_cram
   convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
   convert_cellranger_bam_to_cram >> upload_cram_to_irods
   ## TASK
