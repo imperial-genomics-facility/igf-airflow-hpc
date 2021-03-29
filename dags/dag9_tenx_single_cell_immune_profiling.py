@@ -24,6 +24,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_m
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import index_and_copy_bam_for_parallel_analysis
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import change_pipeline_status
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import clean_up_files
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import create_and_update_qc_pages
 
 ## ARGS
 default_args = {
@@ -555,8 +556,7 @@ with dag:
                 'run_picard_rna_summary',
                 'run_picard_gc_summary',
                 'run_picard_base_dist_summary',
-                'run_samtools_stats']
-            })
+                'run_samtools_stats']})
   ## TASK
   upload_cram_to_irods = \
     PythonOperator(
@@ -962,3 +962,21 @@ with dag:
   upload_cellranger_report_to_ftp >> update_analysis_and_status
   upload_cellranger_report_to_box >> update_analysis_and_status
   upload_cram_to_irods >> update_analysis_and_status
+  ## TASK
+  update_qc_pages = \
+    PythonOperator(
+      task_id='update_qc_pages',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=create_and_update_qc_pages,
+      params={'collection_type_list':[
+                'FTP_MULTIQC_HTML',
+                'FTP_SEURAT_HTML',
+                'FTP_SCIRPY_VDJ_T_HTML',
+                'FTP_SCIRPY_VDJ_B_HTML',
+                'FTP_SCIRPY_VDJ_HTML',
+                'FTP_CELLBROWSER',
+                'FTP_SCANPY_HTML',
+                'FTP_CELLRANGER_MULTI']})
+  ## PIPELINE
+  update_analysis_and_status >> update_qc_pages
