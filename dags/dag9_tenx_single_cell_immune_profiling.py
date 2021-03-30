@@ -170,6 +170,7 @@ with dag:
               'cellranger_xcom_key':'cellranger_output',
               'cellranger_xcom_pull_task':'run_cellranger',
               'collection_type':'CELLRANGER_MULTI',
+              'html_collection_type':'CELLRANGER_HTML',
               'collection_table':'sample',
               'xcom_collection_name_key':'sample_igf_id',
               'genome_column':'genome_build',
@@ -187,7 +188,7 @@ with dag:
               'xcom_pull_files_key':'html_report_file',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
-              'collection_type':'FTP_CELLRANGER_MULTI',
+              'collection_type':'FTP_CELLRANGER_HTML',
               'collection_table':'sample',
               'collect_remote_file':True})
   upload_cellranger_report_to_box = \
@@ -977,6 +978,6 @@ with dag:
                 'FTP_SCIRPY_VDJ_HTML',
                 'FTP_CELLBROWSER',
                 'FTP_SCANPY_HTML',
-                'FTP_CELLRANGER_MULTI']})
+                'FTP_CELLRANGER_HTML']})
   ## PIPELINE
   update_analysis_and_status >> update_qc_pages
