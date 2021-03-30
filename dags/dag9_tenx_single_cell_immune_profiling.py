@@ -970,7 +970,8 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=create_and_update_qc_pages,
-      params={'collection_type_list':[
+      params={'use_ephemeral_space':True,
+              'collection_type_list':[
                 'FTP_MULTIQC_HTML',
                 'FTP_SEURAT_HTML',
                 'FTP_SCIRPY_VDJ_T_HTML',
