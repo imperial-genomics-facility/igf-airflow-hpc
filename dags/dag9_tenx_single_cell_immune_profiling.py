@@ -688,7 +688,7 @@ with dag:
       queue='hpc_4G',
       python_callable=clean_up_files,
       params={'xcom_pull_files_key':'run_picard_rna_summary',
-              'xcom_pull_task':'picard_rna_summary'})
+              'xcom_pull_task':'copy_bam_for_parallel_runs'})
   ## PIPELINE
   run_picard_rna_summary >> cleanup_picard_rna_summary_input
   ## TASK
