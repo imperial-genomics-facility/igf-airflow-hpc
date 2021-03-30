@@ -153,7 +153,7 @@ with dag:
               'run_scirpy_for_vdj_b_task':'run_scirpy_for_vdj_b',
               'run_scirpy_vdj_t_task':'run_scirpy_for_vdj_t',
               'run_seurat_for_sc_5p_task':'run_seurat_for_sc_5p',
-              'copy_bam_for_parallel_runs_task':'copy_bam_for_parallel_runs',
+              'convert_cellranger_bam_to_cram_task':'convert_cellranger_bam_to_cram',
               'library_csv_xcom_key':'cellranger_library_csv',
               'library_csv_xcom_pull_task':'configure_cellranger_run'})
   ## PIPELINE
