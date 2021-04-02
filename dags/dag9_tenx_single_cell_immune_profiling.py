@@ -36,7 +36,7 @@ default_args = {
     'email_on_retry': False,
     'retries': 4,
     'max_active_runs':10,
-    'catchup':False,
+    'catchup':True,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
 }
