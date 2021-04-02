@@ -25,6 +25,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import index
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import change_pipeline_status
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import clean_up_files
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import create_and_update_qc_pages
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_cellranger_metrices_to_collection
 
 ## ARGS
 default_args = {
@@ -234,6 +235,19 @@ with dag:
               'output_cellbrowser_key':'cellbrowser_dirs',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
+  load_cellranger_gex_matrics_to_db = \
+    PythonOperator(
+      task_id='load_cellranger_gex_matrics_to_db',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_cellranger_metrices_to_collection,
+      params={'cellranger_xcom_key':'cellranger_output',
+              'cellranger_xcom_pull_task':'run_cellranger',
+              'collection_type':'ANALYSIS_CRAM',
+              'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'metrics_summary_file':'count/metrics_summary.csv',
+              'attribute_prefix':'CELLRANGER_COUNT'})
   load_scanpy_report_for_sc_5p_to_db = \
     PythonOperator(
       task_id='load_scanpy_report_for_sc_5p_to_db',
@@ -286,6 +300,7 @@ with dag:
   ## PIPELINE
   decide_analysis_branch >> run_scanpy_for_sc_5p
   run_scanpy_for_sc_5p >> load_scanpy_report_for_sc_5p_to_db
+  run_scanpy_for_sc_5p >> load_cellranger_gex_matrics_to_db
   load_scanpy_report_for_sc_5p_to_db >> upload_scanpy_report_for_sc_5p_to_ftp
   load_scanpy_report_for_sc_5p_to_db >> upload_scanpy_report_for_sc_5p_to_box
   run_scanpy_for_sc_5p >> upload_cellbrowser_for_sc_5p_to_ftp
@@ -307,6 +322,19 @@ with dag:
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
+  load_cellranger_vdj_matrics_to_db = \
+    PythonOperator(
+      task_id='load_cellranger_vdj_matrics_to_db',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_cellranger_metrices_to_collection,
+      params={'cellranger_xcom_key':'cellranger_output',
+              'cellranger_xcom_pull_task':'run_cellranger',
+              'collection_type':'ANALYSIS_CRAM',
+              'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'metrics_summary_file':'vdj/metrics_summary.csv',
+              'attribute_prefix':'CELLRANGER_VDJ'})
   load_scirpy_report_for_vdj_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_to_db',
@@ -346,6 +374,7 @@ with dag:
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj
   run_scirpy_for_vdj >> load_scirpy_report_for_vdj_to_db
+  run_scirpy_for_vdj >> load_cellranger_vdj_matrics_to_db
   load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_ftp
   load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_box
   ## TASK
@@ -366,6 +395,19 @@ with dag:
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
+  load_cellranger_vdjB_matrics_to_db = \
+    PythonOperator(
+      task_id='load_cellranger_vdjB_matrics_to_db',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_cellranger_metrices_to_collection,
+      params={'cellranger_xcom_key':'cellranger_output',
+              'cellranger_xcom_pull_task':'run_cellranger',
+              'collection_type':'ANALYSIS_CRAM',
+              'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'metrics_summary_file':'vdj_b/metrics_summary.csv',
+              'attribute_prefix':'CELLRANGER_VDJB'})
   load_scirpy_report_for_vdj_b_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_b_to_db',
@@ -405,6 +447,7 @@ with dag:
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_b
   run_scirpy_for_vdj_b >> load_scirpy_report_for_vdj_b_to_db
+  run_scirpy_for_vdj_b >> load_cellranger_vdjB_matrics_to_db
   load_scirpy_report_for_vdj_b_to_db >> upload_scirpy_report_for_vdj_b_to_ftp
   load_scirpy_report_for_vdj_b_to_db >> upload_scirpy_report_for_vdj_b_to_box
   ## TASK
@@ -425,6 +468,19 @@ with dag:
               'output_notebook_key':'scirpy_notebook',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
+  load_cellranger_vdjT_matrics_to_db = \
+    PythonOperator(
+      task_id='load_cellranger_vdjT_matrics_to_db',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_cellranger_metrices_to_collection,
+      params={'cellranger_xcom_key':'cellranger_output',
+              'cellranger_xcom_pull_task':'run_cellranger',
+              'collection_type':'ANALYSIS_CRAM',
+              'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'metrics_summary_file':'vdj_t/metrics_summary.csv',
+              'attribute_prefix':'CELLRANGER_VDJT'})
   load_scirpy_report_for_vdj_t_to_db = \
     PythonOperator(
       task_id='load_scirpy_report_for_vdj_t_to_db',
@@ -464,6 +520,7 @@ with dag:
   ## PIPELINE
   decide_analysis_branch >> run_scirpy_for_vdj_t
   run_scirpy_for_vdj_t >> load_scirpy_report_for_vdj_t_to_db
+  run_scirpy_for_vdj_t >> load_cellranger_vdjT_matrics_to_db
   load_scirpy_report_for_vdj_t_to_db >> upload_scirpy_report_for_vdj_t_to_ftp
   load_scirpy_report_for_vdj_t_to_db >> upload_scirpy_report_for_vdj_t_to_box
   ## TASK
