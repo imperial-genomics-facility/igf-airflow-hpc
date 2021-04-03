@@ -305,6 +305,7 @@ with dag:
   load_scanpy_report_for_sc_5p_to_db >> upload_scanpy_report_for_sc_5p_to_box
   run_scanpy_for_sc_5p >> upload_cellbrowser_for_sc_5p_to_ftp
   ## TASK
+  """
   run_scirpy_for_vdj = \
     PythonOperator(
       task_id='run_scirpy_for_vdj',
@@ -377,6 +378,7 @@ with dag:
   run_scirpy_for_vdj >> load_cellranger_vdj_matrics_to_db
   load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_ftp
   load_scirpy_report_for_vdj_to_db >> upload_scirpy_report_for_vdj_to_box
+  """
   ## TASK
   run_scirpy_for_vdj_b = \
     PythonOperator(
@@ -1008,8 +1010,8 @@ with dag:
   upload_scanpy_report_for_sc_5p_to_ftp >> update_analysis_and_status
   upload_scanpy_report_for_sc_5p_to_box >> update_analysis_and_status
   upload_cellbrowser_for_sc_5p_to_ftp >> update_analysis_and_status
-  upload_scirpy_report_for_vdj_to_ftp >> update_analysis_and_status
-  upload_scirpy_report_for_vdj_to_box >> update_analysis_and_status
+  #upload_scirpy_report_for_vdj_to_ftp >> update_analysis_and_status            # no more ambiguous VDJ
+  #upload_scirpy_report_for_vdj_to_box >> update_analysis_and_status
   upload_scirpy_report_for_vdj_b_to_ftp >> update_analysis_and_status
   upload_scirpy_report_for_vdj_b_to_box >> update_analysis_and_status
   upload_scirpy_report_for_vdj_t_to_ftp >> update_analysis_and_status
