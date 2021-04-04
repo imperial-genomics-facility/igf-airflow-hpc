@@ -796,7 +796,7 @@ with dag:
   ## TASK
   upload_picard_gc_summary_to_box = \
     PythonOperator(
-      task_id='upload_picard_alignment_summary_to_box',
+      task_id='upload_picard_gc_summary_to_box',
       dag=dag,
       queue='hpc_4G',
       python_callable=upload_analysis_file_to_box,
