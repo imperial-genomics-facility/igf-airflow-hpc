@@ -5,6 +5,13 @@ from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from airflow.operators.dummy_operator import DummyOperator
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import fetch_nextflow_analysis_info_and_branch_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import prep_nf_run_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import run_nf_command_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_data_to_box_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_data_to_irods_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_nf_atacseq_branch_func
+from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import change_pipeline_status
 
 default_args = {
   'owner': 'airflow',
@@ -43,7 +50,7 @@ with dag:
       task_id='prep_nf_atacseq_run',
       dag=dag,
       queue='hpc_4G',
-      python_callable=prep_nf_atacseq_run_func,
+      python_callable=prep_nf_run_func,
       params={'analysis_description_xcom_key':'analysis_description',
               'analysis_description_xcom_task':'fetch_nextflow_analysis_info_and_branch',
               'nextflow_command_xcom_key':'nexflow_command',
