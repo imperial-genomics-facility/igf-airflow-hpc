@@ -11,7 +11,7 @@ from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import run_nf_command_fun
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_nf_data_to_box_func
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_nf_data_to_irods_func
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import nf_analysis_copy_branch_func
-from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import change_pipeline_status
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import change_pipeline_status
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline import copy_nf_output_to_disk_func
 
 default_args = {
