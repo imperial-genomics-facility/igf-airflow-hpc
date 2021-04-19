@@ -81,7 +81,7 @@ with dag:
       task_id='run_nf_atacseq',
       dag=dag,
       queue='hpc_4G_long',
-      pool_slots='nextflow_hpc',
+      pool='nextflow_hpc',
       python_callable=run_nf_command_func,
       params={'nextflow_command_xcom_task':'prep_nf_atacseq_run',
               'nextflow_command_xcom_key':'nexflow_command',
