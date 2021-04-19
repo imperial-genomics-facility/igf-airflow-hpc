@@ -55,7 +55,10 @@
   "multiqc_template_file":"",
   "picard_singularity_image":"",
   "samtools_singularity_image":"",
-  "":"",
+  "igenome_base_path":"",
+  "nextflow_template_file":"",
+  "nextflow_exe":"",
+  "nextflow_singularity_cache_dir":"",
   "hpc_queue_list":{
     "hpc_1G": {
       "pbs_resource":"-lselect=1:ncpus=1:mem=1gb -lwalltime=02:00:00",
@@ -66,6 +69,9 @@
     "hpc_4G":{
       "pbs_resource":"-lselect=1:ncpus=1:mem=4gb -lwalltime=02:00:00",
       "airflow_queue":"hpc_1G,hpc_4G"},
+      "hpc_4G_long":{
+        "pbs_resource":"-lselect=1:ncpus=1:mem=4gb -lwalltime=06:00:00",
+        "airflow_queue":"hpc_1G,hpc_4G,hpc_4G_long"},
     "hpc_4G48hr":{
       "pbs_resource":"-lselect=1:ncpus=1:mem=4gb -lwalltime=48:00:00",
       "airflow_queue":"hpc_1G,hpc_1G4t,hpc_4G,hpc_4G48hr"},
