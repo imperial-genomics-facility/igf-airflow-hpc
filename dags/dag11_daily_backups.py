@@ -30,7 +30,7 @@ with dag:
     BashOperator(
       task_id='backup_prod_db',
       dag=dag,
-      xcom_push=True,
+      xcom_push=False,
       queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/secret_keys/get_dump.sh ')
 
