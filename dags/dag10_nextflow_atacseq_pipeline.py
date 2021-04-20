@@ -42,9 +42,9 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=fetch_nextflow_analysis_info_and_branch_func,
-       params={'no_analysis_task':'no_analysis',
-               'active_tasks':['prep_nf_atacseq_run'],
-               'analysis_description_xcom_key':'analysis_description'})
+      params={'no_analysis_task':'no_analysis',
+              'active_tasks':['prep_nf_atacseq_run'],
+              'analysis_description_xcom_key':'analysis_description'})
   ## TASK
   prep_nf_atacseq_run = \
     PythonOperator(
@@ -100,6 +100,7 @@ with dag:
               'data_dir_list':['bwa'],
               'report_file_dirs':['fastqc','igv','multiqc','pipeline_info','trim_galore'],
               'dag_file_name':'dag.html'})
+  ## TASK
   nf_analysis_copy_branch = \
     BranchPythonOperator(
       task_id='nf_analysis_copy_branch',
@@ -117,6 +118,7 @@ with dag:
               'dag_file_xcom_key':'dag_file',
               'data_file_copy_tasks':['copy_nf_data_to_irods'],
               'report_file_copy_tasks':['copy_nf_data_to_box']})
+  ## TASK
   copy_nf_data_to_irods = \
     PythonOperator(
       task_id='copy_nf_data_to_irods',
@@ -128,6 +130,7 @@ with dag:
               'result_dirname':'results',
               'data_dir_xcom_key':'data_dir',
               'data_dir_xcom_task':'nf_analysis_copy_branch'})
+  ## TASK
   copy_nf_data_to_box = \
     PythonOperator(
       task_id='copy_nf_data_to_box',
