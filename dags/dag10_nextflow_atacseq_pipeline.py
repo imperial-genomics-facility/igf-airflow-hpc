@@ -143,5 +143,6 @@ with dag:
   run_nf_atacseq >> copy_nf_output_to_disk
   nf_analysis_copy_branch >> copy_nf_data_to_irods
   nf_analysis_copy_branch >> copy_nf_data_to_box
+  copy_nf_output_to_disk >> update_analysis_and_status
   copy_nf_data_to_irods >> update_analysis_and_status
   copy_nf_data_to_box >> update_analysis_and_status
