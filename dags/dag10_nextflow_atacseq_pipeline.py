@@ -125,6 +125,7 @@ with dag:
       python_callable=copy_nf_data_to_irods_func,
       params={'nextflow_work_dir_xcom_task':'prep_nf_atacseq_run',
               'nextflow_work_dir_xcom_key':'nextflow_work_dir',
+              'result_dirname':'results',
               'data_dir_xcom_key':'data_dir',
               'data_dir_xcom_task':'nf_analysis_copy_branch'})
   copy_nf_data_to_box = \
@@ -132,7 +133,7 @@ with dag:
       task_id='copy_nf_data_to_box',
       dag=dag,
       queue='hpc_4G',
-      python_callable=copy_nf_data_to_irods_func,
+      python_callable=copy_nf_data_to_box_func,
       params={'report_file_xcom_key':'report_dir',
               'report_file_xcom_task':'nf_analysis_copy_branch',
               'dag_file_xcom_key':'dag_file',
