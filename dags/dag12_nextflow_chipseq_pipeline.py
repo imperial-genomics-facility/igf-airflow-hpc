@@ -43,7 +43,7 @@ with dag:
       queue='hpc_4G',
       python_callable=fetch_nextflow_analysis_info_and_branch_func,
       params={'no_analysis_task':'no_analysis',
-              'active_tasks':['prep_nf_atacseq_run'],
+              'active_tasks':['prep_nf_chipseq_run'],
               'analysis_description_xcom_key':'analysis_description'})
   ## TASK
   prep_nf_chipseq_run = \
