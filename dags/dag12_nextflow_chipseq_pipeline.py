@@ -28,7 +28,7 @@ default_args = {
 
 dag = \
   DAG(
-    dag_id='dag10_nextflow_chipseq_pipeline',
+    dag_id='dag12_nextflow_chipseq_pipeline',
     schedule_interval=None,
     tags=['hpc','analysis','nextflow','chipseq'],
     default_args=default_args,
