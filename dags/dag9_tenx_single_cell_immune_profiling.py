@@ -51,6 +51,8 @@ dag = \
     schedule_interval=None,
     tags=['hpc','analysis','tenx','sc'],
     default_args=default_args,
+    concurrency=100,
+    max_active_runs=20,
     orientation='LR')
 
 with dag:
