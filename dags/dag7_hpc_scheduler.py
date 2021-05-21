@@ -21,7 +21,7 @@ dag = \
   DAG(
     dag_id='dag7_hpc_scheduler',
     catchup=False,
-    schedule_interval="*/30 * * * *",
+    schedule_interval="*/15 * * * *",
     max_active_runs=1,
     tags=['igf-lims','hpc'],
     default_args=default_args)
