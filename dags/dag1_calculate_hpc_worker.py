@@ -139,6 +139,7 @@ with dag:
     PythonOperator(
       task_id='fetch_celery_workers',
       dag=dag,
+      queue='igf-lims',
       python_callable=fetch_celery_worker_list,
       params={'celery_worker_key':'celery_workers'}
     )
