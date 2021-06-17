@@ -23,7 +23,7 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
-        schedule_interval="15,33,54 * * * *",
+        schedule_interval="5,10,15,20,25,30,35,40,45,50,55 * * * *",
         default_args=args,
         tags=['igf-lims',]
       )
