@@ -528,6 +528,50 @@ with dag:
               'collection_type':'ANALYSIS_CRAM',
               'collection_table':'sample',
               'cram_files_xcom_key':'cram_files'})
+  ## PIPELINE
+  decide_analysis_branch >> convert_cellranger_bam_to_cram
+  ## TASK
+  generate_cell_sorted_bam = \
+    DummyOperator(
+      task_id='generate_cell_sorted_bam',
+      dag=dag)
+  run_velocyto = \
+    DummyOperator(
+      task_id='run_velocyto',
+      dag=dag)
+  run_scvelo_for_sc_5p = \
+    DummyOperator(
+      task_id='run_scvelo_for_sc_5p',
+      dag=dag)
+  load_loom_file_to_rds = \
+    DummyOperator(
+      task_id='load_loom_file_to_rds',
+      dag=dag)
+  upload_loom_file_to_irods = \
+    DummyOperator(
+      task_id='upload_loom_file_to_irods',
+      dag=dag)
+  load_scvelo_report_to_rds = \
+    DummyOperator(
+      task_id='load_scvelo_report_to_rds',
+      dag=dag)
+  upload_scvelo_report_to_ftp = \
+    DummyOperator(
+      task_id='upload_scvelo_report_to_ftp',
+      dag=dag)
+  upload_scvelo_report_to_box = \
+    DummyOperator(
+      task_id='upload_scvelo_report_to_box',
+      dag=dag)
+  ## PIPELINE
+  convert_cellranger_bam_to_cram >> generate_cell_sorted_bam
+  generate_cell_sorted_bam >> run_velocyto
+  run_velocyto >> run_scvelo_for_sc_5p
+  run_velocyto >> load_loom_file_to_rds
+  load_loom_file_to_rds >> upload_loom_file_to_irods
+  run_scvelo_for_sc_5p >> load_scvelo_report_to_rds
+  load_scvelo_report_to_rds >> upload_scvelo_report_to_ftp
+  load_scvelo_report_to_rds >> upload_scvelo_report_to_box
   ## TASK
   copy_bam_for_parallel_runs = \
     BranchPythonOperator(
@@ -557,8 +601,8 @@ with dag:
               'collection_name_task':'load_cellranger_result_to_db',
               'analysis_name':'cellranger_multi'})
   ## PIPELINE
-  decide_analysis_branch >> convert_cellranger_bam_to_cram
-  convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
+  #convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
+  generate_cell_sorted_bam >> copy_bam_for_parallel_runs
   convert_cellranger_bam_to_cram >> upload_cram_to_irods
   ## TASK
   run_picard_alignment_summary = \
