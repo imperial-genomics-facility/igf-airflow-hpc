@@ -543,8 +543,8 @@ with dag:
               'xcom_pull_files_key': 'cellranger_output',
               'cellranger_bam_path': 'count/possorted_genome_bam.bam',
               'cellsorted_bam_path': 'count/cellsorted_possorted_genome_bam.bam',
-              'samtools_mem': '12000M',
-              'threads': 6})
+              'samtools_mem': '2G',
+              'threads': 8})
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
