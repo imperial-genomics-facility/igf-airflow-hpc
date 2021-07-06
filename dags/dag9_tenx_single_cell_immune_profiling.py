@@ -544,7 +544,7 @@ with dag:
               'cellranger_bam_path': 'count/possorted_genome_bam.bam',
               'cellsorted_bam_path': 'count/cellsorted_possorted_genome_bam.bam',
               'samtools_mem': '2G',
-              'threads': 8})
+              'threads': 7})
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
