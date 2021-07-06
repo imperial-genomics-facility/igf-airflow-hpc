@@ -1005,6 +1005,8 @@ with dag:
   upload_cellranger_report_to_ftp >> update_analysis_and_status
   upload_cellranger_report_to_box >> update_analysis_and_status
   upload_cram_to_irods >> update_analysis_and_status
+  upload_scvelo_report_to_box >> update_analysis_and_status
+  upload_scvelo_report_to_ftp >> update_analysis_and_status
   ## TASK
   update_qc_pages = \
     PythonOperator(
