@@ -537,14 +537,14 @@ with dag:
     PythonOperator(
       task_id='generate_cell_sorted_bam',
       dag=dag,
-      queue='hpc_8G8t',
+      queue='hpc_16G8t',
       python_callable=generate_cell_sorted_bam_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
               'cellranger_bam_path': 'count/possorted_genome_bam.bam',
               'cellsorted_bam_path': 'count/cellsorted_possorted_genome_bam.bam',
-              'samtools_mem': '6000M',
-              'threads':6})
+              'samtools_mem': '12000M',
+              'threads': 6})
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
