@@ -539,16 +539,19 @@ with dag:
       dag=dag,
       queue='hpc_8G8t',
       python_callable=generate_cell_sorted_bam_func,
-      params={'xcom_pull_task': 'cellranger_output',
-              'xcom_pull_files_key': 'run_cellranger',
+      params={'xcom_pull_task': 'run_cellranger',
+              'xcom_pull_files_key': 'cellranger_output',
+              'cellranger_bam_path': 'count/possorted_genome_bam.bam',
+              'cellsorted_bam_path': 'count/cellsorted_possorted_genome_bam.bam',
+              'samtools_mem': 8000,
               'threads': 8})
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
        queue='hpc_4G',
       python_callable=run_velocyto_func,
-      params={'xcom_pull_task': 'cellranger_output',
-              'xcom_pull_files_key': 'run_cellranger',
+      params={'xcom_pull_task': 'run_cellranger',
+              'xcom_pull_files_key': 'cellranger_output',
               'analysis_description_xcom_pull_task': 'fetch_analysis_info',
               'analysis_description_xcom_key': 'analysis_description' })
   run_scvelo_for_sc_5p = \
