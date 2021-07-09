@@ -28,6 +28,8 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import creat
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_cellranger_metrices_to_collection
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import generate_cell_sorted_bam_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_velocyto_func
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_scvelo_for_sc_5p_func
+from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import load_loom_file_to_rds_func
 
 ## ARGS
 default_args = {
@@ -548,20 +550,24 @@ with dag:
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
-       queue='hpc_8G_long',
+      queue='hpc_8G_long',
       python_callable=run_velocyto_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
               'analysis_description_xcom_pull_task': 'fetch_analysis_info',
               'analysis_description_xcom_key': 'analysis_description' })
   run_scvelo_for_sc_5p = \
-    DummyOperator(
+    PythonOperator(
       task_id='run_scvelo_for_sc_5p',
-      dag=dag)
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=run_scvelo_for_sc_5p_func)
   load_loom_file_to_rds = \
-    DummyOperator(
+    PythonOperator(
       task_id='load_loom_file_to_rds',
-      dag=dag)
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_loom_file_to_rds_func)
   upload_loom_file_to_irods = \
     DummyOperator(
       task_id='upload_loom_file_to_irods',
