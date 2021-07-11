@@ -560,8 +560,18 @@ with dag:
     PythonOperator(
       task_id='run_scvelo_for_sc_5p',
       dag=dag,
-      queue='hpc_4G',
-      python_callable=run_scvelo_for_sc_5p_func)
+      queue='hpc_8G8t',
+      python_callable=run_scvelo_for_sc_5p_func,
+      params={'xcom_pull_task': 'run_cellranger',
+              'xcom_pull_files_key': 'cellranger_output',
+              'analysis_description_xcom_pull_task': 'fetch_analysis_info',
+              'analysis_description_xcom_key': 'analysis_description',
+              'loom_file_key': 'loom_output',
+              'loom_file_task': 'run_velocyto',
+              'timeout': 1200,
+              'allow_errors': False,
+              'cpu_threads': 8,
+              'output_notebook_key': 'scvelo_notebook'})
   load_loom_file_to_rds = \
     PythonOperator(
       task_id='load_loom_file_to_rds',

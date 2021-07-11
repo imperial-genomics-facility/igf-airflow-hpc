@@ -38,6 +38,7 @@
   "igf_lims_server_hostname":"igf-lims.cc.ic.ac.uk",
   "tenx_single_cell_immune_profiling_feature_types": {"gene_expression":"","vdj-t":"","vdj-b":"","antibody_capture":"","antigen_capture":"","crisper_guide_capture":""},
   "scanpy_single_sample_template":"",
+  "scvelo_single_sample_template": "",
   "scanpy_notebook_image":"",
   "scirpy_single_sample_template":"",
   "scirpy_notebook_image":"",
