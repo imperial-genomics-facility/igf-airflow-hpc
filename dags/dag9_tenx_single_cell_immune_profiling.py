@@ -1080,6 +1080,7 @@ with dag:
                 'FTP_SCIRPY_VDJ_HTML',
                 'FTP_CELLBROWSER',
                 'FTP_SCANPY_HTML',
+                'FTP_SCVELO_HTML',
                 'FTP_CELLRANGER_HTML']})
   ## PIPELINE
   update_analysis_and_status >> update_qc_pages
