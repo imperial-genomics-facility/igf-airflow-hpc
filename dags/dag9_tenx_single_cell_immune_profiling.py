@@ -577,15 +577,33 @@ with dag:
       task_id='load_loom_file_to_rds',
       dag=dag,
       queue='hpc_4G',
-      python_callable=load_loom_file_to_rds_func)
+      python_callable=load_analysis_files_func,
+      params={'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'file_name_task':'run_velocyto',
+              'file_name_key':'loom_output',
+              'analysis_name':'velocyto_5p',
+              'collection_type':'VELOCYTO_LOOM',
+              'collection_table':'sample',
+              'output_files_key':'output_db_files'}))
   upload_loom_file_to_irods = \
     DummyOperator(
       task_id='upload_loom_file_to_irods',
       dag=dag)
   load_scvelo_report_to_rds = \
-    DummyOperator(
+    PythonOperator(
       task_id='load_scvelo_report_to_rds',
-      dag=dag)
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=load_analysis_files_func,
+      params={'collection_name_task':'load_cellranger_result_to_db',
+              'collection_name_key':'sample_igf_id',
+              'file_name_task':'run_scvelo_for_sc_5p',
+              'file_name_key':'scvelo_notebook',
+              'analysis_name':'scvelo_5p',
+              'collection_type':'SCVELO_HTML',
+              'collection_table':'sample',
+              'output_files_key':'output_db_files'})
   upload_scvelo_report_to_ftp = \
     DummyOperator(
       task_id='upload_scvelo_report_to_ftp',
