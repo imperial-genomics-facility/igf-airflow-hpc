@@ -624,7 +624,7 @@ with dag:
               'collection_table':'sample',
               'collect_remote_file':True})
   upload_scvelo_report_to_box = \
-    DummyOperator(
+    PythonOperator(
       task_id='upload_scvelo_report_to_box',
       dag=dag,
       queue='hpc_4G',
