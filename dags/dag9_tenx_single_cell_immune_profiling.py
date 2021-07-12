@@ -567,9 +567,9 @@ with dag:
               'analysis_description_xcom_key': 'analysis_description',
               'loom_file_key': 'loom_output',
               'loom_file_task': 'run_velocyto',
-              'timeout': 1200,
+              'timeout': 2400,
               'allow_errors': False,
-              'cpu_threads': 8,
+              'cpu_threads': 7,
               'output_notebook_key': 'scvelo_notebook'})
   load_loom_file_to_rds = \
     PythonOperator(
