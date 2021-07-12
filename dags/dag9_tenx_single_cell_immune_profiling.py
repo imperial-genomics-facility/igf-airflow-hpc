@@ -559,7 +559,7 @@ with dag:
     PythonOperator(
       task_id='run_scvelo_for_sc_5p',
       dag=dag,
-      queue='hpc_8G8t',
+      queue='hpc_16G8t',
       python_callable=run_scvelo_for_sc_5p_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
