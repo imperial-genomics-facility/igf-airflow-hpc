@@ -559,7 +559,7 @@ with dag:
     PythonOperator(
       task_id='run_scvelo_for_sc_5p',
       dag=dag,
-      queue='hpc_16G8t',
+      queue='hpc_32G16t',
       python_callable=run_scvelo_for_sc_5p_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
@@ -569,7 +569,7 @@ with dag:
               'loom_file_task': 'run_velocyto',
               'timeout': 2400,
               'allow_errors': False,
-              'cpu_threads': 7,
+              'cpu_threads': 14,
               'output_notebook_key': 'scvelo_notebook'})
   load_loom_file_to_rds = \
     PythonOperator(
