@@ -238,6 +238,7 @@ with dag:
               'analysis_name':'scanpy',
               'output_notebook_key':'scanpy_notebook',
               'output_cellbrowser_key':'cellbrowser_dirs',
+              'output_scanpy_h5ad_key':'scanpy_h5ad',
               'analysis_description_xcom_pull_task':'fetch_analysis_info',
               'analysis_description_xcom_key':'analysis_description'})
   load_cellranger_gex_matrics_to_db = \
@@ -567,6 +568,8 @@ with dag:
               'analysis_description_xcom_key': 'analysis_description',
               'loom_file_key': 'loom_output',
               'loom_file_task': 'run_velocyto',
+              'scanpy_h5ad_task':'run_scanpy_for_sc_5p',
+              'scanpy_h5ad_key': 'scanpy_h5ad',
               'timeout': 2400,
               'allow_errors': False,
               'cpu_threads': 14,
@@ -636,6 +639,7 @@ with dag:
   convert_cellranger_bam_to_cram >> generate_cell_sorted_bam
   generate_cell_sorted_bam >> run_velocyto
   run_velocyto >> run_scvelo_for_sc_5p
+  run_scanpy_for_sc_5p >> run_scvelo_for_sc_5p
   run_velocyto >> load_loom_file_to_rds
   load_loom_file_to_rds >> upload_loom_file_to_irods
   run_scvelo_for_sc_5p >> load_scvelo_report_to_rds
