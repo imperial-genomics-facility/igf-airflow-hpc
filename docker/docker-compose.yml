@@ -1,4 +1,4 @@
-version: '2.2'
+version: '3'
 networks:
     airflow_network:
         driver: bridge
@@ -40,7 +40,7 @@ services:
         networks:
                - airflow_network
     airflow_webserver:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.1.3
         env_file:
                 - /home/igf/airflow_test/secrets/airflow_env
         links:
@@ -57,7 +57,6 @@ services:
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
-                
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
                 - airflow_db
@@ -69,7 +68,7 @@ services:
         networks:
                - airflow_network
     airflow_scheduler:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.1.3
         env_file:
                 - /home/igf/airflow_test/secrets/airflow_env
         links:
@@ -95,7 +94,7 @@ services:
         networks:
                - airflow_network
     airflow_worker:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.1.3
         env_file:
                 - /home/igf/airflow_test/secrets/airflow_env
         links:
@@ -118,7 +117,7 @@ services:
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
-        command: worker -q igf-lims --celery_hostname igf-lims
+        command: celery worker -q igf-lims --celery-hostname igf-lims
         container_name: airflow_worker
         networks:
                - airflow_network
@@ -137,7 +136,7 @@ services:
         networks:
                - airflow_network
     airflow_flower:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.1.3
         env_file:
                 - /home/igf/airflow_test/secrets/airflow_env
         links:
@@ -159,7 +158,7 @@ services:
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
         restart: always
-        command: flower
+        command: celery flower
         container_name: airflow_flower
         networks:
                - airflow_network
