@@ -9,6 +9,10 @@ services:
                - /home/igf/airflow_test/secrets/airflow_db_env
         ports:
                - "5433:5432"
+        healthcheck:
+          test: ["CMD", "pg_isready", "-U", "airflow"]
+          interval: 5s
+          retries: 5
         restart: always
         volumes:
                 - /home/igf/airflow_test/postgres_airflow_db:/var/lib/postgresql/data:rw
@@ -32,6 +36,11 @@ services:
         ports:
               - "6379:6379"
         restart: always
+        healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 5s
+          timeout: 30s
+          retries: 50
         volumes:
                - /home/igf/airflow_test/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
                - /home/igf/airflow_test/redis_airflow_data:/data:rw
@@ -62,6 +71,11 @@ services:
                 - airflow_db
                 - airflow_results_db
                 - redis-server
+        healthcheck:
+          test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+          interval: 10s
+          timeout: 10s
+          retries: 5
         restart: always
         command: webserver
         container_name: airflow_webserver
@@ -88,6 +102,11 @@ services:
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
+        healthcheck:
+          test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+          interval: 10s
+          timeout: 10s
+          retries: 5
         restart: always
         command: scheduler
         container_name: airflow_scheduler
@@ -116,6 +135,13 @@ services:
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+        healthcheck:
+          test:
+            - "CMD-SHELL"
+            - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+          interval: 10s
+          timeout: 10s
+          retries: 5
         restart: always
         command: celery worker -q igf-lims --celery-hostname igf-lims
         container_name: airflow_worker
@@ -157,6 +183,11 @@ services:
                 - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
                 - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+        healthcheck:
+          test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+          interval: 10s
+          timeout: 10s
+          retries: 5
         restart: always
         command: celery flower
         container_name: airflow_flower
