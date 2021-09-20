@@ -8,7 +8,7 @@
   "hpc_max_workers_per_queue": 10,
   "hpc_max_total_workers": 40,
   "crick_ftp_seqrun_hostname": "hermes.crick.ac.uk",
-  "crick_ftp_config_file": "/home/igf/igf_code/airflow/secret/crick_ftp_config.json",
+  "crick_ftp_config_file": "/rds/general/user/igf/home/secret_keys/crick_ftp_config.json",
   "seqrun_base_path": "/home/igf/seqrun/illumina",
   "seqrun_server_user": "igf",
   "database_config_file": "/rds/general/user/igf/home/secret_keys/dbconfig.json",
