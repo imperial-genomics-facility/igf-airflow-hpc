@@ -75,7 +75,11 @@ with dag:
         exit 1;
       else
         mkdir -p {{ dag_run.conf["seqrun_id"] }};
-        tar -xzf {{ dag_run.conf["seqrun_id"] }}.tar.gz -C {{ dag_run.conf["seqrun_id"] }}
+        tar \
+          --no-same-owner \
+          --no-same-permissions \
+          --owner=igf \
+          -xzf {{ dag_run.conf["seqrun_id"] }}.tar.gz -C {{ dag_run.conf["seqrun_id"] }}
       fi
       """
     )
