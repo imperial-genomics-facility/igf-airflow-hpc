@@ -37,18 +37,6 @@ dag = \
 
 with dag:
   # TASK
-  # check if the FTP host is alive
-  ping_remote_host = \
-    SSHOperator(
-      task_id='ping_remote_host',
-      dag=dag,
-      ssh_hook=orwell_ssh_hook,
-      pool='orwell_exe_pool',
-      do_xcom_push=False,
-      queue='hpc_4G',
-      params={'FTP_SEQRUN_SERVER': FTP_SEQRUN_SERVER},
-      command='ping -c5 {{ params.FTP_SEQRUN_SERVER }}')
-  # TASK
   check_and_transfer_run = \
     SSHOperator(
       task_id='check_and_transfer_run',
@@ -70,4 +58,4 @@ with dag:
           -c {{ params.ftp_config_file }}
         """)
   ## PIPELINE
-  ping_remote_host >> check_and_transfer_run
+  check_and_transfer_run
