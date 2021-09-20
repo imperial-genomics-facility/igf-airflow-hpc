@@ -50,7 +50,7 @@ with dag:
               'ftp_config_file': FTP_CONFIG_FILE,
               'seqrun_id': '{{ dag_run.conf["seqrun_id"] if dag_run else "" }}'},
       command="""
-        source /home/igf/igf_code/env.sh;
+        source /home/igf/igf_code/airflow/env.sh;
         python /home/igf/igf_code/airflow/data-management-python/scripts/ftp_seqrun_transfer/transfer_seqrun_from_crick.py \
           -f {{ params.ftp_seqrun_server }} \
           -s {{ params.seqrun_id }} \
