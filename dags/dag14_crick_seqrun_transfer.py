@@ -47,13 +47,13 @@ with dag:
       queue='hpc_4G',
       params={'ftp_seqrun_server': FTP_SEQRUN_SERVER,
               'seqrun_base_path': SEQRUN_BASE_PATH,
-              'ftp_config_file': FTP_CONFIG_FILE,
-              'seqrun_id': '{{ dag_run.conf["seqrun_id"] if dag_run else "" }}'},
+              'ftp_config_file': FTP_CONFIG_FILE},
+      env={'seqrun_id': '{{ dag_run.conf["seqrun_id"] if dag_run else "" }}'},
       command="""
         source /home/igf/igf_code/airflow/env.sh;
         python /home/igf/igf_code/airflow/data-management-python/scripts/ftp_seqrun_transfer/transfer_seqrun_from_crick.py \
           -f {{ params.ftp_seqrun_server }} \
-          -s {{ params.seqrun_id }} \
+          -s \'$seqrun_id\' \
           -d {{ params.seqrun_base_path }} \
           -c {{ params.ftp_config_file }}
         """)
