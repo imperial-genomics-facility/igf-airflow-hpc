@@ -92,7 +92,7 @@ with dag:
       params={'seqrun_base_path': SEQRUN_BASE_PATH},
       command="""
       cd {{ params.seqrun_base_path }};
-      if [ -d {{ dag_run.conf["seqrun_id"] }} ];
+      if [ -d temp_{{ dag_run.conf["seqrun_id"] }} ];
       then
         echo "Seqrun dir exists";
         exit 1;
@@ -102,9 +102,36 @@ with dag:
           --no-same-owner \
           --no-same-permissions \
           --owner=igf \
-          -xzf {{ dag_run.conf["seqrun_id"] }}.tar.gz -C temp_{{ dag_run.conf["seqrun_id"] }}
+          -xzf {{ dag_run.conf["seqrun_id"] }}.tar.gz \
+          -C temp_{{ dag_run.conf["seqrun_id"] }};
+        find temp_{{ dag_run.conf["seqrun_id"] }} \
+          -type d \
+          -exec chmod 700 {} \;
+        chmod -R u+r temp_{{ dag_run.conf["seqrun_id"] }};
+        chmod -R u+w temp_{{ dag_run.conf["seqrun_id"] }};
       fi
       """
     )
+  ## TASK
+  move_seqrun_dir = \
+    SSHOperator(
+      task_id='move_seqrun_dir',
+      dag=dag,
+      pool='orwell_exe_pool',
+      ssh_hook=orwell_ssh_hook,
+      do_xcom_push=False,
+      queue='hpc_4G',
+      params={'seqrun_base_path': SEQRUN_BASE_PATH},
+      command="""
+        cd {{ params.seqrun_base_path }};
+        if [ -d {{ dag_run.conf["seqrun_id"] }} ];
+        then
+          echo "Seqrun dir exists";
+          exit 1;
+        fi
+        ls temp_{{ dag_run.conf["seqrun_id"] }}/camp/stp/sequencing/inputs/instruments/sequencers/{{ dag_run.conf["seqrun_id"] }};
+        move temp_{{ dag_run.conf["seqrun_id"] }}/camp/stp/sequencing/inputs/instruments/sequencers/{{ dag_run.conf["seqrun_id"] }} {{ params.seqrun_base_path }}/{{ dag_run.conf["seqrun_id"] }};
+      """
+    )
   ## PIPELINE
-  check_and_transfer_run >> extract_tar_file
+  check_and_transfer_run >> extract_tar_file >> move_seqrun_dir
