@@ -5,8 +5,8 @@ from airflow.utils.dates import days_ago
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
 from airflow.operators.python_operator import PythonOperator
-from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import check_and_transfer_run_func
-from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import extract_tar_file_func
+#from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import check_and_transfer_run_func
+#from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import extract_tar_file_func
 
 FTP_SEQRUN_SERVER = Variable.get('crick_ftp_seqrun_hostname')
 FTP_CONFIG_FILE = Variable.get('crick_ftp_config_file')
