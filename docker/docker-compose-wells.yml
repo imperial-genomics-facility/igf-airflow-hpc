@@ -1,0 +1,41 @@
+version: '2.2'
+networks:
+    airflow_network:
+        driver: bridge
+services:
+    airflow_scheduler:
+        image: apache/airflow:1.10.12
+        env_file:
+                - /home/igf/airflow_test/secrets/airflow_env
+        volumes:
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+        restart: always
+        command: scheduler
+        container_name: airflow_scheduler
+        networks:
+               - airflow_network
+    airflow_worker:
+        image: apache/airflow:1.10.12
+        depends_on:
+                - airflow_scheduler
+        env_file:
+                - /home/igf/airflow_test/secrets/airflow_env
+        ports:
+                - "8793:8793"
+        volumes:
+                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
+                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+                - /data/igf:/rds/general/user/igf/ephemeral:rw
+        restart: always
+        command: worker -q wells --celery_hostname wells
+        container_name: airflow_worker
+        networks:
+               - airflow_network

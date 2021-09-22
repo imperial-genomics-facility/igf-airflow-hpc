@@ -57,7 +57,6 @@ services:
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
-                
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
                 - airflow_db
