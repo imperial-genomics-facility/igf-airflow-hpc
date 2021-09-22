@@ -8,7 +8,7 @@ from airflow.operators.python_operator import PythonOperator
 #from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import extract_tar_file_func
 
 FTP_SEQRUN_SERVER = Variable.get('crick_ftp_seqrun_hostname')
-FTP_CONFIG_FILE = Variable.get('crick_ftp_config_file')
+FTP_CONFIG_FILE = Variable.get('crick_ftp_config_file_wells')
 SEQRUN_BASE_PATH = Variable.get('seqrun_base_path')
 HPC_SEQRUN_BASE_PATH = Variable.get('hpc_seqrun_path')
 
@@ -36,7 +36,7 @@ dag = \
     dag_id='dag14_crick_seqrun_transfer',
     schedule_interval=None,
     default_args=args,
-    tags=['ftp', 'hpc', 'orwell'])
+    tags=['ftp', 'hpc', 'orwell', 'wells'])
 
 
 with dag:
@@ -67,13 +67,12 @@ with dag:
       pool='crick_ftp_pool',
       ssh_hook=orwell_ssh_hook,
       do_xcom_push=False,
-      queue='hpc_4G',
+      queue='wells',
       params={'ftp_seqrun_server': FTP_SEQRUN_SERVER,
-              'seqrun_base_path': SEQRUN_BASE_PATH,
+              'seqrun_base_path': HPC_SEQRUN_BASE_PATH,
               'ftp_config_file': FTP_CONFIG_FILE},
       command="""
-        source /home/igf/igf_code/airflow/env.sh;
-        python /home/igf/igf_code/airflow/data-management-python/scripts/ftp_seqrun_transfer/transfer_seqrun_from_crick.py \
+        python /rds/general/user/igf/home/data2/airflow_test/github/data-management-python/scripts/ftp_seqrun_transfer/transfer_seqrun_from_crick.py \
           -f {{ params.ftp_seqrun_server }} \
           -s {{ dag_run.conf["seqrun_id"] }} \
           -d {{ params.seqrun_base_path }} \
@@ -84,11 +83,9 @@ with dag:
     SSHOperator(
       task_id='extract_tar_file',
       dag=dag,
-      pool='orwell_exe_pool',
-      ssh_hook=orwell_ssh_hook,
       do_xcom_push=False,
-      queue='hpc_4G',
-      params={'seqrun_base_path': SEQRUN_BASE_PATH},
+      queue='wells',
+      params={'seqrun_base_path': HPC_SEQRUN_BASE_PATH},
       command="""
       cd {{ params.seqrun_base_path }};
       if [ -d temp_{{ dag_run.conf["seqrun_id"] }} ];
