@@ -84,10 +84,11 @@ with dag:
       task_id='check_and_transfer_run',
       dag=dag,
       pool='crick_ftp_pool',
-      queue='wells',
+      queue='hpc_4G',
       ssh_conn_id="crick_sftp_conn",
+      params={'seqrun_base_path': HPC_SEQRUN_BASE_PATH},
       local_filepath="/rds/general/user/igf/ephemeral/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
-      remote_filepath="/users/dattaa/runs/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
+      remote_filepath="{{ params.seqrun_base_path }}/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
       operation='get'
     )
   # TASK
@@ -96,7 +97,7 @@ with dag:
       task_id='extract_tar_file',
       dag=dag,
       do_xcom_push=False,
-      queue='wells',
+      queue='hpc_4G',
       params={'seqrun_base_path': HPC_SEQRUN_BASE_PATH},
       bash_command="""
       cd {{ params.seqrun_base_path }};
