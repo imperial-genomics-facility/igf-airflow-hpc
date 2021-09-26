@@ -35,7 +35,7 @@ services:
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
                 - /data/igf:/rds/general/user/igf/ephemeral:rw
         restart: always
-        command: worker -q wells --celery_hostname wells
+        command: worker -q wells,generic --celery_hostname wells
         container_name: airflow_worker
         networks:
                - airflow_network

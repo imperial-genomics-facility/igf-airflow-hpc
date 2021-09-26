@@ -117,7 +117,7 @@ services:
                 - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
-        command: worker -q igf-lims --celery_hostname igf-lims
+        command: worker -q igf-lims,generic --celery_hostname igf-lims
         container_name: airflow_worker
         networks:
                - airflow_network
