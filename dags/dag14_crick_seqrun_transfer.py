@@ -5,7 +5,7 @@ from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.contrib.operators.sftp_operator import SFTPOperator, SFTPOperation
+from airflow.contrib.operators.sftp_operator import SFTPOperator
 #from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import check_and_transfer_run_func
 #from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import extract_tar_file_func
 
@@ -88,7 +88,7 @@ with dag:
       ssh_conn_id="crick_sftp_conn",
       local_filepath="/rds/general/project/genomics-facility-archive-2019/ephemeral/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
       remote_filepath="/users/dattaa/runs/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
-      operation=SFTPOperation.GET
+      operation='get'
     )
   # TASK
   extract_tar_file = \
