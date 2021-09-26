@@ -86,7 +86,7 @@ with dag:
       pool='crick_ftp_pool',
       queue='wells',
       ssh_conn_id="crick_sftp_conn",
-      local_filepath="/rds/general/project/genomics-facility-archive-2019/ephemeral/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
+      local_filepath="/rds/general/user/igf/ephemeral/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
       remote_filepath="/users/dattaa/runs/{{ dag_run.conf['seqrun_id'] }}.tar.gz",
       operation='get'
     )
