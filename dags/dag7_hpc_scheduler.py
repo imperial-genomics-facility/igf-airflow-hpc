@@ -42,7 +42,7 @@ with dag:
       task_id='run_hpc_scheduler',
       dag=dag,
       ssh_hook=hpc_hook,
-      queue='igf-lims',
+      queue='generic',
       command="""
         source /etc/bashrc; \
         qsub /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)

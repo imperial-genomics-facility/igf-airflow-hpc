@@ -163,7 +163,7 @@ with dag:
       dag=dag,
       python_callable=airflow_utils_for_redis,
       op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
-      queue='igf-lims')
+      queue='generic')
   ## TASK
   check_hpc_queue = \
     SSHOperator(
@@ -171,7 +171,7 @@ with dag:
       ssh_hook=hpc_hook,
       dag=dag,
       command='source /etc/bashrc;qstat',
-      queue='igf-lims')
+      queue='generic')
   ## TASK
   fetch_active_jobs_from_hpc = \
     SSHOperator(
@@ -183,13 +183,13 @@ with dag:
         source /project/tgu/data2/airflow_test/secrets/hpc_env.sh;\
         python /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
-      queue='igf-lims')
+      queue='generic')
   ## TASK
   fetch_celery_workers = \
     PythonOperator(
       task_id='fetch_celery_workers',
       dag=dag,
-      queue='igf-lims',
+      queue='generic',
       python_callable=fetch_celery_worker_list,
       params={'celery_worker_key':'celery_workers'}
     )
@@ -199,10 +199,10 @@ with dag:
       task_id='calculate_new_worker_size_and_branch',
       dag=dag,
       python_callable=get_new_workers,
-      queue='igf-lims',
+      queue='generic',
       params={'celery_worker_key':'celery_workers',
               'empty_celery_worker_key':'empty_celery_worker',
-              'base_queue':'igf-lims'})
+              'base_queue':'generic'})
   ## TASK
   queue_tasks = list()
   hpc_queue_list = Variable.get('hpc_queue_list')
@@ -213,7 +213,7 @@ with dag:
       task_id=q,
       ssh_hook=hpc_hook,
       dag=dag,
-      queue='igf-lims',
+      queue='generic',
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
         source /etc/bashrc; \
@@ -245,7 +245,7 @@ with dag:
     PythonOperator(
       task_id='cleanup_celery_workers',
       dag=dag,
-      queue='igf-lims',
+      queue='generic',
       params={'empty_celery_worker_key':'empty_celery_worker'},
       python_callable=stop_celery_workers)
   ## PIPELINE
