@@ -61,7 +61,6 @@ with dag:
       task_id='extract_tar_file',
       dag=dag,
       queue='hpc_4G',
-      params={'hpc_seqrun_base_path': HPC_SEQRUN_BASE_PATH},
       python_callable=extract_tar_file_func)
   #check_and_transfer_run = \
   #  BashOperator(
