@@ -60,10 +60,11 @@ with dag:
       task_id='find_and_split_md5',
       dag=dag,
       queue='hpc_4G',
+      params={'split_count': 50},
       python_callable=find_and_split_md5_func)
   ## PIPELINE
   check_and_transfer_run >> extract_tar_file >> find_and_split_md5
-  for chunk_id in range(0, 21):
+  for chunk_id in range(0, 50):
     t = \
       PythonOperator(
         task_id='md5_validate_chunk_{0}'.format(i),
