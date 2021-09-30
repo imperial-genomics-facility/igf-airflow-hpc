@@ -67,7 +67,7 @@ with dag:
   for chunk_id in range(0, 50):
     t = \
       PythonOperator(
-        task_id='md5_validate_chunk_{0}'.format(i),
+        task_id='md5_validate_chunk_{0}'.format(chunk_id),
         dag=dag,
         queue='hpc_4G',
         params={'chunk_id': chunk_id,
