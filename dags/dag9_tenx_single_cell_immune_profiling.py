@@ -545,8 +545,8 @@ with dag:
       python_callable=generate_cell_sorted_bam_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
-              'cellranger_bam_path': 'count/possorted_genome_bam.bam',
-              'cellsorted_bam_path': 'count/cellsorted_possorted_genome_bam.bam',
+              'cellranger_bam_path': 'count/sample_alignments.bam',
+              'cellsorted_bam_path': 'count/cellsorted_sample_alignments.bam',
               'samtools_mem': '2G',
               'threads': 7})
   run_velocyto = \
@@ -556,6 +556,7 @@ with dag:
       python_callable=run_velocyto_func,
       params={'xcom_pull_task': 'run_cellranger',
               'xcom_pull_files_key': 'cellranger_output',
+              'cell_sorted_bam_name': 'count/cellsorted_sample_alignments.bam',
               'analysis_description_xcom_pull_task': 'fetch_analysis_info',
               'analysis_description_xcom_key': 'analysis_description' })
   run_scvelo_for_sc_5p = \
