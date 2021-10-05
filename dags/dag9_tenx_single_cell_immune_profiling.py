@@ -655,15 +655,17 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=index_and_copy_bam_for_parallel_analysis,
-      params={'xcom_pull_files_key':'cellranger_output',
-              'xcom_pull_task':'run_cellranger',
-              'list_of_tasks':[
-                'run_picard_alignment_summary',
-                'run_picard_qual_summary',
-                'run_picard_rna_summary',
-                'run_picard_gc_summary',
-                'run_picard_base_dist_summary',
-                'run_samtools_stats']})
+      params={
+        'xcom_pull_files_key': 'cellranger_output',
+        'xcom_pull_task': 'run_cellranger',
+        'cellranger_bam_path': 'count/sample_alignments.bam',
+        'list_of_tasks': [
+          'run_picard_alignment_summary',
+          'run_picard_qual_summary',
+          'run_picard_rna_summary',
+          'run_picard_gc_summary',
+          'run_picard_base_dist_summary',
+          'run_samtools_stats']})
   ## TASK
   upload_cram_to_irods = \
     PythonOperator(
@@ -671,11 +673,12 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=irods_files_upload_for_analysis,
-      params={'xcom_pull_task':'convert_cellranger_bam_to_cram',
-              'xcom_pull_files_key':'cram_files',
-              'collection_name_key':'sample_igf_id',
-              'collection_name_task':'load_cellranger_result_to_db',
-              'analysis_name':'cellranger_multi'})
+      params={
+        'xcom_pull_task': 'convert_cellranger_bam_to_cram',
+        'xcom_pull_files_key': 'cram_files',
+        'collection_name_key': 'sample_igf_id',
+        'collection_name_task': 'load_cellranger_result_to_db',
+        'analysis_name': 'cellranger_multi'})
   ## PIPELINE
   #convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
   generate_cell_sorted_bam >> copy_bam_for_parallel_runs
