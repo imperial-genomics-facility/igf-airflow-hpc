@@ -252,7 +252,7 @@ with dag:
               'collection_type':'CELLRANGER_MULTI',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
-              'metrics_summary_file':'count/metrics_summary.csv',
+              'metrics_summary_file':'metrics_summary.csv',
               'attribute_prefix':'CELLRANGER_COUNT'})
   load_scanpy_report_for_sc_5p_to_db = \
     PythonOperator(
@@ -339,7 +339,7 @@ with dag:
               'collection_type':'CELLRANGER_MULTI',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
-              'metrics_summary_file':'vdj_b/metrics_summary.csv',
+              'metrics_summary_file':'metrics_summary.csv',
               'attribute_prefix':'CELLRANGER_VDJB'})
   load_scirpy_report_for_vdj_b_to_db = \
     PythonOperator(
@@ -412,7 +412,7 @@ with dag:
               'collection_type':'CELLRANGER_MULTI',
               'collection_name_task':'load_cellranger_result_to_db',
               'collection_name_key':'sample_igf_id',
-              'metrics_summary_file':'vdj_t/metrics_summary.csv',
+              'metrics_summary_file':'metrics_summary.csv',
               'attribute_prefix':'CELLRANGER_VDJT'})
   load_scirpy_report_for_vdj_t_to_db = \
     PythonOperator(
