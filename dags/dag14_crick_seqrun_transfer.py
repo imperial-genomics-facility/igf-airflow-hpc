@@ -11,6 +11,7 @@ from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import check_and_divide
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import copy_run_file_to_remote_func
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import run_interop_dump_func
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import generate_interop_report_func
+from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import send_message_to_channels_with_mention_func
 
 args = {
     'owner': 'airflow',
@@ -80,6 +81,13 @@ with dag:
   ## PIPELINE
   extract_tar_file >> check_and_divide_run_for_remote_copy
   ## TASK
+  send_message_to_channels_with_mention = \
+    PythonOperator(
+      task_id='send_message_to_channels_with_mention',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=send_message_to_channels_with_mention_func)
+  ## TASK
   for i in range(1, 9):
     t = \
       PythonOperator(
@@ -92,7 +100,7 @@ with dag:
                 'xcom_key': 'bcl_files'},
         python_callable=copy_run_file_to_remote_func)
     ## PIPELINE
-    check_and_divide_run_for_remote_copy >> t
+    check_and_divide_run_for_remote_copy >> t >> send_message_to_channels_with_mention
   copy_additional_file_to_remote = \
     PythonOperator(
       task_id='copy_additional_file_to_remote',
