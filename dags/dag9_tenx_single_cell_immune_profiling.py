@@ -913,7 +913,7 @@ with dag:
       queue='hpc_4G',
       python_callable=run_picard_for_cellranger,
       params={
-        'xcom_pull_files_key':- 'run_picard_base_dist_summary',
+        'xcom_pull_files_key': 'run_picard_base_dist_summary',
         'xcom_pull_task': 'copy_bam_for_parallel_runs',
         'analysis_description_xcom_pull_task': 'fetch_analysis_info',
         'analysis_description_xcom_key': 'analysis_description',
