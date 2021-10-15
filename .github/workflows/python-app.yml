@@ -40,9 +40,10 @@ jobs:
     - name: Test with pytest
       run: |
         ls $GITHUB_WORKSPACE
-        pytest test
+        echo $PYTHONPATH
+        pytest test/
       env:
-        PYTHONPATH: $GITHUB_WORKSPACE/data-management-python:$PYTHONPATH
+        PYTHONPATH: $GITHUB_WORKSPACE/data-management-python:${PYTHONPATH}
         AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 20
         AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
         AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"airflow_var/var.json","connections_file_path":"airflow_var/conn.json"}'
