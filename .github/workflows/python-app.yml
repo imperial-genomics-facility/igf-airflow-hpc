@@ -36,7 +36,7 @@ jobs:
       with:
         repository: imperial-genomics-facility/data-management-python
         ref: cellranger_v6
-        path: $GITHUB_WORKSPACE/data-management-python
+        path: data-management-python
     - name: Test with pytest
       run: |
         ls $GITHUB_WORKSPACE
