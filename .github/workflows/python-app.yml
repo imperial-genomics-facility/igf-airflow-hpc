@@ -32,9 +32,10 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Checkout other repo
-      uses: actions/checkout@cellranger_v6
+      uses: actions/checkout@master
       with:
         repository: imperial-genomics-facility/data-management-python
+        ref: cellranger_v6
     - name: Test with pytest
       run: |
         pytest
