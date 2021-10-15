@@ -39,12 +39,9 @@ jobs:
         path: data-management-python
     - name: Test with pytest
       run: |
-        echo $GITHUB_ENV
-        echo $GITHUB_ENV[PYTHONPATH]
-        echo "::set-env name=PYTHONPATH::igf-airflow-hpc/igf-airflow-hpc/data-management-python"
-        echo $PYTHONPATH
         pytest test/
       env:
+        PYTHONPATH: /home/runner/work/igf-airflow-hpc/igf-airflow-hpc/data-management-python
         AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 20
         AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
         AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"airflow_var/var.json","connections_file_path":"airflow_var/conn.json"}'
