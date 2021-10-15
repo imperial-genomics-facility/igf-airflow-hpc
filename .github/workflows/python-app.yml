@@ -47,11 +47,9 @@ jobs:
         AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
         AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"/home/runner/work/igf-airflow-hpc/igf-airflow-hpc/airflow_var/var.json","connections_file_path":"/home/runner/work/igf-airflow-hpc/igf-airflow-hpc/airflow_var/conn.json"}'
     - name: Send custom JSON data to Slack workflow
-      id: slack
       uses: slackapi/slack-github-action@v1.14.0
       with:
         channel-id: '#code_development'
-        payload: "{\"status\":\${{ job.status }}\"}" # This data can be any valid JSON from a previous step in the GitHub Action
-      if: always()
+        payload: "{\"status\":\"${{ job.status }}\"}" # This data can be any valid JSON from a previous step in the GitHub Action
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
