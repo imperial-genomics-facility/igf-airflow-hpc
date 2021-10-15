@@ -39,6 +39,8 @@ jobs:
         path: data-management-python
     - name: Test with pytest
       run: |
+        echo $$GITHUB_ENV
+        echo $GITHUB_ENV[PYTHONPATH]
         echo "::set-env name=PYTHONPATH::igf-airflow-hpc/igf-airflow-hpc/data-management-python"
         echo $PYTHONPATH
         pytest test/
