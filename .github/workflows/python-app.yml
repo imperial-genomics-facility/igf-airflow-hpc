@@ -36,12 +36,10 @@ jobs:
       with:
         repository: imperial-genomics-facility/data-management-python
         ref: cellranger_v6
+        path: $GITHUB_WORKSPACE/data-management-python
     - name: Test with pytest
       run: |
-        pwd
-        ls
-        echo $GITHUB_WORKSPACE
-        ls airflow_var
+        ls $GITHUB_WORKSPACE
         pytest
       env:
         PYTHONPATH: $GITHUB_WORKSPACE/data-management-python:$PYTHONPATH
