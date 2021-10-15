@@ -1,0 +1,46 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Checkout other repo
+      uses: actions/checkout@cellranger_v6
+      with:
+        repository: imperial-genomics-facility/data-management-python
+    - name: Test with pytest
+      run: |
+        pytest
+      env:
+        PYTHONPATH: $GITHUB_WORKSPACE/data-management-python:$PYTHONPATH
+        AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 20
+        AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
+        AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"airflow_var/var.json","connections_file_path":"airflow_var/conn.json"}'
+
