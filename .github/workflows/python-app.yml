@@ -38,6 +38,10 @@ jobs:
         ref: cellranger_v6
     - name: Test with pytest
       run: |
+        pwd
+        ls
+        echo $GITHUB_WORKSPACE
+        ls airflow_var
         pytest
       env:
         PYTHONPATH: $GITHUB_WORKSPACE/data-management-python:$PYTHONPATH
