@@ -6,7 +6,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from igf_airflow.utils.dag16_test_illumina_demultiplexing_utils import get_samplesheet_and_decide_flow_func
 from igf_airflow.utils.dag16_test_illumina_demultiplexing_utils import  run_demultiplexing_func
-#from igf_airflow.utils.dag16_test_illumina_demultiplexing_utils import  prepare_merged_report_func
+from igf_airflow.utils.dag16_test_illumina_demultiplexing_utils import  prepare_merged_report_func
 
 
 args = {
@@ -44,16 +44,19 @@ with dag:
                 'samplesheet_xcom_key': 'formatted_samplesheets'},
             python_callable=get_samplesheet_and_decide_flow_func)
     ## TASK
-    # prepare_merged_report = \
-    #    PythonOperator(
-    #        task_id='prepare_merged_report',
-    #        dag=dag,
-    #        queue='hpc_4G',
-    #        params={
-    #            'samplesheet_xcom_task': 'get_samplesheet_and_decide_flow',
-    #            'samplesheet_xcom_key': 'formatted_samplesheets',
-    #            'output_path_xcom_key': 'temp_output_path'},
-    #        python_callable=prepare_merged_report_func)
+    prepare_merged_report = \
+       PythonOperator(
+           task_id='prepare_merged_report',
+           dag=dag,
+           queue='hpc_4G',
+           params={
+               'output_path_xcom_task': 'get_samplesheet_and_decide_flow',
+               'samplesheet_xcom_key': 'formatted_samplesheets',
+               'output_path_xcom_key': 'temp_output_path',
+               'script_path': '/project/tgu/software/demultiplexing_report/scripts/generate_illumina_report_spark.py',
+               'template_path': '/project/tgu/software/demultiplexing_report/template/illumina_report_v1.html',
+               'code_dir': '/project/tgu/software/demultiplexing_report/'},
+           python_callable=prepare_merged_report_func)
     ## TASK
     for i in range(1, 9):
         t = \
@@ -70,5 +73,5 @@ with dag:
                     'output_path_xcom_key': 'temp_output_path'},
                 python_callable=run_demultiplexing_func)
         ## PIPELINE
-        get_samplesheet_and_decide_flow >> t
+        get_samplesheet_and_decide_flow >> t >> prepare_merged_report
 
