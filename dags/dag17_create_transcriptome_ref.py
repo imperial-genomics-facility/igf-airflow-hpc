@@ -11,6 +11,7 @@ from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_rsem_i
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_reflat_index_func
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_ribosomal_interval_func
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_cellranger_ref_func
+from igf_airflow.utils.dag17_create_transcriptome_ref_utils import add_refs_to_db_collection_func
 
 
 args = {
@@ -112,9 +113,26 @@ with dag:
                 'memory': 8
             },
             python_callable=create_cellranger_ref_func)
+    ## TASK
+    add_refs_to_db_collection = \
+        PythonOperator(
+            task_id='add_refs_to_db_collection',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'task_list': [
+                    ['download_gtf_file', 'gtf_file', 'GENE_GTF'],
+                    ['create_star_index', 'star_ref', 'TRANSCRIPTOME_STAR'],
+                    ['create_rsem_index', 'rsem_ref', 'TRANSCRIPTOME_RSEM'],
+                    ['create_reflat_index', 'refflat_ref', 'GENE_REFFLAT'],
+                    ['create_ribosomal_interval', 'ribosomal_ref', 'RIBOSOMAL_INTERVAL'],
+                    ['create_cellranger_ref', 'cellranger_ref', 'TRANSCRIPTOME_TENX']
+                ]
+            },
+            python_callable=add_refs_to_db_collection_func)
     ## PIPELINE
-    download_gtf_file >> create_star_index
-    download_gtf_file >> create_rsem_index
-    download_gtf_file >> create_reflat_index
-    download_gtf_file >> create_ribosomal_interval
-    download_gtf_file >> create_cellranger_ref
+    download_gtf_file >> create_star_index >> add_refs_to_db_collection
+    download_gtf_file >> create_rsem_index >> add_refs_to_db_collection
+    download_gtf_file >> create_reflat_index >> add_refs_to_db_collection
+    download_gtf_file >> create_ribosomal_interval >> add_refs_to_db_collection
+    download_gtf_file >> create_cellranger_ref >> add_refs_to_db_collection
