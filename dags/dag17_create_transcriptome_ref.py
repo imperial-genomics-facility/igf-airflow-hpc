@@ -65,7 +65,7 @@ with dag:
         PythonOperator(
             task_id="create_rsem_index",
             dag=dag,
-            queue='hpc_8G8t',
+            queue='hpc_4G',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
                 'gtf_xcom_key': 'gtf_file',
