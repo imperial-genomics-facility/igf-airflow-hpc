@@ -53,7 +53,7 @@ with dag:
                'output_path_xcom_task': 'get_samplesheet_and_decide_flow',
                'samplesheet_xcom_key': 'formatted_samplesheets',
                'output_path_xcom_key': 'temp_output_path',
-               'script_path': '/project/tgu/software/demultiplexing_report/scripts/generate_illumina_report_spark.py',
+               'script_path': '/project/tgu/software/demultiplexing_report/scripts/generate_illumina_report.py',
                'template_path': '/project/tgu/software/demultiplexing_report/template/illumina_report_v1.html',
                'code_dir': '/project/tgu/software/demultiplexing_report/'},
            python_callable=prepare_merged_report_func)
