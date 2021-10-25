@@ -103,14 +103,14 @@ with dag:
         PythonOperator(
             task_id='create_cellranger_ref',
             dag=dag,
-            queue='hpc_8G8t',
+            queue='hpc_32G8t',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
                 'gtf_xcom_key': 'gtf_file',
                 'cellranger_ref_xcom_key': 'cellranger_ref',
                 'skip_gtf_rows': 5,
                 'threads': 8,
-                'memory': 8
+                'memory': 32
             },
             python_callable=create_cellranger_ref_func)
     ## TASK
