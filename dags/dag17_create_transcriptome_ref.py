@@ -55,7 +55,7 @@ with dag:
                 'gtf_xcom_task': 'download_gtf_file',
                 'gtf_xcom_key': 'gtf_file',
                 'star_ref_xcom_key': 'star_ref',
-                'threads': 8,
+                'threads': 7,
                 'star_options': [
                     '--sjdbOverhang', 149]
             },
@@ -109,8 +109,8 @@ with dag:
                 'gtf_xcom_key': 'gtf_file',
                 'cellranger_ref_xcom_key': 'cellranger_ref',
                 'skip_gtf_rows': 5,
-                'threads': 8,
-                'memory': 32
+                'threads': 7,
+                'memory': 30
             },
             python_callable=create_cellranger_ref_func)
     ## TASK
