@@ -55,7 +55,7 @@ with dag:
                 'gtf_xcom_task': 'download_gtf_file',
                 'gtf_xcom_key': 'gtf_file',
                 'star_ref_xcom_key': 'star_ref',
-                'threads': 7,
+                'threads': 2,
                 'star_options': [
                     '--sjdbOverhang', 149]
             },
