@@ -50,12 +50,12 @@ with dag:
         PythonOperator(
             task_id="create_star_index",
             dag=dag,
-            queue='hpc_32G8t',
+            queue='hpc_42G16t',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
                 'gtf_xcom_key': 'gtf_file',
                 'star_ref_xcom_key': 'star_ref',
-                'threads': 2,
+                'threads': 12,
                 'star_options': [
                     '--sjdbOverhang', 149]
             },
