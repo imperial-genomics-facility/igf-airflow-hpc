@@ -9,6 +9,7 @@ from airflow.operators.dagrun_operator import TriggerDagRunOperator
 #from airflow.operators.trigger_dagrun import TriggerDagRunOperator # FIX for v2
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_designs_func
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import load_analysis_design_func
+from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_to_trigger_dags_func
 
 args = {
     'owner': 'airflow',
@@ -69,7 +70,10 @@ with dag:
             task_id="find_analysis_to_trigger_dags",
             dag=dag,
             queue='hpc_4G',
-            params={},
+            params={
+                "no_trigger_task": "no_trigger",
+                "analysis_limit": 20,
+                "trigger_task_prefix": "trigger"},
             trigger_rule='none_failed_or_skipped',
             python_callable=find_analysis_to_trigger_dags_func)
     ## TASK
