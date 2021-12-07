@@ -128,4 +128,5 @@ with dag:
     ## PIPELINE
     find_analysis_designs >> load_analysis_design_tasks 
     load_analysis_design_tasks >> find_analysis_to_trigger_dags
+    find_analysis_to_trigger_dags >> no_trigger
     trigger_analysis_dag_tasks >> send_log_and_reset_trigger_file
