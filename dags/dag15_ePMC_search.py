@@ -19,7 +19,7 @@ args = {
 dag = \
   DAG(
     dag_id='dag15_ePMC_search',
-    schedule_interval='@monthly',
+    schedule_interval='0 0 8 * *',
     default_args=args,
     tags=['hpc'])
 
