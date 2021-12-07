@@ -37,6 +37,7 @@ dag = \
         dag_id=DAG_ID,
         schedule_interval=None,
         default_args=args,
+        orientation='LR',
         tags=['hpc'])
 ANALYSIS_LIST = \
     Variable.get("analysis_dag_list", default_var={})
