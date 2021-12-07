@@ -136,7 +136,7 @@ with dag:
     ## TASK
     trigger_analysis_dag_tasks = [no_trigger]
     for analysis_name in ANALYSIS_LIST.keys():
-        for i in (range(0, 40)):
+        for i in range(0, 40):
             t = \
                 TriggerDagRunOperator(
                     task_id="trigger_{0}_{0}".format(analysis_name, i),
