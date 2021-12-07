@@ -107,7 +107,7 @@ with dag:
     for i in range(0, 10):
         t = \
             PythonOperator(
-                task_id="load_analysis_design_{i}".format(i),
+                task_id="load_analysis_design_{0}".format(i),
                 dag=dag,
                 params={
                     "task_index": i,
@@ -139,7 +139,7 @@ with dag:
         for i in range(0, 40):
             t = \
                 TriggerDagRunOperator(
-                    task_id="trigger_{0}_{0}".format(analysis_name, i),
+                    task_id="trigger_{0}_{1}".format(analysis_name, i),
                     trigger_dag_id=analysis_name,
                     dag=dag,
                     queue='hpc_4G',
