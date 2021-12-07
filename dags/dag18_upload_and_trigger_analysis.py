@@ -123,6 +123,7 @@ with dag:
             params={
                 "xcom_key": "analysis_list",
                 "xcom_task": "find_analysis_to_trigger_dags"},
+            trigger_rule='none_failed_or_skipped',
             python_callable=send_log_and_reset_trigger_file_func)
     ## PIPELINE
     find_analysis_designs >> load_analysis_design_tasks 
