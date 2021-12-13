@@ -67,6 +67,7 @@ with dag:
             PythonOperator(
                 task_id="load_analysis_design_{0}".format(i),
                 dag=dag,
+                queue='hpc_4G',
                 params={
                     "task_index": i,
                     "load_design_xcom_key": "load_design",
