@@ -38,7 +38,6 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 4,
-    'max_active_runs': 10,
     'catchup': True,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -55,7 +54,7 @@ dag = \
     tags=['hpc', 'analysis', 'tenx', 'sc'],
     default_args=default_args,
     concurrency=100,
-    max_active_runs=20,
+    max_active_runs=5,
     orientation='LR')
 
 with dag:
