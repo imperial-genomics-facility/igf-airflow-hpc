@@ -56,7 +56,7 @@ with dag:
             project_level_start_tasks.\
                 append(fetch_samples_for_lane_project)
             sample_level_tasks = list()
-            for sample_count in range(1,201):
+            for sample_count in range(1,11):
                 ## TASK - sample level
                 run_fastq_screen_for_sample = \
                     DummyOperator(
