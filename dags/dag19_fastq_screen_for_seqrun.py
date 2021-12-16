@@ -47,7 +47,7 @@ with dag:
             append(fetch_projects_for_lane)
         project_level_start_tasks = list()
         project_level_end_tasks = list()
-        for project_id in range(1,6):
+        for project_id in range(1,4):
             ## TASK - project level
             fetch_samples_for_lane_project = \
                 DummyOperator(
@@ -56,7 +56,7 @@ with dag:
             project_level_start_tasks.\
                 append(fetch_samples_for_lane_project)
             sample_level_tasks = list()
-            for sample_count in range(1,11):
+            for sample_count in range(1,97):
                 ## TASK - sample level
                 run_fastq_screen_for_sample = \
                     DummyOperator(
