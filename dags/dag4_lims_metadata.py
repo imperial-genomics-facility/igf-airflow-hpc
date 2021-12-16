@@ -1,7 +1,7 @@
 from datetime import timedelta
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.bash import BashOperator
 
 ## ARGS
 default_args = {

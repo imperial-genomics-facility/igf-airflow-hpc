@@ -2,9 +2,9 @@ import os
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.bash import BashOperator
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import download_gtf_file_func
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_star_index_func
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_rsem_index_func

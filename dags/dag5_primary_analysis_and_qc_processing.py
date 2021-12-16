@@ -1,9 +1,9 @@
 from datetime import timedelta
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.bash_operator import BashOperator
-from airflow.contrib.operators.ssh_operator import SSHOperator
-from airflow.contrib.hooks.ssh_hook import SSHHook
+from airflow.operators.bash import BashOperator
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
 
 ## ARGS
 default_args = {

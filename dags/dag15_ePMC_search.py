@@ -1,7 +1,7 @@
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from igf_airflow.utils.dag15_ePMC_search_utils import update_wiki_publication_page_func
 
 args = {

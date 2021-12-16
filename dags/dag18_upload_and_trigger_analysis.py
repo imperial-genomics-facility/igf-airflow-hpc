@@ -2,11 +2,11 @@ import os, logging
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-#from airflow.operators.trigger_dagrun import TriggerDagRunOperator # FIX for v2
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+#from airflow.operators.dagrun_operator import TriggerDagRunOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator # FIX for v2
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_designs_func
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import load_analysis_design_func
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_to_trigger_dags_func
