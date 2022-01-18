@@ -49,6 +49,7 @@ services:
                 - redis-server
         ports:
                 - "8083:8080"
+        user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
@@ -80,6 +81,7 @@ services:
                 - airflow_results_db
                 - airflow_webserver
                 - redis-server
+        user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
@@ -109,6 +111,7 @@ services:
                 - airflow_scheduler
         ports:
                 - "8793:8793"
+        user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
@@ -117,22 +120,8 @@ services:
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
-        command: celery worker -q igf-lims,generic --hostname igf-lims
+        command: celery worker -q wells,generic --celery-hostname wells
         container_name: airflow_worker
-        networks:
-               - airflow_network
-    airflow_adminer:
-        image: adminer:latest
-        ports:
-                - "8085:8080"
-        depends_on:
-                - airflow_db
-                - airflow_results_db
-        links:
-                - airflow_db
-                - airflow_results_db
-        restart: always
-        container_name: airflow_adminer
         networks:
                - airflow_network
     airflow_flower:
@@ -151,6 +140,7 @@ services:
                 - airflow_webserver
                 - redis-server
                 - airflow_scheduler
+        user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
@@ -171,6 +161,7 @@ services:
                 _AIRFLOW_WWW_USER_CREATE: 'true'
                 _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
                 _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+        user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
