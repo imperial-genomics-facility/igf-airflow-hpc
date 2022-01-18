@@ -1,6 +1,6 @@
 version: '3'
 networks:
-    airflow_network:
+    airflow_network_v2:
         driver: bridge
 services:
     airflow_db:
@@ -13,9 +13,9 @@ services:
         restart: always
         volumes:
                 - /home/igf/airflow_v2/postgres_airflow_db:/var/lib/postgresql/data:rw
-        container_name: airflow_db
+        container_name: airflow_db_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow_results_db:
         image: postgres:14
         env_file:
@@ -26,9 +26,9 @@ services:
         restart: always
         volumes:
                 - /home/igf/airflow_v2/postgres_airflow_results_db:/var/lib/postgresql/data:rw
-        container_name: airflow_results_db
+        container_name: airflow_results_db_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     redis-server:
         image: redis:6.2
         ports:
@@ -38,18 +38,18 @@ services:
         volumes:
                - /home/igf/airflow_v2/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
                - /home/igf/airflow_v2/redis_airflow_data:/data:rw
-        container_name: redis-server
+        container_name: redis-server_v2
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow_webserver:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         ports:
                 - "8083:8080"
         user: "${AIRFLOW_UID:-50000}:0"
@@ -63,27 +63,27 @@ services:
                 - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         restart: always
         command: webserver
         container_name: airflow_webserver_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow_scheduler:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         depends_on:
-                - airflow_db
-                - airflow_results_db
-                - airflow_webserver
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - airflow_webserver_v2
+                - redis-server_v2
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
@@ -97,21 +97,21 @@ services:
         command: scheduler
         container_name: airflow_scheduler_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow_worker:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         depends_on:
-                - airflow_db
-                - airflow_results_db
-                - airflow_webserver
-                - redis-server
-                - airflow_scheduler
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - airflow_webserver_v2
+                - redis-server_v2
+                - airflow_scheduler_v2
         ports:
                 - "8793:8793"
         user: "${AIRFLOW_UID:-50000}:0"
@@ -126,23 +126,23 @@ services:
         command: celery worker -q wells,generic --celery-hostname wells
         container_name: airflow_worker_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow_flower:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         ports:
                 - "5555:5555"
         depends_on:
-                - airflow_db
-                - airflow_results_db
-                - airflow_webserver
-                - redis-server
-                - airflow_scheduler
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - airflow_webserver_v2
+                - redis-server_v2
+                - airflow_scheduler_v2
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
@@ -154,7 +154,7 @@ services:
         command: celery flower
         container_name: airflow_flower_v2
         networks:
-               - airflow_network
+               - airflow_network_v2
     airflow-init:
         image: apache/airflow:2.2.3
         env_file:
@@ -165,10 +165,14 @@ services:
                 _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
                 _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
         user: "${AIRFLOW_UID:-50000}:0"
+        links:
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         depends_on:
-                - airflow_db
-                - airflow_results_db
-                - redis-server
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - redis-server_v2
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
@@ -176,3 +180,5 @@ services:
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         command: version
+        networks:
+               - airflow_network_v2
