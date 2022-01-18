@@ -152,7 +152,7 @@ services:
         container_name: airflow_flower
         networks:
                - airflow_network
-  airflow-init:
+    airflow-init:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
