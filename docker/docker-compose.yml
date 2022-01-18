@@ -3,7 +3,7 @@ networks:
     airflow_network_v2:
         driver: bridge
 services:
-    airflow_db:
+    airflow_db_v2:
         image: postgres:14
         env_file:
                - /home/igf/airflow_v2/secrets/airflow_db_env
@@ -16,7 +16,7 @@ services:
         container_name: airflow_db_v2
         networks:
                - airflow_network_v2
-    airflow_results_db:
+    airflow_results_db_v2:
         image: postgres:14
         env_file:
                - /home/igf/airflow_v2/secrets/airflow_results_db_env
@@ -29,7 +29,7 @@ services:
         container_name: airflow_results_db_v2
         networks:
                - airflow_network_v2
-    redis-server:
+    redis-server_v2:
         image: redis:6.2
         ports:
               - "6379:6379"
@@ -42,7 +42,7 @@ services:
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
                - airflow_network_v2
-    airflow_webserver:
+    airflow_webserver_v2:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
@@ -71,7 +71,7 @@ services:
         container_name: airflow_webserver_v2
         networks:
                - airflow_network_v2
-    airflow_scheduler:
+    airflow_scheduler_v2:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
@@ -98,7 +98,7 @@ services:
         container_name: airflow_scheduler_v2
         networks:
                - airflow_network_v2
-    airflow_worker:
+    airflow_worker_v2:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
@@ -127,7 +127,7 @@ services:
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
-    airflow_flower:
+    airflow_flower_v2:
         image: apache/airflow:2.2.3
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
