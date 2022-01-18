@@ -65,7 +65,7 @@ services:
                 - redis-server
         restart: always
         command: webserver
-        container_name: airflow_webserver
+        container_name: airflow_webserver_v2
         networks:
                - airflow_network
     airflow_scheduler:
@@ -92,7 +92,7 @@ services:
                 - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
         restart: always
         command: scheduler
-        container_name: airflow_scheduler
+        container_name: airflow_scheduler_v2
         networks:
                - airflow_network
     airflow_worker:
@@ -121,7 +121,7 @@ services:
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
         command: celery worker -q wells,generic --celery-hostname wells
-        container_name: airflow_worker
+        container_name: airflow_worker_v2
         networks:
                - airflow_network
     airflow_flower:
@@ -149,7 +149,7 @@ services:
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         restart: always
         command: celery flower
-        container_name: airflow_flower
+        container_name: airflow_flower_v2
         networks:
                - airflow_network
     airflow-init:
