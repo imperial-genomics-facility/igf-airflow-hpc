@@ -9,7 +9,6 @@ services:
                - /home/igf/airflow_v2/secrets/airflow_db_env
         ports:
                - "5433:5432"
-        user: "${AIRFLOW_UID:-50000}:0"
         restart: always
         volumes:
                 - /home/igf/airflow_v2/postgres_airflow_db:/var/lib/postgresql/data:rw
@@ -22,7 +21,6 @@ services:
                - /home/igf/airflow_v2/secrets/airflow_results_db_env
         ports:
                - "5434:5432"
-        user: "${AIRFLOW_UID:-50000}:0"
         restart: always
         volumes:
                 - /home/igf/airflow_v2/postgres_airflow_results_db:/var/lib/postgresql/data:rw
@@ -34,7 +32,6 @@ services:
         ports:
               - "6379:6379"
         restart: always
-        user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                - /home/igf/airflow_v2/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
                - /home/igf/airflow_v2/redis_airflow_data:/data:rw
