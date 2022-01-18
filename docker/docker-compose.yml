@@ -1,48 +1,48 @@
-version: '2.2'
+version: '3'
 networks:
     airflow_network:
         driver: bridge
 services:
     airflow_db:
-        image: postgres:latest
+        image: postgres:14
         env_file:
-               - /home/igf/airflow_test/secrets/airflow_db_env
+               - /home/igf/airflow_v2/secrets/airflow_db_env
         ports:
                - "5433:5432"
         restart: always
         volumes:
-                - /home/igf/airflow_test/postgres_airflow_db:/var/lib/postgresql/data:rw
+                - /home/igf/airflow_v2/postgres_airflow_db:/var/lib/postgresql/data:rw
         container_name: airflow_db
         networks:
                - airflow_network
     airflow_results_db:
-        image: postgres:latest
+        image: postgres:14
         env_file:
-               - /home/igf/airflow_test/secrets/airflow_results_db_env
+               - /home/igf/airflow_v2/secrets/airflow_results_db_env
         ports:
                - "5434:5432"
         restart: always
         volumes:
-                - /home/igf/airflow_test/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+                - /home/igf/airflow_v2/postgres_airflow_results_db:/var/lib/postgresql/data:rw
         container_name: airflow_results_db
         networks:
                - airflow_network
     redis-server:
-        image: redis:latest
+        image: redis:6.2
         ports:
               - "6379:6379"
         restart: always
         volumes:
-               - /home/igf/airflow_test/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
-               - /home/igf/airflow_test/redis_airflow_data:/data:rw
+               - /home/igf/airflow_v2/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
+               - /home/igf/airflow_v2/redis_airflow_data:/data:rw
         container_name: redis-server
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
                - airflow_network
     airflow_webserver:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.2.3
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -50,13 +50,13 @@ services:
         ports:
                 - "8083:8080"
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
-                - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-                - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/airflow_v2/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+                - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
                 - airflow_db
@@ -68,9 +68,9 @@ services:
         networks:
                - airflow_network
     airflow_scheduler:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.2.3
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -81,22 +81,22 @@ services:
                 - airflow_webserver
                 - redis-server
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
-                - /home/igf/airflow_test/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-                - /home/igf/airflow_test/ssl_cert/airflow.key:/SSL/airflow.key:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
+                - /home/igf/airflow_v2/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+                - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
         restart: always
         command: scheduler
         container_name: airflow_scheduler
         networks:
                - airflow_network
     airflow_worker:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.2.3
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -110,14 +110,14 @@ services:
         ports:
                 - "8793:8793"
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
-        command: worker -q igf-lims,generic --celery_hostname igf-lims
+        command: celery worker -q igf-lims,generic --hostname igf-lims
         container_name: airflow_worker
         networks:
                - airflow_network
@@ -136,9 +136,9 @@ services:
         networks:
                - airflow_network
     airflow_flower:
-        image: apache/airflow:1.10.12
+        image: apache/airflow:2.2.3
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
         links:
                 - airflow_db
                 - airflow_results_db
@@ -152,13 +152,29 @@ services:
                 - redis-server
                 - airflow_scheduler
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         restart: always
-        command: flower
+        command: celery flower
         container_name: airflow_flower
         networks:
                - airflow_network
+  airflow-init:
+        image: apache/airflow:2.2.3
+        env_file:
+                - /home/igf/airflow_v2/secrets/airflow_env
+        environment:
+                _AIRFLOW_DB_UPGRADE: 'true'
+                _AIRFLOW_WWW_USER_CREATE: 'true'
+                _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+                _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+        volumes:
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
+        command: version
