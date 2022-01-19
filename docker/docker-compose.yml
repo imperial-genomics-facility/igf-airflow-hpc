@@ -1,4 +1,4 @@
-version: '3'
+version: '2.2'
 networks:
     airflow_network_v2:
         driver: bridge
@@ -40,7 +40,7 @@ services:
         networks:
                - airflow_network_v2
     airflow_webserver_v2:
-        image: apache/airflow:2.2.3
+        image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
@@ -69,7 +69,7 @@ services:
         networks:
                - airflow_network_v2
     airflow_scheduler_v2:
-        image: apache/airflow:2.2.3
+        image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
@@ -96,7 +96,7 @@ services:
         networks:
                - airflow_network_v2
     airflow_worker_v2:
-        image: apache/airflow:2.2.3
+        image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
@@ -110,7 +110,7 @@ services:
                 - redis-server_v2
                 - airflow_scheduler_v2
         ports:
-                - "8793:8793"
+                - "8794:8793"
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
@@ -125,7 +125,7 @@ services:
         networks:
                - airflow_network_v2
     airflow_flower_v2:
-        image: apache/airflow:2.2.3
+        image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         links:
@@ -153,7 +153,7 @@ services:
         networks:
                - airflow_network_v2
     airflow-init:
-        image: apache/airflow:2.2.3
+        image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
         environment:
