@@ -102,7 +102,6 @@ with dag:
             t = \
                 PythonOperator(
                     task_id="trigger_{0}_{1}".format(analysis_name, i),
-                    trigger_dag_id=analysis_name,
                     dag=dag,
                     queue='hpc_4G',
                     params={
