@@ -30,7 +30,6 @@ with dag:
     BashOperator(
       task_id='submit_metadata_fetch_job',
       dag=dag,
-      xcom_push=False,
       queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/lims_metadata/fetch_lims_metadata_qsub.sh ')
 
