@@ -100,7 +100,7 @@ with dag:
                 dag=dag)
         for i in range(0, 40):
             t = \
-                TriggerDagRunOperator(
+                PythonOperator(
                     task_id="trigger_{0}_{1}".format(analysis_name, i),
                     trigger_dag_id=analysis_name,
                     dag=dag,
