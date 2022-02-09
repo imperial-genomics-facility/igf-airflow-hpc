@@ -2,6 +2,8 @@ version: '2.2'
 networks:
     airflow_network_v2:
         driver: bridge
+    airflow_network_host:
+        driver: host
 services:
     airflow_db_v2:
         image: postgres:14
@@ -126,7 +128,7 @@ services:
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
-               - host
+               - airflow_network_host
     airflow_flower_v2:
         image: apache/airflow:2.2.2
         env_file:
