@@ -103,12 +103,14 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_flower_v2
         depends_on:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - airflow_webserver_v2
                 - redis-server_v2
                 - airflow_scheduler_v2
+                - airflow_flower_v2
         ports:
                 - "8794:8793"
         user: "${AIRFLOW_UID:-50000}:0"
