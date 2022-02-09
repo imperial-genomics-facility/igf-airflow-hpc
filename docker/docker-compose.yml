@@ -126,6 +126,7 @@ services:
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
+               - host
     airflow_flower_v2:
         image: apache/airflow:2.2.2
         env_file:
