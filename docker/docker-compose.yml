@@ -1,4 +1,4 @@
-version: '2.2'
+version: '3.4'
 networks:
     airflow_network_v2:
         driver: bridge
@@ -53,11 +53,11 @@ services:
                 - "8083:8080"
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
-                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
                 - /home/igf/airflow_v2/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
                 - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
@@ -85,7 +85,7 @@ services:
                 - redis-server_v2
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
-                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
                 - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
@@ -117,18 +117,17 @@ services:
                 - "8794:8793"
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
-                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
                 - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
-        command: celery worker -q wells,generic --celery-hostname wells
+        command: celery worker -q generic --celery-hostname wells
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
-               - airflow_network_host
     airflow_flower_v2:
         image: apache/airflow:2.2.2
         env_file:
@@ -147,7 +146,7 @@ services:
                 - airflow_scheduler_v2
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
-                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
                 - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
@@ -174,7 +173,7 @@ services:
                 - airflow_results_db_v2
                 - redis-server_v2
         volumes:
-                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
                 - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
