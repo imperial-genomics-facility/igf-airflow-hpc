@@ -1,8 +1,6 @@
 version: '3.4'
 networks:
     airflow_network_v2:
-        driver: bridge
-    airflow_network_host:
         driver: host
 services:
     airflow_db_v2:
