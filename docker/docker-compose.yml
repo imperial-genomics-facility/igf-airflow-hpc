@@ -25,7 +25,8 @@ services:
         volumes:
                 - /home/igf/airflow_v2/postgres_airflow_results_db:/var/lib/postgresql/data:rw
         container_name: airflow_results_db_v2
-        network_mode: host
+        networks:
+               - airflow_network_v2
     redis-server_v2:
         image: redis:6.2
         ports:
