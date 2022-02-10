@@ -44,7 +44,7 @@ with dag:
       queue='generic',
       command="""
         source /etc/bashrc; \
-        qsub /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
+        qsub /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
 
   ## TASK
   restart_flower_server = \
