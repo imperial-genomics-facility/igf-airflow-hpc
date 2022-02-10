@@ -60,7 +60,8 @@ def get_new_workers(**kwargs):
       raise ValueError('ti not present in kwargs')
     ti = kwargs.get('ti')
     active_tasks = ti.xcom_pull(task_ids='fetch_active_jobs_from_hpc')
-    active_tasks = active_tasks.decode()
+    if isinstance(active_tasks, bytes):
+      active_tasks = active_tasks.decode()
     active_tasks = json.loads(active_tasks)
     queued_tasks = ti.xcom_pull(task_ids='fetch_queue_list_from_redis')
     worker_to_submit,unique_queue_list = \
