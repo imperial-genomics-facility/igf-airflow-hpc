@@ -1,4 +1,4 @@
-import os, json, logging, requests
+import os, json, logging, requests, base64
 from datetime import timedelta
 from requests.auth import HTTPBasicAuth
 from airflow.models import DAG, Variable
@@ -60,8 +60,14 @@ def get_new_workers(**kwargs):
       raise ValueError('ti not present in kwargs')
     ti = kwargs.get('ti')
     active_tasks = ti.xcom_pull(task_ids='fetch_active_jobs_from_hpc')
-    if isinstance(active_tasks, bytes):
-      active_tasks = active_tasks.decode()
+    if isinstance(active_tasks, str):
+      active_tasks = \
+        base64.b64decode(
+          active_tasks.encode('ascii')).\
+        decode('utf-8').\
+        strip()
+    elif isinstance(active_tasks, bytes):
+      active_tasks = active_tasks.decode('utf-8')
     active_tasks = json.loads(active_tasks)
     queued_tasks = ti.xcom_pull(task_ids='fetch_queue_list_from_redis')
     worker_to_submit,unique_queue_list = \
@@ -181,8 +187,8 @@ with dag:
       dag=dag,
       command="""
         source /etc/bashrc;\
-        source /project/tgu/data2/airflow_test/secrets/hpc_env.sh;\
-        python /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
+        source /project/tgu/data2/airflow_v2/secrets/hpc_env.sh;\
+        python /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       queue='generic')
   ## TASK
