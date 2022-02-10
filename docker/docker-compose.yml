@@ -99,11 +99,6 @@ services:
         image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
-        links:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - redis-server_v2
-                - airflow_flower_v2
         depends_on:
                 - airflow_db_v2
                 - airflow_results_db_v2
