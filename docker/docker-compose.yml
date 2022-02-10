@@ -99,6 +99,13 @@ services:
         image: apache/airflow:2.2.2
         env_file:
                 - /home/igf/airflow_v2/secrets/airflow_env
+        links:
+                - airflow_db_v2
+                - airflow_results_db_v2
+                - airflow_webserver_v2
+                - redis-server_v2
+                - airflow_scheduler_v2
+                - airflow_flower_v2
         depends_on:
                 - airflow_db_v2
                 - airflow_results_db_v2
@@ -115,9 +122,12 @@ services:
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: always
+        ports:
+                - "8794:8794"
         command: celery worker -q generic --celery-hostname wells
         container_name: airflow_worker_v2
-        network_mode: host
+        networks:
+               - airflow_network_v2
     airflow_flower_v2:
         image: apache/airflow:2.2.2
         env_file:
