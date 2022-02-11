@@ -39,7 +39,7 @@ jobs:
         path: data-management-python
     - name: Test with pytest
       run: |
-        airflow upgradedb
+        airflow db upgrade
         pytest --log-cli-level=10 test/
       env:
         PYTHONPATH: /home/runner/work/igf-airflow-hpc/igf-airflow-hpc/data-management-python
