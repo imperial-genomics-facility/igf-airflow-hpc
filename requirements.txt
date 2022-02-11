@@ -4,7 +4,6 @@ alabaster==0.7.12
 alembic==1.4.2
 amqp==2.6.1
 anyio==3.3.4
-apache-airflow==1.10.12
 apache-airflow==2.2.2
 apache-airflow-providers-celery==2.1.0
 apache-airflow-providers-ftp==2.0.1
