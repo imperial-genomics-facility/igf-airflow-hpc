@@ -156,7 +156,7 @@ with dag:
       DummyOperator(
         task_id='wait_for_copy_chunk_run_{0}'.format(i),
         dag=dag,
-        trigger_rule='none_failed_or_skipped',
+        trigger_rule='none_failed_min_one_success',
         queue='hpc_4G')
     ## PIPELINE
     copy_seqrun_files >> wait_for_copy_chunk

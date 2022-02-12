@@ -84,7 +84,7 @@ with dag:
                 "analysis_limit": 40,
                 "xcom_key": "analysis_list",
                 "trigger_task_prefix": "trigger"},
-            trigger_rule='none_failed_or_skipped',
+            trigger_rule='none_failed_min_one_success',
             python_callable=find_analysis_to_trigger_dags_func)
     ## TASK
     no_trigger = \
@@ -122,7 +122,7 @@ with dag:
             params={
                 "xcom_key": "analysis_list",
                 "xcom_task": "find_analysis_to_trigger_dags"},
-            trigger_rule='none_failed_or_skipped',
+            trigger_rule='none_failed_min_one_success',
             python_callable=send_log_and_reset_trigger_file_func)
     ## PIPELINE
     find_analysis_designs >> load_analysis_design_tasks 

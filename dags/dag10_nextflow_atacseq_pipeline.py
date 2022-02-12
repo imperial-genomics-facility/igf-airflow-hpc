@@ -68,7 +68,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=change_pipeline_status,
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={'new_status':'FINISHED',
               'no_change_status':'SEEDED'})
   ## PIPELINE

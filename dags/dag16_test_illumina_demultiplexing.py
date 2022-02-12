@@ -49,6 +49,7 @@ with dag:
            task_id='prepare_merged_report',
            dag=dag,
            queue='hpc_4G',
+           trigger_rule='none_failed_min_one_success',
            params={
                'output_path_xcom_task': 'get_samplesheet_and_decide_flow',
                'samplesheet_xcom_key': 'formatted_samplesheets',

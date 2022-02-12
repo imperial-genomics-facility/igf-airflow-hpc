@@ -76,7 +76,7 @@ with dag:
       task_id='configure_cellranger_run',
       dag=dag,
       queue='hpc_4G',
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={
         'xcom_pull_task_id': 'fetch_analysis_info',
         'analysis_description_xcom_key': 'analysis_description',
@@ -121,7 +121,7 @@ with dag:
     collect_trimmed_files = \
       DummyOperator(
         task_id='collect_trimmed_files_{0}'.format(analysis_name),
-        trigger_rule='none_failed_or_skipped',
+        trigger_rule='none_failed_min_one_success',
         dag=dag)
     ## PIPELINE
     fetch_analysis_info_and_branch >> task_branch
@@ -1033,7 +1033,7 @@ with dag:
       task_id='run_multiqc',
       dag=dag,
       queue='hpc_4G',
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       python_callable=run_multiqc_for_cellranger,
       params={
         'list_of_analysis_xcoms_and_tasks': {
@@ -1113,7 +1113,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=change_pipeline_status,
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={
         'new_status': 'FINISHED',
         'no_change_status': 'SEEDED'})
