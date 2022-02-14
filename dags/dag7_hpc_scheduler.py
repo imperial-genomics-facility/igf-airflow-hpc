@@ -33,6 +33,11 @@ igf_lims_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('igf_lims_server_hostname'))
+wells_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('wells_server_hostname'))
 
 with dag:
   ## TASK
@@ -51,9 +56,9 @@ with dag:
     SSHOperator(
       task_id='restart_flower_server',
       dag=dag,
-      ssh_hook=igf_lims_ssh_hook,
+      ssh_hook=wells_ssh_hook,
       queue='hpc_4G',
-      command="docker restart airflow_flower")
+      command="docker restart airflow_flower_v2")
 
   ## PIPELNE
   run_hpc_scheduler >> restart_flower_server

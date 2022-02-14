@@ -44,6 +44,7 @@
   "woolf_server_hostname": "woolf.med.ic.ac.uk",
   "eliot_server_hostname": "eliot.med.ic.ac.uk",
   "igf_lims_server_hostname": "igf-lims.cc.ic.ac.uk",
+  "wells_server_hostname": "wells.mdr.ic.ac.uk",
   "tenx_single_cell_immune_profiling_feature_types": {"gene_expression": "", "vdj-t": "", "vdj-b": "", "antibody_capture": "", "antigen_capture": "", "crisper_guide_capture": ""},
   "analysis_dag_list": {"dag9_tenx_single_cell_immune_profiling": "", "dag12_nextflow_chipseq_pipeline": "", "dag10_nextflow_atacseq_pipeline": ""},
   "analysis_lookup_dir": "/project/tgu/data2/pipeline_control/analysis_designs",
