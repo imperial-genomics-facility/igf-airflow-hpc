@@ -1,6 +1,7 @@
 {
   "celery_flower_base_url": "http://airflow_flower_v2:5555",
   "redis_conn_file": "/rds/general/user/igf/home/data2/airflow_v2/secrets/redis_conn.json",
+  "igf_portal_conf": "/rds/general/user/igf/home/data2/airflow_v2/secrets/igf_portal_conf.json",
   "hpc_host": "login.hpc.ic.ac.uk",
   "hpc_user": "igf",
   "igf_lims_ssh_key_file": "/SSH/id_rsa_airflow",

@@ -1,9 +1,11 @@
 import os
 from datetime import timedelta
+import queue
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from igf_airflow.utils.dag20_portal_tasks_utils import get_metadata_dump_from_pipeline_db_func
+from igf_airflow.utils.dag20_portal_tasks_utils import upload_metadata_to_portal_db_func
 
 args = {
     'owner': 'airflow',
@@ -35,6 +37,18 @@ with dag:
             dag=dag,
             queue='hpc_4G',
             params={
-                'json_dump_xcom_key': 'json_dump'
-            },
+                'json_dump_xcom_key': 'json_dump'},
             python_callable=get_metadata_dump_from_pipeline_db_func)
+    ## TASK
+    upload_metadata_to_portal_db = \
+        PythonOperator(
+            task_id="upload_metadata_to_portal_db",
+            dag=dag,
+            queue="hpc_4G",
+            params={
+                "json_dump_xcom_key": "json_dump",
+                "json_dump_xcom_task": "get_metadata_dump_from_pipeline_db",
+                "data_load_url": "/api/v1/metadata/load_metadata"},
+            python_callable=upload_metadata_to_portal_db_func)
+    ## PIPELINE
+    get_metadata_dump_from_pipeline_db >> upload_metadata_to_portal_db
