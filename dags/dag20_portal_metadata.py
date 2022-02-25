@@ -34,9 +34,9 @@ DAG_ID = \
 ## SSH HOOK
 orwell_ssh_hook = \
   SSHHook(
-    key_file=Variable.get('hpc_ssh_key_file'),
-    username=Variable.get('hpc_user'),
-    remote_host='orwell.hh.med.ic.ac.uk')
+    key_file=Variable.get('hpc_ssh_key_file',  default_var=""),
+    username=Variable.get('hpc_user',  default_var=""),
+    remote_host=Variable.get('orwell_server_hostname',  default_var=""))
 
 
 dag = \
@@ -49,7 +49,7 @@ with dag:
     ## TASK
     copy_quota_xlsx = \
         PythonOperator(
-            task_ids="copy_quota_xlsx",
+            task_id="copy_quota_xlsx",
             dag=dag,
             queue='hpc_4G',
             pool="orwell_scp_pool",
@@ -62,7 +62,7 @@ with dag:
     ## TASK
     copy_access_db = \
         PythonOperator(
-            task_ids="copy_access_db",
+            task_id="copy_access_db",
             dag=dag,
             queue='hpc_4G',
             pool="orwell_scp_pool",
@@ -75,7 +75,7 @@ with dag:
     ## TASK
     get_known_projects = \
         PythonOperator(
-            task_ids="get_known_projects",
+            task_id="get_known_projects",
             dag=dag,
             queue='hpc_4G',
             params={
@@ -84,7 +84,7 @@ with dag:
     ## TASK
     create_raw_metadata_for_new_projects = \
         PythonOperator(
-            task_ids="create_raw_metadata_for_new_projects",
+            task_id="create_raw_metadata_for_new_projects",
             dag=dag,
             queue='hpc_8G8t',
             params={
@@ -104,7 +104,7 @@ with dag:
     ## TASK
     get_formatted_metadata_files = \
         PythonOperator(
-            task_ids="get_formatted_metadata_files",
+            task_id="get_formatted_metadata_files",
             dag=dag,
             queue='hpc_4G',
             params={
@@ -116,7 +116,7 @@ with dag:
     ## TASK
     upload_raw_metadata_to_portal = \
         PythonOperator(
-            task_ids="upload_raw_metadata_to_portal",
+            task_id="upload_raw_metadata_to_portal",
             dag=dag,
             queue='hpc_4G',
             params={
@@ -127,7 +127,7 @@ with dag:
     ## TASK
     fetch_validated_metadata_from_portal_and_load = \
         SSHOperator(
-            task_ids="fetch_validated_metadata_from_portal_and_load",
+            task_id="fetch_validated_metadata_from_portal_and_load",
             dag=dag,
             queue='hpc_4G',
             ssh_hook=orwell_ssh_hook,
