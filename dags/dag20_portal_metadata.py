@@ -42,7 +42,7 @@ orwell_ssh_hook = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
+        schedule_interval="@hourly",
         default_args=args,
         tags=['hpc'])
 with dag:
