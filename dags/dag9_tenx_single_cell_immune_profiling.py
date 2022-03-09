@@ -83,17 +83,17 @@ with dag:
         'analysis_info_xcom_key': 'analysis_info',
         'library_csv_xcom_key': 'cellranger_library_csv'},
       python_callable=configure_cellranger_run_func)
-  for analysis_name in FEATURE_TYPE_LIST.keys():
+  for feature_name in FEATURE_TYPE_LIST.keys():
     ## TASK
     task_branch = \
       BranchPythonOperator(
-        task_id=analysis_name,
+        task_id=feature_name,
         dag=dag,
         queue='hpc_4G',
         params={
           'xcom_pull_task_id': 'fetch_analysis_info',
           'analysis_info_xcom_key': 'analysis_info',
-          'analysis_name': analysis_name,
+          'feature_name': feature_name,
           'task_prefix': 'run_trim'},
         python_callable=task_branch_function)
     run_trim_list = list()
@@ -101,14 +101,14 @@ with dag:
       ## TASK
       t = \
         PythonOperator(
-          task_id='run_trim_{0}_{1}'.format(analysis_name, run_id),
+          task_id='run_trim_{0}_{1}'.format(feature_name, run_id),
           dag=dag,
           queue='hpc_4G',
           params={
             'xcom_pull_task_id': 'fetch_analysis_info',
             'analysis_info_xcom_key': 'analysis_info',
             'analysis_description_xcom_key': 'analysis_description',
-            'analysis_name': analysis_name,
+            'feature_name': feature_name,
             'run_id': run_id,
             'r1-length': 0,
             'r2-length': 0,
@@ -120,7 +120,7 @@ with dag:
     ## TASK
     collect_trimmed_files = \
       DummyOperator(
-        task_id='collect_trimmed_files_{0}'.format(analysis_name),
+        task_id='collect_trimmed_files_{0}'.format(feature_name),
         trigger_rule='none_failed_min_one_success',
         dag=dag)
     ## PIPELINE
