@@ -246,7 +246,7 @@ with dag:
         'allow_errors': False,
         'kernel_name': 'python3',
         'count_dir': 'count',
-        'analysis_name': 'scanpy',
+        'sc_analysis_name': 'scanpy',
         'output_notebook_key': 'scanpy_notebook',
         'output_cellbrowser_key': 'cellbrowser_dirs',
         'output_scanpy_h5ad_key': 'scanpy_h5ad',
