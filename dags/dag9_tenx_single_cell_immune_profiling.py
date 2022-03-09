@@ -187,7 +187,7 @@ with dag:
         'collection_table': 'sample',
         'xcom_collection_name_key': 'sample_igf_id',
         'genome_column': 'genome_build',
-        'analysis_name': 'cellranger_multi',
+        'sc_analysis_name': 'cellranger_multi',
         'output_xcom_key': 'loaded_output_files',
         'html_xcom_key': 'html_report_file',
         'html_report_file_name': 'web_summary.html'})
@@ -226,7 +226,7 @@ with dag:
         'xcom_pull_files_key': 'loaded_output_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'cellranger_multi'})
+        'sc_analysis_name': 'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> load_cellranger_result_to_db
   load_cellranger_result_to_db >> upload_cellranger_report_to_ftp
@@ -277,7 +277,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scanpy_for_sc_5p',
         'file_name_key': 'scanpy_notebook',
-        'analysis_name': 'scanpy_5p',
+        'sc_analysis_name': 'scanpy_5p',
         'collection_type': 'SCANPY_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -339,7 +339,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'python3',
-        'analysis_name': 'scirpy',
+        'sc_analysis_name': 'scirpy',
         'vdj_dir': 'vdj_b',
         'count_dir': 'count',
         'output_notebook_key': 'scirpy_notebook',
@@ -370,7 +370,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scirpy_for_vdj_b',
         'file_name_key': 'scirpy_notebook',
-        'analysis_name': 'scirpy_vdj_b',
+        'sc_analysis_name': 'scirpy_vdj_b',
         'collection_type': 'SCIRPY_VDJ_B_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -417,7 +417,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'python3',
-        'analysis_name': 'scirpy',
+        'sc_analysis_name': 'scirpy',
         'vdj_dir': 'vdj_t',
         'count_dir': 'count',
         'output_notebook_key': 'scirpy_notebook',
@@ -448,7 +448,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scirpy_for_vdj_t',
         'file_name_key': 'scirpy_notebook',
-        'analysis_name': 'scirpy_vdj_t',
+        'sc_analysis_name': 'scirpy_vdj_t',
         'collection_type': 'SCIRPY_VDJ_T_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -495,7 +495,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'ir',
-        'analysis_name': 'seurat',
+        'sc_analysis_name': 'seurat',
         'vdj_dir': 'vdj',
         'count_dir': 'count',
         'output_notebook_key': 'seurat_notebook',
@@ -512,7 +512,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_seurat_for_sc_5p',
         'file_name_key': 'seurat_notebook',
-        'analysis_name': 'seurat_5p',
+        'sc_analysis_name': 'seurat_5p',
         'collection_type': 'SEURAT_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -560,7 +560,7 @@ with dag:
         'use_ephemeral_space': True,
         'threads': 4,
         'cellranger_bam_path': 'count/sample_alignments.bam',
-        'analysis_name': 'cellranger',
+        'sc_analysis_name': 'cellranger',
         'collection_type': 'ANALYSIS_CRAM',
         'collection_table': 'sample',
         'cram_files_xcom_key': 'cram_files'})
@@ -621,7 +621,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_velocyto',
         'file_name_key': 'loom_output',
-        'analysis_name': 'velocyto_5p',
+        'sc_analysis_name': 'velocyto_5p',
         'collection_type': 'VELOCYTO_LOOM',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -636,7 +636,7 @@ with dag:
         'xcom_pull_files_key': 'output_db_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'velocyto_loom'})
+        'sc_analysis_name': 'velocyto_loom'})
   load_scvelo_report_to_rds = \
     PythonOperator(
       task_id='load_scvelo_report_to_rds',
@@ -648,7 +648,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scvelo_for_sc_5p',
         'file_name_key': 'scvelo_notebook',
-        'analysis_name': 'scvelo_5p',
+        'sc_analysis_name': 'scvelo_5p',
         'collection_type': 'SCVELO_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -716,7 +716,7 @@ with dag:
         'xcom_pull_files_key': 'cram_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'cellranger_multi'})
+        'sc_analysis_name': 'cellranger_multi'})
   ## PIPELINE
   #convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
   generate_cell_sorted_bam >> copy_bam_for_parallel_runs
@@ -1070,7 +1070,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_multiqc',
         'file_name_key': 'multiqc_html',
-        'analysis_name': 'multiqc',
+        'sc_analysis_name': 'multiqc',
         'collection_type': 'MULTIQC_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
