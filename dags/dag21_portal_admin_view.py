@@ -73,7 +73,7 @@ with dag:
             dag=dag,
             queue='hpc_4G',
             params={
-                'json_dump_xcom_key': 'seqrun_json_dump'}
+                'json_dump_xcom_key': 'seqrun_json_dump'},
             python_callable=get_seqrun_counts_func)
     ## TASK
     orwell_home_space = \
@@ -232,6 +232,7 @@ with dag:
             task_id="create_merged_json_and_upload_to_portal",
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             params={
                 'seqrun_json_xcom_task': 'get_seqrun_counts',
                 'seqrun_json_xcom_key': 'seqrun_json_dump',
