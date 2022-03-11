@@ -82,7 +82,7 @@ with dag:
             dag=dag,
             ssh_hook=orwell_ssh_hook,
             queue='hpc_4G',
-            pool='orwell_ssh_pool',
+            pool='orwell_exe_pool',
             command='df /home|grep -w "/home"|cut -d " " -f 3,4,7')
     ## TASK
     wells_home_space = \
