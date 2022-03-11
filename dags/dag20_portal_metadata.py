@@ -119,6 +119,7 @@ with dag:
             task_id="upload_raw_metadata_to_portal",
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             params={
                 'formatted_metadata_xcom_key': 'formatted_metadata',
                 'formatted_metadata_xcom_task': 'get_formatted_metadata_files'
@@ -130,6 +131,7 @@ with dag:
             task_id="fetch_validated_metadata_from_portal_and_load",
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             ssh_hook=orwell_ssh_hook,
             command="""
                 source /home/igf/igf_code/IGF-cron-scripts/orwell/env.sh;
@@ -156,6 +158,7 @@ with dag:
             task_id="upload_metadata_to_portal_db",
             dag=dag,
             queue="hpc_4G",
+            pool='igf_portal_pool',
             params={
                 "json_dump_xcom_key": "json_dump",
                 "json_dump_xcom_task": "get_metadata_dump_from_pipeline_db",
