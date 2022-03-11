@@ -183,7 +183,7 @@ with dag:
             task_id="hpc_rds_space",
             dag=dag,
             queue='hpc_4G',
-            bash_command='quota|grep -w "genomics-facility-archive-2019" -A1|grep Live|cut -d " " -f13,15')
+            bash_command='cat /rds/general/sys-info/quotas/user/igf|grep -w "genomics-facility-archive-2019" -A1|grep Live|cut -d " " -f13,15')
     ## TASK
     prepare_storage_plot = \
         PythonOperator(
