@@ -232,6 +232,7 @@ def print_configuration_function(**context):
 
 print_configuration = PythonOperator(
     task_id='print_configuration',
+    queue='hpc_4G',
     python_callable=print_configuration_function,
     provide_context=True,
     dag=dag)
@@ -342,6 +343,7 @@ for db_object in DATABASE_OBJECTS:
     cleanup_op = PythonOperator(
         task_id='cleanup_' + str(db_object["airflow_db_model"].__name__),
         python_callable=cleanup_function,
+        queue='hpc_4G',
         params=db_object,
         provide_context=True,
         dag=dag
