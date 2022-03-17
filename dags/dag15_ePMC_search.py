@@ -6,7 +6,7 @@ from igf_airflow.utils.dag15_ePMC_search_utils import update_wiki_publication_pa
 
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': days_ago(60),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -19,7 +19,7 @@ args = {
 dag = \
   DAG(
     dag_id='dag15_ePMC_search',
-    schedule_interval='0 0 8 * *',
+    schedule_interval='@monthly',
     default_args=args,
     tags=['hpc'])
 
