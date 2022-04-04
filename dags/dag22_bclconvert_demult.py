@@ -112,6 +112,14 @@ with dag:
 								"qc_ig_{0}_lane_{1}_project_{2}".format(ig_id, lane_id, project_id),
 								tooltip="QC of project {0}, lane {1}, IG {2}".format(project_id, lane_id, ig_id)) \
 								as qc_known:
+                                ## TASK
+								sample_groups_ig = \
+									DummyOperator(
+										task_id="sample_groups_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
+								## TASK
+								sample_groups_finished_ig = \
+									DummyOperator(
+										task_id="sample_groups_finished_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
 								for sample_id in range(1, MAX_SAMPLES+1):
 									## TASK
 									fq_known = \
@@ -139,7 +147,8 @@ with dag:
 											task_id="upload_fastq_to_irods_{0}_ig_{1}_lane_{2}_project_{3}".\
 													format(sample_id, ig_id, lane_id, project_id))
 									##PIPELINE
-									fq_known >> fqs_known >> md5_calc >> load_fastq_and_qc_to_db >> upload_fastq_to_irods
+									sample_groups_ig >> fq_known >> fqs_known >> md5_calc >> load_fastq_and_qc_to_db
+									load_fastq_and_qc_to_db >> upload_fastq_to_irods >> sample_groups_finished_ig
 							## TASKGROUP - QC UNKNOWN
 							with TaskGroup(
 								"qc_unknown_ig_{0}_lane_{1}_project_{2}".format(ig_id, lane_id, project_id),
