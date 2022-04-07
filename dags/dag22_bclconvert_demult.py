@@ -1,11 +1,17 @@
 import os
 from datetime import timedelta
 from itertools import chain
+import queue
 from airflow.models.dag import DAG
 from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.task_group import TaskGroup
+from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 
 ## DEFAULTS
 MAX_PROJECTS = 4
@@ -43,18 +49,30 @@ dag = \
 with dag:
 	## TASK
 	find_seqrun = \
-		DummyOperator(
-			task_id="find_seqrun")
+		BranchPythonOperator(
+			task_id="find_seqrun",
+			dag=dag,
+			queue="hpc_4G",
+			python_callable=find_seqrun_func)
 	## TASK
 	format_and_split_samplesheet = \
-		DummyOperator(
-			task_id="format_and_split_samplesheet")
+		BranchPythonOperator(
+			task_id="format_and_split_samplesheet",
+			dag=dag,
+			queue="hpc_4G",
+			params={
+				'xcom_key': 'formatted_samplesheets',
+				'project_task_prefix': 'demult_start_project',
+				'max_projects': MAX_PROJECTS},
+			python_callable=format_and_split_samplesheet_func)
 	## TASK
 	mark_run_finished = \
 		DummyOperator(
 			task_id='mark_run_finished')
 	## PIPELINE
 	find_seqrun >> format_and_split_samplesheet
+	find_seqrun >> mark_run_finished
+	format_and_split_samplesheet >> mark_run_finished
 	for project_id in range(1, MAX_PROJECTS+1):
 		## TASKGROUP PROJECT_SECTION
 		with TaskGroup(
@@ -63,8 +81,19 @@ with dag:
 			as project_section_demultiplexing:
 			## TASK
 			demult_pj_start = \
-				DummyOperator(
-					task_id="demult_start_project_{0}".format(project_id))
+				BranchPythonOperator(
+					task_id="demult_start_project_{0}".format(project_id),
+					dag=dag,
+					queue="hpc_4G",
+					params={
+						"xcom_key": "formatted_samplesheets",
+						"xcaom_task": "format_and_split_samplesheet",
+						"project_index": project_id,
+						"project_index_column": "project",
+						"lane_index_column": "lane",
+						"max_lanes": MAX_LANES,
+						"lane_task_prefix": "demultiplexing_of_project_{0}_lane".format(project_id),},
+					python_callable=trigger_lane_jobs)
 			## TASK
 			demult_pj_finish = \
 				DummyOperator(
