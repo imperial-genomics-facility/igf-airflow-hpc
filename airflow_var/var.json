@@ -93,8 +93,11 @@
       "pbs_resource": "-lselect=1:ncpus=4:mem=1gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t"},
     "hpc_4G": {
-      "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=12:00:00",
+      "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=04:00:00",
       "airflow_queue": "hpc_1G,hpc_4G"},
+    "hpc_4G_long": {
+        "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=12:00:00",
+        "airflow_queue": "hpc_1G,hpc_4G"},
     "hpc_4G12hr": {
       "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_4G,hpc_4G12hr"},
