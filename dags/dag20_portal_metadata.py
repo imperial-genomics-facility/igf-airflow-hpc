@@ -55,6 +55,7 @@ with dag:
             pool="orwell_scp_pool",
             params={
                 'xcom_key': 'quota_xlsx',
+                'hpc_ssh_key_file': Variable.get('hpc_ssh_key_file',  default_var=""),
                 'source_address': Variable.get("seqrun_server", default_var=""),
                 'source_user': Variable.get("seqrun_server_user", default_var=""),
                 'source_path': '/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'},
@@ -68,6 +69,7 @@ with dag:
             pool="orwell_scp_pool",
             params={
                 'xcom_key': 'access_db',
+                'hpc_ssh_key_file': Variable.get('hpc_ssh_key_file',  default_var=""),
                 'source_address': Variable.get("seqrun_server", default_var=""),
                 'source_user': Variable.get("seqrun_server_user", default_var=""),
                 'source_path': '/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'},
