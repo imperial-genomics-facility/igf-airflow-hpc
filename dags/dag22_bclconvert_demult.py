@@ -14,6 +14,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_sam
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
 
 
 ## DEFAULTS
@@ -144,6 +145,7 @@ with dag:
 									params={
 										'xcom_key': 'formatted_samplesheets',
 										'xcom_task': 'format_and_split_samplesheet',
+										'xcom_key_for_reports': 'bclconvert_reports',
 										'project_index_column': 'project_index',
 										'lane_index_column': 'lane_index',
 										'ig_index_column': 'index_group_index',
@@ -162,8 +164,16 @@ with dag:
 									python_callable=run_bclconvert_func)
 							## TASK
 							demult_report = \
-								DummyOperator(
-									task_id="demult_report_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
+								PythonOperator(
+									task_id="demult_report_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
+									dag=dag,
+									queue="hpc_4G",
+									params={
+										'xcom_key_for_reports': 'bclconvert_reports',
+										'xcom_task_for_reports': "bclconvert_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
+										
+									},
+									python_callable=bclconvert_report_func)
 							## TASK
 							multiqc_report = \
 								DummyOperator(

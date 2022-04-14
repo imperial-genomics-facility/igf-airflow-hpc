@@ -37,6 +37,8 @@
   "box_config_file": "/rds/general/user/igf/home/secret_keys/boxconfig.json",
   "bcl2fastq_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/igf-demultiplexing-image/igf-demultiplexing-image_v0.0.1.sif",
   "bclconvert_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/bclconvert/bclvonvert_v3.9.3.sif",
+  "bclconvert_report_template": "/project/tgu/software/demultiplexing_report/template/bclconvert_report_v0.01.ipynb",
+  "bclconvert_report_library": "/project/tgu/software/demultiplexing_report",
   "pandoc_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/pandoc/pandoc.sif",
   "singlecell_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium-shared-sample-indexes-plate_20180301.json",
   "singlecell_dual_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium_dual_indexes_plate_TT_NT_20210209.json",
