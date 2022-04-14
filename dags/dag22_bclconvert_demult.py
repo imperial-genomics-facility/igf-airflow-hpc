@@ -12,6 +12,9 @@ from airflow.utils.task_group import TaskGroup
 from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
+from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
+from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
+
 
 ## DEFAULTS
 MAX_PROJECTS = 4
@@ -106,8 +109,22 @@ with dag:
 					as lane_project_section_demultiplexing:
 					## TASK
 					demult_ln_start = \
-						DummyOperator(
-							task_id="demult_start_project_{0}_lane_{1}".format(project_id, lane_id))
+						PythonOperator(
+							task_id="demult_start_project_{0}_lane_{1}".format(project_id, lane_id),
+							dag=dag,
+							queue="hpc_4G",
+							params={
+								"xcom_key": "formatted_samplesheets",
+								"xcaom_task": "format_and_split_samplesheet",
+								"project_index": project_id,
+								"project_index_column": "project",
+								"lane_index": lane_id,
+								"lane_index_column": "lane",
+								"ig_index_column": "index_group_index",
+								"max_index_groups": MAX_INDEX_GROUPS,
+								"ig_task_prefix": "bclconvert_project_{0}_lane_{1}_ig".format(project_id, lane_id),
+							},
+							python_callable=trigger_ig_jobs)
 					## TASK
 					demult_ln_finish = \
 						DummyOperator(
@@ -120,8 +137,29 @@ with dag:
 							as ig_project_lane_section_demultiplexing:
 							## TASK
 							bclconvert_ig = \
-								DummyOperator(
-									task_id="bclconvert_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
+								PythonOperator(
+									task_id="bclconvert_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
+									dag=dag,
+									queue="hpc_64G16t",
+									params={
+										'xcom_key': 'formatted_samplesheets',
+										'xcom_task': 'format_and_split_samplesheet',
+										'project_index_column': 'project_index',
+										'lane_index_column': 'lane_index',
+										'ig_index_column': 'index_group_index',
+										'project_column': 'project',
+										'lane_column': 'lane',
+										'index_group_column': 'index_group',
+										'project_index': project_id,
+										'lane_index': lane_id,
+										'ig_index': ig_id,
+										'samplesheet_column': 'samplesheet_file',
+										'bcl_num_conversion_threads': 4,
+										'bcl_num_compression_threads': 2,
+										'bcl_num_decompression_threads': 2,
+										'bcl_num_parallel_tiles': 4
+									},
+									python_callable=run_bclconvert_func)
 							## TASK
 							demult_report = \
 								DummyOperator(

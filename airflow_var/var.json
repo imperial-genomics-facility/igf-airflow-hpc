@@ -36,6 +36,7 @@
   "box_username": "igf@imperial.ac.uk",
   "box_config_file": "/rds/general/user/igf/home/secret_keys/boxconfig.json",
   "bcl2fastq_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/igf-demultiplexing-image/igf-demultiplexing-image_v0.0.1.sif",
+  "bclconvert_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/bclconvert/bclvonvert_v3.9.3.sif",
   "pandoc_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/pandoc/pandoc.sif",
   "singlecell_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium-shared-sample-indexes-plate_20180301.json",
   "singlecell_dual_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium_dual_indexes_plate_TT_NT_20210209.json",
@@ -144,11 +145,14 @@
       "pbs_resource": "-lselect=1:ncpus=16:mem=32gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_4G8t,hpc_8G,hpc_8G4t,hpc_8G8t,hpc_8G16,hpc_16G4t,hpc_16G8t,hpc_16G8t,hpc_32G8t"},
     "hpc_32G16t": {
-      "pbs_resource": "-lselect=1:ncpus=16:mem=32gb -lwalltime=12:00:00",
+      "pbs_resource": "-lselect=1:ncpus=16:mem=32gb -lwalltime=08:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_4G8t,hpc_4G16t,hpc_8G,hpc_8G4t,hpc_8G8t,hpc_8G16,hpc_16G4t,hpc_16G8t,hpc_16G16t,hpc_32G16t"},
     "hpc_42G16t": {
       "pbs_resource": "-lselect=1:ncpus=16:mem=42gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_4G8t,hpc_4G16t,hpc_8G,hpc_8G4t,hpc_8G8t,hpc_8G16,hpc_16G4t,hpc_16G8t,hpc_16G16t,hpc_32G16,hpc_42G16t"},
+    "hpc_64G16t": {
+      "pbs_resource": "-lselect=1:ncpus=16:mem=64gb -lwalltime=08:00:00",
+      "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_4G8t,hpc_4G16t,hpc_8G,hpc_8G4t,hpc_8G8t,hpc_8G16,hpc_16G4t,hpc_16G8t,hpc_16G16t,hpc_32G16,hpc_42G16t,hpc_64G16t"},
     "hpc_64G16t24hr": {
       "pbs_resource": "-lselect=1:ncpus=16:mem=64gb -lwalltime=24:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_4G8t,hpc_4G16t,hpc_8G,hpc_8G4t,hpc_8G8t,hpc_8G16,hpc_16G4t,hpc_16G8t,hpc_16G16t,hpc_32G16,hpc_42G16t,hpc_64G16t24hr"},
