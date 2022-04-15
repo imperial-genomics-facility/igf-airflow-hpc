@@ -15,7 +15,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
-
+from igf_airflow.utils.dag22_bclconvert_demult_utils import sample_known_qc_factory_func
 
 ## DEFAULTS
 MAX_PROJECTS = 4
@@ -80,13 +80,16 @@ with dag:
 	for project_id in range(1, MAX_PROJECTS+1):
 		## TASKGROUP PROJECT_SECTION
 		with TaskGroup(
-			"demultiplexing_of_project_{0}".format(project_id),
-			tooltip="Demultiplexing run for project {0}".format(project_id)) \
+			"demultiplexing_of_project_{0}".\
+			format(project_id),
+			tooltip="Demultiplexing run for project {0}".\
+					format(project_id)) \
 			as project_section_demultiplexing:
 			## TASK
 			demult_pj_start = \
 				BranchPythonOperator(
-					task_id="demult_start_project_{0}".format(project_id),
+					task_id="demult_start_project_{0}".\
+							format(project_id),
 					dag=dag,
 					queue="hpc_4G",
 					params={
@@ -96,22 +99,27 @@ with dag:
 						"project_index_column": "project",
 						"lane_index_column": "lane",
 						"max_lanes": MAX_LANES,
-						"lane_task_prefix": "demultiplexing_of_project_{0}_lane".format(project_id),},
+						"lane_task_prefix": "demultiplexing_of_project_{0}_lane".\
+											format(project_id)},
 					python_callable=trigger_lane_jobs)
 			## TASK
 			demult_pj_finish = \
 				DummyOperator(
-					task_id="demult_finish_project_{0}".format(project_id))
+					task_id="demult_finish_project_{0}".\
+							format(project_id))
 			for lane_id in range(1, MAX_LANES+1):
 				## TASKGROUP POJECT_LANE_SECTION
 				with TaskGroup(
-					"demultiplexing_of_project_{0}_lane_{1}".format(project_id, lane_id),
-					tooltip="Demultiplexing run for project {0}, lane {1}".format(project_id, lane_id)) \
+					"demultiplexing_of_project_{0}_lane_{1}".\
+					format(project_id, lane_id),
+					tooltip="Demultiplexing run for project {0}, lane {1}".\
+							format(project_id, lane_id)) \
 					as lane_project_section_demultiplexing:
 					## TASK
 					demult_ln_start = \
 						PythonOperator(
-							task_id="demult_start_project_{0}_lane_{1}".format(project_id, lane_id),
+							task_id="demult_start_project_{0}_lane_{1}".\
+									format(project_id, lane_id),
 							dag=dag,
 							queue="hpc_4G",
 							params={
@@ -123,29 +131,35 @@ with dag:
 								"lane_index_column": "lane",
 								"ig_index_column": "index_group_index",
 								"max_index_groups": MAX_INDEX_GROUPS,
-								"ig_task_prefix": "bclconvert_project_{0}_lane_{1}_ig".format(project_id, lane_id),
+								"ig_task_prefix": "bclconvert_project_{0}_lane_{1}_ig".\
+													format(project_id, lane_id),
 							},
 							python_callable=trigger_ig_jobs)
 					## TASK
 					demult_ln_finish = \
 						DummyOperator(
-							task_id="demult_finish_project_{0}_lane_{1}".format(project_id, lane_id))
+							task_id="demult_finish_project_{0}_lane_{1}".\
+									format(project_id, lane_id))
 					for ig_id in range(1, MAX_INDEX_GROUPS+1):
 						## TASKGROUP INDEX_GROUP_POJECT_LANE_SECTION
 						with TaskGroup(
-							"demultiplexing_of_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
-							tooltip="Demultiplexing run for project {0}, lane {1}, IG {2}".format(project_id, lane_id, ig_id)) \
+							"demultiplexing_of_project_{0}_lane_{1}_ig_{2}".\
+							format(project_id, lane_id, ig_id),
+							tooltip="Demultiplexing run for project {0}, lane {1}, IG {2}".\
+									format(project_id, lane_id, ig_id)) \
 							as ig_project_lane_section_demultiplexing:
 							## TASK
 							bclconvert_ig = \
 								PythonOperator(
-									task_id="bclconvert_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
+									task_id="bclconvert_project_{0}_lane_{1}_ig_{2}".\
+											format(project_id, lane_id, ig_id),
 									dag=dag,
 									queue="hpc_64G16t",
 									params={
 										'xcom_key': 'formatted_samplesheets',
 										'xcom_task': 'format_and_split_samplesheet',
 										'xcom_key_for_reports': 'bclconvert_reports',
+										'xcom_key_for_output': 'bclconvert_output',
 										'project_index_column': 'project_index',
 										'lane_index_column': 'lane_index',
 										'ig_index_column': 'index_group_index',
@@ -165,13 +179,14 @@ with dag:
 							## TASK
 							demult_report = \
 								PythonOperator(
-									task_id="demult_report_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
+									task_id="demult_report_project_{0}_lane_{1}_ig_{2}".\
+											format(project_id, lane_id, ig_id),
 									dag=dag,
 									queue="hpc_4G",
 									params={
-										'xcom_key_for_reports': 'bclconvert_reports',
-										'xcom_task_for_reports': "bclconvert_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id),
-										
+										'xcom_key_for_reports': "bclconvert_reports",
+										'xcom_task_for_reports': "bclconvert_project_{0}_lane_{1}_ig_{2}".\
+																	format(project_id, lane_id, ig_id)
 									},
 									python_callable=bclconvert_report_func)
 							## TASK
@@ -186,23 +201,39 @@ with dag:
 											format(project_id, lane_id, ig_id))
 							## TASKGROUP - QC KNOWN
 							with TaskGroup(
-								"qc_ig_{0}_lane_{1}_project_{2}".format(ig_id, lane_id, project_id),
-								tooltip="QC of project {0}, lane {1}, IG {2}".format(project_id, lane_id, ig_id)) \
+								"qc_ig_{0}_lane_{1}_project_{2}".\
+								format(ig_id, lane_id, project_id),
+								tooltip="QC of project {0}, lane {1}, IG {2}".\
+										format(project_id, lane_id, ig_id)) \
 								as qc_known:
                                 ## TASK
 								sample_groups_ig = \
-									DummyOperator(
-										task_id="sample_groups_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
+									PythonOperator(
+										task_id="sample_groups_project_{0}_lane_{1}_ig_{2}".\
+												format(project_id, lane_id, ig_id),
+										dag=dag,
+										queue="hpc_4G",
+										params={
+											'xcom_key_for_bclconvert_output': 'bclconvert_output',
+											'xcom_task_for_bclconvert_output': "bclconvert_project_{0}_lane_{1}_ig_{2}".\
+																				format(project_id, lane_id, ig_id),
+											'samplesheet_file_suffix': "Reports/SampleSheet.csv",
+											'max_samples': MAX_SAMPLES,
+											'fastqc_task_prefix': "fastqc_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+																	format(ig_id, lane_id, project_id, sample_id)
+										},
+										python_callable=sample_known_qc_factory_func)
 								## TASK
 								sample_groups_finished_ig = \
 									DummyOperator(
-										task_id="sample_groups_finished_project_{0}_lane_{1}_ig_{2}".format(project_id, lane_id, ig_id))
+										task_id="sample_groups_finished_project_{0}_lane_{1}_ig_{2}".\
+												format(project_id, lane_id, ig_id))
 								for sample_id in range(1, MAX_SAMPLES+1):
 									## TASK
 									fq_known = \
 										DummyOperator(
-											task_id="fastqc_known_sample_{0}_ig_{1}_lane_{2}_project_{3}".\
-													format(sample_id, ig_id, lane_id, project_id))
+											task_id="fastqc_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+													format(ig_id, lane_id, project_id, sample_id))
 									## TASK
 									fqs_known = \
 										DummyOperator(
@@ -228,8 +259,10 @@ with dag:
 									load_fastq_and_qc_to_db >> upload_fastq_to_irods >> sample_groups_finished_ig
 							## TASKGROUP - QC UNKNOWN
 							with TaskGroup(
-								"qc_unknown_ig_{0}_lane_{1}_project_{2}".format(ig_id, lane_id, project_id),
-								tooltip="QC of project {0}, lane {1}, IG {2}".format(project_id, lane_id, ig_id)) \
+								"qc_unknown_ig_{0}_lane_{1}_project_{2}".\
+								format(ig_id, lane_id, project_id),
+								tooltip="QC of project {0}, lane {1}, IG {2}".\
+										format(project_id, lane_id, ig_id)) \
 								as qc_unknown:
 								## TASK
 								fastqc_unknown = \
@@ -261,11 +294,13 @@ with dag:
 			## TASK
 			setup_qc_page = \
 				DummyOperator(
-					task_id="setup_qc_page_for_{0}".format(project_id))
+					task_id="setup_qc_page_for_{0}".\
+							format(project_id))
 			## TASK
 			send_email = \
 				DummyOperator(
-					task_id="send_email_for_{0}".format(project_id))
+					task_id="send_email_for_{0}".\
+							format(project_id))
 			## PIPELINE
 			demult_pj_finish >> setup_qc_page >> send_email
 		## PIPELINE
