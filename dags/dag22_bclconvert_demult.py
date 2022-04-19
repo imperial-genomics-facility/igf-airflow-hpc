@@ -247,11 +247,12 @@ with dag:
 												'xcom_key_for_sample_group': 'sample_group',
 												'xcom_task_for_sample_group': "sample_groups_project_{0}_lane_{1}_ig_{2}".\
 																			format(project_id, lane_id, ig_id),
+												"xcom_key_for_checksum_sample_group": "checksum_sample_group",
 												'samplesheet_file_suffix': "Reports/SampleSheet.csv",
 												'project_index': project_id,
 												'lane_index': lane_id,
 												'ig_index': ig_id,
-												'sample_id': sample_id
+												'sample_group_id': sample_id
 											},
 											python_callable=calculate_fastq_md5_checksum_func)
 									## TASK
