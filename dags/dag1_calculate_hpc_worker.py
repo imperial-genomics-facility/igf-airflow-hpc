@@ -26,7 +26,7 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
-        schedule_interval="*/5 * * * *",
+        schedule_interval="*/3 * * * *",
         default_args=args,
         tags=['igf-lims',]
       )
