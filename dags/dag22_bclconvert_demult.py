@@ -17,6 +17,10 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import sample_known_qc_factory_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import calculate_fastq_md5_checksum_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import load_fastq_and_qc_to_db_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
+
 ## DEFAULTS
 MAX_PROJECTS = 4
 MAX_LANES = 4
@@ -257,19 +261,56 @@ with dag:
 											python_callable=calculate_fastq_md5_checksum_func)
 									## TASK
 									load_fastq_and_qc_to_db = \
-										DummyOperator(
+										PythonOperator(
 											task_id="load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
-													format(ig_id, lane_id, project_id, sample_id))
+													format(ig_id, lane_id, project_id, sample_id),
+											dag=dag,
+											queue="hpc_4G",
+											params={
+												"xcom_key_for_checksum_sample_group": "checksum_sample_group",
+												"xcom_task_for_checksum_sample_group": "md5_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+																						format(ig_id, lane_id, project_id, sample_id),
+												"xcom_key_for_collection_group": "collection_group",
+												"project_index_column": "project_index",
+												"lane_index_column": "lane_index",
+												"lane_index": lane_id,
+												'ig_index_column': 'index_group_index',
+												'ig_index': ig_id,
+												'index_group_column': 'index_group',
+											},
+											python_callable=load_fastq_and_qc_to_db_func)
 									## TASK
 									fq_known = \
-										DummyOperator(
+										PythonOperator(
 											task_id="fastqc_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
-													format(ig_id, lane_id, project_id, sample_id))
+													format(ig_id, lane_id, project_id, sample_id),
+											dag=dag,
+											queue="hpc_4G",
+											params={
+												'xcom_key_for_bclconvert_output': 'bclconvert_output',
+												'xcom_task_for_bclconvert_output': "bclconvert_project_{0}_lane_{1}_ig_{2}".\
+																				   format(project_id, lane_id, ig_id),
+												"xcom_key_for_collection_group": "collection_group",
+												"xcom_task_for_collection_group": "load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+																				  format(ig_id, lane_id, project_id, sample_id),
+											},
+											python_callable=fastqc_run_wrapper_for_known_samples_func)
 									## TASK
 									fqs_known = \
-										DummyOperator(
+										PythonOperator(
 											task_id="fastqscreen_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
-													format(ig_id, lane_id, project_id, sample_id))
+													format(ig_id, lane_id, project_id, sample_id),
+											dag=dag,
+											queue="hpc_4G",
+											params={
+												'xcom_key_for_bclconvert_output': 'bclconvert_output',
+												'xcom_task_for_bclconvert_output': "bclconvert_project_{0}_lane_{1}_ig_{2}".\
+																				   format(project_id, lane_id, ig_id),
+												"xcom_key_for_collection_group": "collection_group",
+												"xcom_task_for_collection_group": "load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+																				  format(ig_id, lane_id, project_id, sample_id),
+											},
+											python_callable=fastqscreen_run_wrapper_for_known_samples_func)
 									## TASK
 									upload_fastq_to_irods = \
 										DummyOperator(
@@ -277,7 +318,8 @@ with dag:
 													format(ig_id, lane_id, project_id, sample_id))
 									##PIPELINE
 									sample_groups_ig >> md5_calc >> load_fastq_and_qc_to_db
-									load_fastq_and_qc_to_db >> fq_known >> fqs_known >> sample_groups_finished_ig
+									load_fastq_and_qc_to_db >> fq_known >> sample_groups_finished_ig
+									load_fastq_and_qc_to_db >> fqs_known >> sample_groups_finished_ig
 									load_fastq_and_qc_to_db >> upload_fastq_to_irods >> sample_groups_finished_ig
 							## TASKGROUP - QC UNKNOWN
 							with TaskGroup(
