@@ -124,7 +124,7 @@ services:
         restart: always
         ports:
                 - "8794:8794"
-        command: celery worker -q generic --celery-hostname wells
+        command: celery worker -q generic --celery-hostname igf-lims
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2

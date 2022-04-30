@@ -56,7 +56,7 @@ with dag:
     SSHOperator(
       task_id='restart_flower_server',
       dag=dag,
-      ssh_hook=wells_ssh_hook,
+      ssh_hook=igf_lims_ssh_hook,
       queue='hpc_4G',
       command="docker restart airflow_flower_v2")
 
