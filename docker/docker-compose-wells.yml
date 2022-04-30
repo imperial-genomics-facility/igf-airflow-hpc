@@ -37,7 +37,7 @@ services:
                 - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
                 - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         restart: always
-        celery worker -q generic --celery-hostname wells
+        command: celery worker -q generic --celery-hostname wells
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
