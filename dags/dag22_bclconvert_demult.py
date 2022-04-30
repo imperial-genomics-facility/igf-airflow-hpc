@@ -227,8 +227,8 @@ with dag:
 											'project_index': project_id,
 											'lane_index': lane_id,
 											'ig_index': ig_id,
-											'next_task_prefix': "md5_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
-																	format(ig_id, lane_id, project_id, sample_id)
+											'next_task_prefix': "md5_known_ig_{0}_lane_{1}_project_{2}_sample_".\
+																	format(ig_id, lane_id, project_id)
 										},
 										python_callable=sample_known_qc_factory_func)
 								## TASK
