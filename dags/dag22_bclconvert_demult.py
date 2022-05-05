@@ -109,7 +109,7 @@ with dag:
 						"project_index_column": "project_index",
 						"lane_index_column": "lane_index",
 						"max_lanes": MAX_LANES,
-						"lane_task_prefix": "demultiplexing_of_project_{0}_lane_".\
+						"lane_task_prefix": "dummy_demultiplexing_of_project_{0}_lane_".\
 											format(project_id)},
 					python_callable=trigger_lane_jobs)
 			## TASK
@@ -118,6 +118,13 @@ with dag:
 					task_id="demult_finish_project_{0}".\
 							format(project_id))
 			for lane_id in range(1, MAX_LANES+1):
+				## TASK
+				dummy_lane_task = \
+					DummyOperator(
+						task_id='dummy_demultiplexing_of_project_{0}_lane_{1}'.\
+								format(project_id, lane_id),
+						dag=dag,
+						queue="hpc_4G")
 				## TASKGROUP POJECT_LANE_SECTION
 				with TaskGroup(
 					"demultiplexing_of_project_{0}_lane_{1}".\
@@ -136,12 +143,12 @@ with dag:
 								"xcom_key": "formatted_samplesheets",
 								"xcaom_task": "format_and_split_samplesheet",
 								"project_index": project_id,
-								"project_index_column": "project",
+								"project_index_column": "project_index",
 								"lane_index": lane_id,
-								"lane_index_column": "lane",
+								"lane_index_column": "lane_index",
 								"ig_index_column": "index_group_index",
 								"max_index_groups": MAX_INDEX_GROUPS,
-								"ig_task_prefix": "bclconvert_project_{0}_lane_{1}_ig".\
+								"ig_task_prefix": "dummy_demultiplexing_of_project_{0}_lane_{1}_ig_".\
 													format(project_id, lane_id),
 							},
 							python_callable=trigger_ig_jobs)
@@ -151,6 +158,13 @@ with dag:
 							task_id="demult_finish_project_{0}_lane_{1}".\
 									format(project_id, lane_id))
 					for ig_id in range(1, MAX_INDEX_GROUPS+1):
+						## TASK
+						dummy_ig_task = \
+							DummyOperator(
+								task_id="dummy_demultiplexing_of_project_{0}_lane_{1}_ig_{2}".\
+										format(project_id, lane_id, ig_id),
+								dag=dag,
+								queue="hpc_4G")
 						## TASKGROUP INDEX_GROUP_POJECT_LANE_SECTION
 						with TaskGroup(
 							"demultiplexing_of_project_{0}_lane_{1}_ig_{2}".\
@@ -357,10 +371,10 @@ with dag:
 							bclconvert_ig >> qc_known >> multiqc_report >> sample_qc_page
 							bclconvert_ig >> qc_unknown >> sample_qc_page
 						## PIPELINE
-						demult_ln_start >> ig_project_lane_section_demultiplexing >> demult_ln_finish
+						demult_ln_start >> dummy_ig_task >> ig_project_lane_section_demultiplexing >> demult_ln_finish
 					## PIPELINE
-					demult_pj_start >> demult_ln_start
-					demult_ln_finish >> demult_pj_finish	
+					demult_pj_start >> dummy_lane_task >> demult_ln_start
+					demult_ln_finish >> demult_pj_finish
 			## TASK
 			setup_qc_page = \
 				DummyOperator(
