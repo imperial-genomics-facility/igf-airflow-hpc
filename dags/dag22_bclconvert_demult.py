@@ -109,7 +109,7 @@ with dag:
 						"project_index_column": "project_index",
 						"lane_index_column": "lane_index",
 						"max_lanes": MAX_LANES,
-						"lane_task_prefix": "dummy_demultiplexing_of_project_{0}_lane_".\
+						"lane_task_prefix": "demultiplexing_of_project_{0}.dummy_demultiplexing_of_project_{0}_lane_".\
 											format(project_id)},
 					python_callable=trigger_lane_jobs)
 			## TASK
