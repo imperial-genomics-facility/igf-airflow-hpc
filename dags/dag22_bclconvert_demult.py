@@ -70,7 +70,7 @@ with dag:
 			queue="hpc_4G",
 			params={
 				'xcom_key': 'formatted_samplesheets',
-				'project_task_prefix': 'demultiplexing_of_project_',
+				'project_task_prefix': 'dummy_demult_start_project_',
 				'max_projects': MAX_PROJECTS},
 			python_callable=format_and_split_samplesheet_func)
 	## TASK
@@ -82,6 +82,12 @@ with dag:
 	find_seqrun >> mark_run_finished
 	format_and_split_samplesheet >> mark_run_finished
 	for project_id in range(1, MAX_PROJECTS+1):
+		## TASK
+		dummy_project_task = \
+			DummyOperator(
+				task_id='dummy_demult_start_project_{}'.format(project_id),
+				dag=dag,
+				queue="hpc_4G")
 		## TASKGROUP PROJECT_SECTION
 		with TaskGroup(
 			"demultiplexing_of_project_{0}".\
@@ -368,4 +374,4 @@ with dag:
 			## PIPELINE
 			demult_pj_finish >> setup_qc_page >> send_email
 		## PIPELINE
-		format_and_split_samplesheet >> project_section_demultiplexing >> mark_run_finished
+		format_and_split_samplesheet >> dummy_project_task >> project_section_demultiplexing >> mark_run_finished
