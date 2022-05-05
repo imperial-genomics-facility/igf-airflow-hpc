@@ -134,7 +134,7 @@ with dag:
 					as lane_project_section_demultiplexing:
 					## TASK
 					demult_ln_start = \
-						PythonOperator(
+						BranchPythonOperator(
 							task_id="demult_start_project_{0}_lane_{1}".\
 									format(project_id, lane_id),
 							dag=dag,
