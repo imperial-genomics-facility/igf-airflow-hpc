@@ -104,7 +104,7 @@
       "airflow_queue": "hpc_1G,hpc_4G"},
     "hpc_4G_long": {
         "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=12:00:00",
-        "airflow_queue": "hpc_1G,hpc_4G"},
+        "airflow_queue": "hpc_1G,hpc_4G,hpc_4G_long"},
     "hpc_4G12hr": {
       "pbs_resource": "-lselect=1:ncpus=1:mem=4gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_4G,hpc_4G12hr"},
