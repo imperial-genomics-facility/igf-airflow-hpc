@@ -70,7 +70,7 @@ with dag:
 			queue="hpc_4G",
 			params={
 				'xcom_key': 'formatted_samplesheets',
-				'project_task_prefix': 'demult_start_project',
+				'project_task_prefix': 'demultiplexing_of_project_',
 				'max_projects': MAX_PROJECTS},
 			python_callable=format_and_split_samplesheet_func)
 	## TASK
