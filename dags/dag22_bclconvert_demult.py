@@ -25,7 +25,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_f
 MAX_PROJECTS = 4
 MAX_LANES = 4
 MAX_INDEX_GROUPS = 2
-MAX_SAMPLES = 20 # divide samples to 30 groups
+MAX_SAMPLES = 10 # divide samples to 10 groups
 
 ## ARGS
 args = {
