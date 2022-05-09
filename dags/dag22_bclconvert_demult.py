@@ -90,7 +90,7 @@ with dag:
 				queue="hpc_4G")
 		## TASKGROUP PROJECT_SECTION
 		with TaskGroup(
-			"demultiplexing_of_project_{0}".\
+			"project_{0}".\
 			format(project_id),
 			tooltip="Demultiplexing run for project {0}".\
 					format(project_id)) \
@@ -127,8 +127,8 @@ with dag:
 						queue="hpc_4G")
 				## TASKGROUP POJECT_LANE_SECTION
 				with TaskGroup(
-					"demultiplexing_of_project_{0}_lane_{1}".\
-					format(project_id, lane_id),
+					"lane_{0}".\
+					format(lane_id),
 					tooltip="Demultiplexing run for project {0}, lane {1}".\
 							format(project_id, lane_id)) \
 					as lane_project_section_demultiplexing:
@@ -167,8 +167,8 @@ with dag:
 								queue="hpc_4G")
 						## TASKGROUP INDEX_GROUP_POJECT_LANE_SECTION
 						with TaskGroup(
-							"demultiplexing_of_project_{0}_lane_{1}_ig_{2}".\
-							format(project_id, lane_id, ig_id),
+							"ig_{0}".\
+							format(ig_id),
 							tooltip="Demultiplexing run for project {0}, lane {1}, IG {2}".\
 									format(project_id, lane_id, ig_id)) \
 							as ig_project_lane_section_demultiplexing:
@@ -225,8 +225,8 @@ with dag:
 											format(project_id, lane_id, ig_id))
 							## TASKGROUP - QC KNOWN
 							with TaskGroup(
-								"qc_ig_{0}_lane_{1}_project_{2}".\
-								format(ig_id, lane_id, project_id),
+								"qc_ig_{0}".\
+								format(ig_id),
 								tooltip="QC of project {0}, lane {1}, IG {2}".\
 										format(project_id, lane_id, ig_id)) \
 								as qc_known:
@@ -240,7 +240,7 @@ with dag:
 										params={
 											'xcom_key_for_bclconvert_output': 'bclconvert_output',
 											'xcom_task_for_bclconvert_output': "bclconvert_project_{0}_lane_{1}_ig_{2}".\
-																				format(project_id, lane_id, ig_id),
+																			    format(project_id, lane_id, ig_id),
 											'xcom_key_for_sample_group': 'sample_group',
 											'samplesheet_file_suffix': "Reports/SampleSheet.csv",
 											'max_samples': MAX_SAMPLES,
