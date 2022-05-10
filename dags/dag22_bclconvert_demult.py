@@ -233,7 +233,7 @@ with dag:
 								as qc_known:
                                 ## TASK
 								sample_groups_ig = \
-									PythonOperator(
+									BranchPythonOperator(
 										task_id="sample_groups_project_{0}_lane_{1}_ig_{2}".\
 												format(project_id, lane_id, ig_id),
 										dag=dag,
