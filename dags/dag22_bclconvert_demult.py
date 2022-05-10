@@ -293,6 +293,7 @@ with dag:
 																						format(ig_id, lane_id, project_id, sample_id),
 												"xcom_key_for_collection_group": "collection_group",
 												"project_index_column": "project_index",
+												'project_index': project_id,
 												"lane_index_column": "lane_index",
 												"lane_index": lane_id,
 												'ig_index_column': 'index_group_index',
