@@ -148,7 +148,7 @@ with dag:
 								"lane_index_column": "lane_index",
 								"ig_index_column": "index_group_index",
 								"max_index_groups": MAX_INDEX_GROUPS,
-								"ig_task_prefix": "dummy_demultiplexing_of_project_{0}_lane_{1}_ig_".\
+								"ig_task_prefix": "project_{0}.lane_{1}.dummy_demultiplexing_of_project_{0}_lane_{1}_ig_".\
 													format(project_id, lane_id),
 							},
 							python_callable=trigger_ig_jobs)
