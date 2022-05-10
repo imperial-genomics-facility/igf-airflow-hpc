@@ -248,7 +248,7 @@ with dag:
 											'project_index': project_id,
 											'lane_index': lane_id,
 											'ig_index': ig_id,
-											'next_task_prefix': "project_{0}.lane_{1}.ig_{2}.md5_known_ig_{0}_lane_{1}_project_{2}_sample_".\
+											'next_task_prefix': "project_{0}.lane_{1}.ig_{2}.qc_ig_{2}.md5_known_ig_{0}_lane_{1}_project_{2}_sample_".\
 																	format(ig_id, lane_id, project_id)
 										},
 										python_callable=sample_known_qc_factory_func)
@@ -270,7 +270,7 @@ with dag:
 												'xcom_task_for_bclconvert_output': "project_{0}.lane_{1}.ig_{2}.bclconvert_project_{0}_lane_{1}_ig_{2}".\
 																					format(project_id, lane_id, ig_id),
 												'xcom_key_for_sample_group': 'sample_group',
-												'xcom_task_for_sample_group': "project_{0}.lane_{1}.ig_{2}.sample_groups_project_{0}_lane_{1}_ig_{2}".\
+												'xcom_task_for_sample_group': "project_{0}.lane_{1}.ig_{2}.qc_ig_{2}.sample_groups_project_{0}_lane_{1}_ig_{2}".\
 																			format(project_id, lane_id, ig_id),
 												"xcom_key_for_checksum_sample_group": "checksum_sample_group",
 												'samplesheet_file_suffix': "Reports/SampleSheet.csv",
@@ -289,7 +289,7 @@ with dag:
 											queue="hpc_4G",
 											params={
 												"xcom_key_for_checksum_sample_group": "checksum_sample_group",
-												"xcom_task_for_checksum_sample_group": "project_{0}.lane_{1}.ig_{2}.md5_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+												"xcom_task_for_checksum_sample_group": "project_{0}.lane_{1}.ig_{2}.qc_ig_{2}.md5_known_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
 																						format(ig_id, lane_id, project_id, sample_id),
 												"xcom_key_for_collection_group": "collection_group",
 												"project_index_column": "project_index",
@@ -312,7 +312,7 @@ with dag:
 												'xcom_task_for_bclconvert_output': "project_{0}.lane_{1}.ig_{2}.bclconvert_project_{0}_lane_{1}_ig_{2}".\
 																				   format(project_id, lane_id, ig_id),
 												"xcom_key_for_collection_group": "collection_group",
-												"xcom_task_for_collection_group": "project_{0}.lane_{1}.ig_{2}.load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+												"xcom_task_for_collection_group": "project_{0}.lane_{1}.ig_{2}.qc_ig_{2}.load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
 																				  format(ig_id, lane_id, project_id, sample_id),
 											},
 											python_callable=fastqc_run_wrapper_for_known_samples_func)
@@ -328,7 +328,7 @@ with dag:
 												'xcom_task_for_bclconvert_output': "project_{0}.lane_{1}.ig_{2}.bclconvert_project_{0}_lane_{1}_ig_{2}".\
 																				   format(project_id, lane_id, ig_id),
 												"xcom_key_for_collection_group": "collection_group",
-												"xcom_task_for_collection_group": "project_{0}.lane_{1}.ig_{2}.load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
+												"xcom_task_for_collection_group": "project_{0}.lane_{1}.ig_{2}.qc_ig_{2}.load_fastq_and_qc_ig_{0}_lane_{1}_project_{2}_sample_{3}".\
 																				  format(ig_id, lane_id, project_id, sample_id),
 											},
 											python_callable=fastqscreen_run_wrapper_for_known_samples_func)
