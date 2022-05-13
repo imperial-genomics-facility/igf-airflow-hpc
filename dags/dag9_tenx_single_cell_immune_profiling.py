@@ -582,7 +582,7 @@ with dag:
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
-      queue='hpc_16G_long',
+      queue='hpc_32G24hr',
       python_callable=run_velocyto_func,
       params={
         'xcom_pull_task': 'run_cellranger',
