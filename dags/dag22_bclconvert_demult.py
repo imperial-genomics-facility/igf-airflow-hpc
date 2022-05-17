@@ -22,8 +22,8 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrap
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
 
 ## DEFAULTS
-MAX_PROJECTS = 4
-MAX_LANES = 4
+MAX_PROJECTS = 2
+MAX_LANES = 2
 MAX_INDEX_GROUPS = 2
 MAX_SAMPLES = 10 # divide samples to 10 groups
 
