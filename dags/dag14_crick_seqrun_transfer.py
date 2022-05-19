@@ -47,7 +47,7 @@ with dag:
     PythonOperator(
       task_id='extract_tar_file',
       dag=dag,
-      queue='hpc_4G',
+      queue='hpc_4G_long',
       python_callable=extract_tar_file_func)
   ## TASK
   find_and_split_md5 = \
