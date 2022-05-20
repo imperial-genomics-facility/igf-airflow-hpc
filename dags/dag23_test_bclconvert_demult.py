@@ -44,8 +44,11 @@ dag = \
 with dag:
 	## TASK
     get_samplesheet_from_portal = \
-        DummyOperator(
-            task_id='get_samplesheet_from_portal')
+        PythonOperator(
+            task_id='get_samplesheet_from_portal',
+            dag=dag,
+            queue='hpc_4G',
+            python_callable=get_samplesheet_from_portal_func)
     # TASK
     mark_seqrun_running = \
         DummyOperator(
