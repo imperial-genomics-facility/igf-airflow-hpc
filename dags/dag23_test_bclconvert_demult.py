@@ -13,7 +13,7 @@ from igf_airflow.utils.dag23_test_bclconvert_demult_utils import generate_report
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import upload_report_to_box_func
 
 ## DEFAULTS
-MAX_SAMPLESHEETS = 20
+MAX_SAMPLESHEETS = 30
 
 ## ARGS
 args = {
@@ -77,14 +77,17 @@ with dag:
             task_id='mark_seqrun_finished')
     # TASK
     get_formatted_samplesheets = \
-        PythonOperator(
+        BranchPythonOperator(
             task_id='get_formatted_samplesheets',
             dag=dag,
             queue='hpc_4G',
             params={
-                'next_task_prefix': 'bcl_convert_run_',
                 'samplesheet_xcom_key': 'samplesheet_data',
-                'samplesheet_xcom_task': 'get_samplesheet_from_portal' 
+                'samplesheet_xcom_task': 'get_samplesheet_from_portal',
+                'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
+                'samplesheet_tag': 'samplesheet_tag',
+                'samplesheet_file': 'samplesheet_file',
+                'next_task_prefix': 'bcl_convert_run_'
             },
             python_callable=get_formatted_samplesheets_func)
     for samplesheet_id in range(0, MAX_SAMPLESHEETS):
