@@ -48,19 +48,45 @@ with dag:
             task_id='get_samplesheet_from_portal',
             dag=dag,
             queue='hpc_4G',
+            params={
+                'samplesheet_xcom_key': 'samplesheet_data',
+            },
             python_callable=get_samplesheet_from_portal_func)
     # TASK
     mark_seqrun_running = \
+        PythonOperator(
+            task_id='mark_seqrun_running',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'next_task': 'get_formatted_samplesheets',
+                'last_task': 'no_work',
+                'seed_table': 'seqrun',
+                'seed_status': 'RUNNING',
+                'no_change_status': 'RUNNING'},
+            python_callable=mark_seqrun_status_func)
+    # TASK
+    no_work = \
         DummyOperator(
-            task_id='mark_seqrun_running')
+            task_id='no_work',
+            dag=dag,
+            queue='hpc_4G')
     # TASK
     mark_seqrun_finished = \
         DummyOperator(
             task_id='mark_seqrun_finished')
     # TASK
     get_formatted_samplesheets = \
-        DummyOperator(
-            task_id='get_formatted_samplesheets')
+        PythonOperator(
+            task_id='get_formatted_samplesheets',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'next_task_prefix': 'bcl_convert_run_',
+                'samplesheet_xcom_key': 'samplesheet_data',
+                'samplesheet_xcom_task': 'get_samplesheet_from_portal' 
+            },
+            python_callable=get_formatted_samplesheets_func)
     for samplesheet_id in range(0, MAX_SAMPLESHEETS):
         # TASK
         bcl_convert_run = \
@@ -81,3 +107,4 @@ with dag:
         bcl_convert_run >> generate_report
         generate_report >> upload_report_to_box
         upload_report_to_box >> mark_seqrun_finished
+        mark_seqrun_running >> no_work
