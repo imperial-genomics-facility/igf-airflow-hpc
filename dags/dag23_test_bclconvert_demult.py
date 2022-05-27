@@ -12,7 +12,7 @@ from igf_airflow.utils.dag23_test_bclconvert_demult_utils import calculate_overr
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import bcl_convert_run_func
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import generate_report_func
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import upload_report_to_box_func
-
+from igf_airflow.utils.dag23_test_bclconvert_demult_utils import create_demult_report_for_portal
 
 ## DEFAULTS
 MAX_SAMPLESHEETS = 30
@@ -81,7 +81,7 @@ with dag:
             queue='hpc_4G',
             trigger_rule='none_failed',
             params={},
-            python_callable=generate_merged_report_func)
+            python_callable=create_demult_report_for_portal)
     ## TASK
     upload_merged_report_to_portal = \
         DummyOperator(
