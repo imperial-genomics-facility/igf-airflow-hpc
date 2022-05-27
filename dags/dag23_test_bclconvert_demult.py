@@ -75,9 +75,13 @@ with dag:
             queue='hpc_4G')
     ## TASK
     generate_merged_report = \
-        DummyOperator(
+        PythonOperator(
             task_id='generate_merged_report',
-            trigger_rule='none_failed',)
+            dag=dag,
+            queue='hpc_4G',
+            trigger_rule='none_failed',
+            params={},
+            python_callable=generate_merged_report_func)
     ## TASK
     upload_merged_report_to_portal = \
         DummyOperator(
