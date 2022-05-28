@@ -100,7 +100,7 @@ with dag:
                 'samplesheet_xcom_key': 'samplesheet_data',
                 'samplesheet_xcom_task': 'get_samplesheet_from_portal',
                 'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
-                'samplesheet_tag': 'samplesheet_tag',
+                'samplesheet_tag_label': 'samplesheet_tag',
                 'samplesheet_file': 'samplesheet_file',
                 'next_task_prefix': 'calculate_override_bases_mask_'
             },
