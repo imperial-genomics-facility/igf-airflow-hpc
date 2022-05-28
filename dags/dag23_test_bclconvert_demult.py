@@ -102,7 +102,7 @@ with dag:
                 'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
                 'samplesheet_tag': 'samplesheet_tag',
                 'samplesheet_file': 'samplesheet_file',
-                'next_task_prefix': 'bcl_convert_run_'
+                'next_task_prefix': 'calculate_override_bases_mask_'
             },
             python_callable=get_formatted_samplesheets_func)
     ## PIPELINE
