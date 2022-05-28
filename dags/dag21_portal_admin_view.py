@@ -64,6 +64,7 @@ dag = \
         dag_id=DAG_ID,
         schedule_interval="@hourly",
         default_args=args,
+        catchup=False,
         tags=['hpc'])
 with dag:
     ## TASK
