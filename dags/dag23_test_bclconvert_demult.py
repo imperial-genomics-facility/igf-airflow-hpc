@@ -90,7 +90,7 @@ with dag:
     ## TASK
     mark_seqrun_finished = \
         PythonOperator(
-            task_id='mark_seqrun_running',
+            task_id='mark_seqrun_finished',
             dag=dag,
             queue='hpc_4G',
             params={
