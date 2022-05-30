@@ -13,6 +13,7 @@ from igf_airflow.utils.dag23_test_bclconvert_demult_utils import bcl_convert_run
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import generate_report_func
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import upload_report_to_box_func
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import create_demult_report_for_portal
+from igf_airflow.utils.dag23_test_bclconvert_demult_utils import copy_report_to_rds_func
 
 ## DEFAULTS
 MAX_SAMPLESHEETS = 30
@@ -157,6 +158,23 @@ with dag:
                 },
                 python_callable=generate_report_func)
         ## TASK
+        copy_report_to_rds = \
+            PythonOperator(
+                task_id=f'copy_report_to_rds_{samplesheet_id}',
+                dag=dag,
+                queue='hpc_4G',
+                params={
+                    'index_column': 'index',
+                    'lane_column': 'lane',
+                    'tag_column': 'tag',
+                    'samplesheet_index': samplesheet_id,
+                    'demult_report_key': 'demult_report',
+                    'demult_report_task': f'generate_report_{samplesheet_id}',
+                    'formatted_samplesheet_xcom_task': 'get_formatted_samplesheets',
+                    'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
+                },
+                python_callable=copy_report_to_rds_func)
+        ## TASK
         upload_report_to_box = \
             PythonOperator(
                 task_id=f'upload_report_to_box{samplesheet_id}',
@@ -179,7 +197,8 @@ with dag:
         calculate_override_bases_mask >> bcl_convert_run
         bcl_convert_run >> generate_report
         generate_report >> upload_report_to_box
-        upload_report_to_box >> generate_merged_report
+        generate_report >> copy_report_to_rds
+        copy_report_to_rds >> generate_merged_report
     ## PIPELINE
     generate_merged_report >> upload_merged_report_to_portal
     upload_merged_report_to_portal >> mark_seqrun_finished

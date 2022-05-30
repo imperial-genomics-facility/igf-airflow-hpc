@@ -27,6 +27,7 @@
   "ms_teams_conf": "/rds/general/user/igf/home/secret_keys/team_de-mult.json",
   "analysis_ms_teams_conf": "/rds/general/user/igf/home/secret_keys/team_analysis.json",
   "hpc_seqrun_path": "/rds/general/project/genomics-facility-archive-2019/ephemeral/",
+  "hpc_seqrun_report_path": "/rds/general/project/genomics-facility-archive-2019/live/orwell/Demultiplexing_reports",
   "interop_dumptext_exe": "/rds/general/user/igf/home/anaconda3/envs/interop/bin/interop_dumptext",
   "interop_notebook_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/interop/interop-notebook-image_v0.0.3.sif",
   "interop_notebook_template": "/project/tgu/software/interop-notebook-image/templates/interop_report_v0.0.3.ipynb",
