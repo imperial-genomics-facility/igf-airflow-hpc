@@ -89,8 +89,17 @@ with dag:
             task_id='upload_merged_report_to_portal')
     ## TASK
     mark_seqrun_finished = \
-        DummyOperator(
-            task_id='mark_seqrun_finished')
+        PythonOperator(
+            task_id='mark_seqrun_running',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'next_task': 'get_formatted_samplesheets',
+                'last_task': 'no_work',
+                'seed_table': 'seqrun',
+                'seed_status': 'FINISHED',
+                'no_change_status': 'SEEDED'},
+            python_callable=mark_seqrun_status_func)
     ## TASK
     get_formatted_samplesheets = \
         BranchPythonOperator(
