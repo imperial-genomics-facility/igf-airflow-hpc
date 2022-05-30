@@ -119,6 +119,7 @@ with dag:
                 queue='hpc_4G',
                 params={
                     'samplesheet_index': samplesheet_id,
+                    'index_column': 'index',
                     'formatted_samplesheet_xcom_task': 'get_formatted_samplesheets',
                     'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
                     'mod_samplesheet_xcom_key': 'mod_samplesheet'
@@ -131,6 +132,9 @@ with dag:
                 dag=dag,
                 queue='hpc_4G',
                 params={
+                    'samplesheet_index': samplesheet_id,
+                    'index_column': 'index',
+                    'lane_column': 'lane',
                     'mod_samplesheet_xcom_key': 'mod_samplesheet',
                     'mod_samplesheet_xcom_task': f'calculate_override_bases_mask_{samplesheet_id}',
                     'demult_dir_key': 'demult_dir'
@@ -143,6 +147,10 @@ with dag:
                 dag=dag,
                 queue='hpc_4G',
                 params={
+                    'samplesheet_index': samplesheet_id,
+                    'index_column': 'index',
+                    'lane_column': 'lane',
+                    'tag_column': 'tag',
                     'demult_dir_key': 'demult_dir',
                     'demult_dir_task': f'bcl_convert_run_{samplesheet_id}',
                     'demult_report_key': 'demult_report'
