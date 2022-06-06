@@ -9,6 +9,7 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.task_group import TaskGroup
 from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -62,12 +63,23 @@ with dag:
             python_callable=find_seqrun_func)
     ## TASK
     mark_seqrun_as_running = \
-        DummyOperator(
-            task_id="mark_seqrun_as_running")
+        BranchPythonOperator(
+            task_id="mark_seqrun_as_running",
+            dag=dag,
+            queue="hpc_4G",
+            params={
+                'next_task': 'fetch_samplesheet_for_run',
+                'last_task': 'no_work',
+                'seed_status': 'RUNNING',
+                'no_change_status': 'RUNNING',
+                'seed_table': 'seqrun'
+            },
+            python_callable=mark_seqrun_status_func)
     ## TASK
     fetch_samplesheet_for_run = \
         DummyOperator(
-            task_id="fetch_samplesheet_for_run")
+            task_id="fetch_samplesheet_for_run",
+            )
     ## TASK
     format_and_split_samplesheet = \
         DummyOperator(
@@ -84,12 +96,21 @@ with dag:
     find_seqrun >> mark_seqrun_as_running
     find_seqrun >> no_work
     mark_seqrun_as_running >> fetch_samplesheet_for_run
+    mark_seqrun_as_running >> no_work
     fetch_samplesheet_for_run >> format_and_split_samplesheet
     format_and_split_samplesheet >> project_factory
     ## TASK
     mark_seqrun_as_finished = \
-        DummyOperator(
-            task_id="mark_seqrun_as_finished")
+        PythonOperator(
+            task_id="mark_seqrun_as_finished",
+            dag=dag,
+            queue="hpc_4G",
+            params={
+                'seed_status': 'FINISHED',
+                'no_change_status': 'SEEDED',
+                'seed_table': 'seqrun'
+            },
+            python_callable=mark_seqrun_status_func
     ## LOOP - PROJECT
     for project_id in sample_groups:
         ## TASK - PROJECT
