@@ -72,7 +72,8 @@ with dag:
                 'last_task': 'no_work',
                 'seed_status': 'RUNNING',
                 'no_change_status': 'RUNNING',
-                'seed_table': 'seqrun'
+                'seed_table': 'seqrun',
+                'check_all_pipelines_for_seed_id': True
             },
             python_callable=mark_seqrun_status_func)
     ## TASK
