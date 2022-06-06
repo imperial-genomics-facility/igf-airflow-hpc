@@ -11,6 +11,7 @@ from airflow.utils.task_group import TaskGroup
 from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import get_samplesheet_from_portal_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -89,12 +90,15 @@ with dag:
             python_callable=get_samplesheet_from_portal_func)
     ## TASK
     format_and_split_samplesheet = \
-        DummyOperator(
-            task_id="format_and_split_samplesheet")
-    ## TASK
-    project_factory = \
-        DummyOperator(
-            task_id="project_factory")
+        BranchPythonOperator(
+			task_id="format_and_split_samplesheet",
+			dag=dag,
+			queue="hpc_4G",
+			params={
+				'xcom_key': 'formatted_samplesheets',
+				'project_task_prefix': 'setup_qc_page_for_project_',
+				'max_projects': len(sample_groups)},
+			python_callable=format_and_split_samplesheet_func)
     ## TASK
     no_work = \
         DummyOperator(
@@ -105,7 +109,6 @@ with dag:
     mark_seqrun_as_running >> fetch_samplesheet_for_run
     mark_seqrun_as_running >> no_work
     fetch_samplesheet_for_run >> format_and_split_samplesheet
-    format_and_split_samplesheet >> project_factory
     ## TASK
     mark_seqrun_as_finished = \
         PythonOperator(
@@ -141,7 +144,7 @@ with dag:
             DummyOperator(
                 task_id=f"send_email_to_user_for_project_{project_id}")
         ## PIPELINE - PROJECT
-        project_factory >> setup_qc_page_for_project
+        format_and_split_samplesheet >> setup_qc_page_for_project
         setup_qc_page_for_project >> setup_globus_transfer_for_project
         setup_globus_transfer_for_project >> get_lanes_for_project
         build_qc_page_for_project >> send_email_to_user_for_project
