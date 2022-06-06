@@ -140,7 +140,7 @@ with dag:
             PythonOperator(
                 task_id=f'bcl_convert_run_{samplesheet_id}',
                 dag=dag,
-                queue='hpc_4G',
+                queue='hpc_8G',
                 params={
                     'samplesheet_index': samplesheet_id,
                     'index_column': 'index',
