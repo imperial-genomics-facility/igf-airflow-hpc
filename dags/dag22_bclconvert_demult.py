@@ -8,6 +8,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.task_group import TaskGroup
+from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -50,8 +51,15 @@ dag = \
 with dag:
 	## TASK
     find_seqrun = \
-        DummyOperator(
-            task_id="find_seqrun")
+        BranchPythonOperator(
+            task_id="find_seqrun",
+            dag=dag,
+            queue="hpc_4G",
+            params={
+                'next_task_id': 'mark_seqrun_as_running',
+                'no_work_task': 'no_work'
+            },
+            python_callable=find_seqrun_func)
     ## TASK
     mark_seqrun_as_running = \
         DummyOperator(
@@ -68,8 +76,13 @@ with dag:
     project_factory = \
         DummyOperator(
             task_id="project_factory")
+    ## TASK
+    no_work = \
+        DummyOperator(
+            task_id="no_work")
     ## PIPELINE
     find_seqrun >> mark_seqrun_as_running
+    find_seqrun >> no_work
     mark_seqrun_as_running >> fetch_samplesheet_for_run
     fetch_samplesheet_for_run >> format_and_split_samplesheet
     format_and_split_samplesheet >> project_factory
