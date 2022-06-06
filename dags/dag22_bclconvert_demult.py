@@ -10,6 +10,7 @@ from airflow.operators.dummy import DummyOperator
 from airflow.utils.task_group import TaskGroup
 from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import get_samplesheet_from_portal_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -78,9 +79,14 @@ with dag:
             python_callable=mark_seqrun_status_func)
     ## TASK
     fetch_samplesheet_for_run = \
-        DummyOperator(
+        PythonOperator(
             task_id="fetch_samplesheet_for_run",
-            )
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'samplesheet_xcom_key': 'samplesheet_data',
+            },
+            python_callable=get_samplesheet_from_portal_func)
     ## TASK
     format_and_split_samplesheet = \
         DummyOperator(
