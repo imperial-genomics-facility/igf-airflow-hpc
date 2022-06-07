@@ -69,6 +69,7 @@
   "ftp_hostname": "eliot.med.ic.ac.uk",
   "ftp_username": "igf",
   "ftp_project_path": "/www/html/report/project",
+  "qc_page_template_dir": "/project/tgu/data2/airflow_v2/github/data-management-python/template/",
   "all_cell_marker_list": "/project/tgu/resources/pipeline_resource/cell_markers/PangaloDB/PanglaoDB_markers_27_Mar_2020.tsv",
   "cellranger_exe": "/project/tgu/resources/cellranger-6.1.2/bin/cellranger",
   "base_result_dir": "/project/tgu/data2/results",
