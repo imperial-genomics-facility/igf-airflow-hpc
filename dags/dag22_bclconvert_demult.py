@@ -120,7 +120,7 @@ with dag:
                 'no_change_status': 'SEEDED',
                 'seed_table': 'seqrun'
             },
-            python_callable=mark_seqrun_status_func
+            python_callable=mark_seqrun_status_func)
     ## LOOP - PROJECT
     for project_id in sample_groups:
         ## TASK - PROJECT
