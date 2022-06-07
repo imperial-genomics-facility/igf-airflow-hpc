@@ -95,6 +95,8 @@ with dag:
 			dag=dag,
 			queue="hpc_4G",
 			params={
+                'samplesheet_xcom_key': 'samplesheet_data',
+                'samplesheet_xcom_task': 'fetch_samplesheet_for_run',
 				'xcom_key': 'formatted_samplesheets',
 				'project_task_prefix': 'setup_qc_page_for_project_',
 				'max_projects': len(sample_groups)},
