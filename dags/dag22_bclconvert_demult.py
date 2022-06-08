@@ -18,6 +18,11 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import sample_known_qc_factory_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import calculate_fastq_md5_checksum_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import load_fastq_and_qc_to_db_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -270,40 +275,102 @@ with dag:
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
                     ## TASK - INDEXGROUP
                     get_samples_for_project_lane_ig = \
-                        DummyOperator(
-                            task_id=f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
+                        PythonOperator(
+                            task_id=f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            dag=dag,
+							queue="hpc_4G",
+                            params={
+								'xcom_key_for_bclconvert_output': 'bclconvert_output',
+								'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+								'xcom_key_for_sample_group': 'sample_group',
+								'samplesheet_file_suffix': "Reports/SampleSheet.csv",
+								'max_samples': int(sample_groups.get(project_id).get(lane_id).get(index_id)),
+								'project_index': project_id,
+								'lane_index': lane_id,
+								'ig_index': index_id,
+								'next_task_prefix': f"calculate_md5_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}"},
+							python_callable=sample_known_qc_factory_func)
                     ## LOOP - SAMPLE
                     for sample_id in range(1, sample_groups.get(project_id).get(lane_id).get(index_id) + 1):
+                        ## TASK -SAMPLE
+                        calculate_md5_for_fastq = \
+                            PythonOperator(
+								task_id=f"calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+								dag=dag,
+								queue="hpc_4G",
+								params={
+									'xcom_key_for_bclconvert_output': 'bclconvert_output',
+									'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+									'xcom_key_for_sample_group': 'sample_group',
+									'xcom_task_for_sample_group': f'sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}',
+									"xcom_key_for_checksum_sample_group": "checksum_sample_group",
+									'samplesheet_file_suffix': "Reports/SampleSheet.csv",
+									'project_index': project_id,
+									'lane_index': lane_id,
+									'ig_index': index_id,
+									'sample_group_id': sample_id},
+								python_callable=calculate_fastq_md5_checksum_func)
                         ## TASK - SAMPLE
                         load_fastq_to_db = \
-                            DummyOperator(
-                                task_id=f"load_fastq_to_db_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                            PythonOperator(
+                                task_id=f"load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+                                dag=dag,
+								queue="hpc_4G",
+								params={
+									"xcom_key_for_checksum_sample_group": "checksum_sample_group",
+									"xcom_task_for_checksum_sample_group": f"sample_group_{project_id}_{lane_id}_{index_id}.calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+									"xcom_key_for_collection_group": "collection_group",
+									"project_index_column": "project_index",
+									'project_index': project_id,
+									"lane_index_column": "lane_index",
+									"lane_index": lane_id,
+									'ig_index_column': 'index_group_index',
+									'ig_index': index_id,
+									'index_group_column': 'index_group'},
+								python_callable=load_fastq_and_qc_to_db_func)
                         ## TASK - SAMPLE
                         copy_fastq_to_irods = \
                             DummyOperator(
-                                task_id=f"copy_fastq_to_irods_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                                task_id=f"copy_fastq_to_irods_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         copy_fastq_to_globus = \
                             DummyOperator(
-                                task_id=f"copy_fastq_to_globus_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                                task_id=f"copy_fastq_to_globus_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         fastqc = \
-                            DummyOperator(
-                                task_id=f"fastqc_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                            PythonOperator(
+                                task_id=f"fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+                                dag=dag,
+								queue="hpc_4G",
+								params={
+									'xcom_key_for_bclconvert_output': 'bclconvert_output',
+									'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+									"xcom_key_for_collection_group": "collection_group",
+									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
+							    python_callable=fastqc_run_wrapper_for_known_samples_func)
                         ## TASK - SAMPLE
                         load_fastqc = \
                             DummyOperator(
-                                task_id=f"load_fastqc_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                                task_id=f"load_fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         fastq_screen = \
-                            DummyOperator(
-                                task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                            PythonOperator(
+                                task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+                                dag=dag,
+							    queue="hpc_4G",
+								params={
+								    'xcom_key_for_bclconvert_output': 'bclconvert_output',
+								    'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+								    "xcom_key_for_collection_group": "collection_group",
+									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
+								python_callable=fastqscreen_run_wrapper_for_known_samples_func)
                         # TASK - SAMPLE
                         load_fastq_screen = \
                             DummyOperator(
-                                task_id=f"load_fastq_screen_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
+                                task_id=f"load_fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## PIPELINE - SAMPLE
-                        get_samples_for_project_lane_ig >> load_fastq_to_db
+                        get_samples_for_project_lane_ig >> calculate_md5_for_fastq
+                        calculate_md5_for_fastq >> load_fastq_to_db
                         load_fastq_to_db >> copy_fastq_to_irods
                         load_fastq_to_db >> copy_fastq_to_globus
                         load_fastq_to_db >> fastqc
