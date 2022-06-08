@@ -14,6 +14,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import get_samplesheet_from
 from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_qc_page_for_project_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_globus_transfer_for_project_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 
 sample_groups = {
     1: { 			# project 1 index
@@ -158,8 +159,19 @@ with dag:
                 python_callable=setup_globus_transfer_for_project_func)
         ## TASK - PROJECT
         get_lanes_for_project = \
-            DummyOperator(
-                task_id=f"get_lanes_for_project_{project_id}")
+            BranchPythonOperator(
+                task_id=f"get_lanes_for_project_{project_id}",
+                dag=dag,
+				queue="hpc_4G",
+                params={
+					"xcom_key": "formatted_samplesheets",
+					"xcaom_task": "format_and_split_samplesheet",
+					"project_index": project_id,
+					"project_index_column": "project_index",
+					"lane_index_column": "lane_index",
+					"max_lanes": len(sample_groups.get(project_id)),
+					"lane_task_prefix": f"get_igs_for_project_{project_id}_lane_"},
+					python_callable=trigger_lane_jobs)
         ## TASK - PROJECT
         build_qc_page_for_project = \
             DummyOperator(
