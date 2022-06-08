@@ -16,6 +16,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_qc_page_for_pr
 from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_globus_transfer_for_project_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
+from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -217,8 +218,30 @@ with dag:
             for index_id in sample_groups.get(project_id).get(lane_id):
                 ## TASK - INDEXGROUP
                 bclconvert_for_project_lane_index_group = \
-                    DummyOperator(
-                        task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}")
+                    PythonOperator(
+                        task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}",
+                        dag=dag,
+						queue="hpc_64G16t",
+                        params={
+							'xcom_key': 'formatted_samplesheets',
+							'xcom_task': 'format_and_split_samplesheet',
+							'xcom_key_for_reports': 'bclconvert_reports',
+							'xcom_key_for_output': 'bclconvert_output',
+							'project_index_column': 'project_index',
+							'lane_index_column': 'lane_index',
+							'ig_index_column': 'index_group_index',
+							'project_column': 'project',
+							'lane_column': 'lane',
+							'index_group_column': 'index_group',
+							'project_index': project_id,
+							'lane_index': lane_id,
+							'ig_index': index_id,
+							'samplesheet_column': 'samplesheet_file',
+							'bcl_num_conversion_threads': 4,
+							'bcl_num_compression_threads': 2,
+							'bcl_num_decompression_threads': 2,
+							'bcl_num_parallel_tiles': 4},
+						python_callable=run_bclconvert_func)
                 ## TASK - INDEXGROUP
                 generate_demult_report_for_project_lane_index_group = \
                     DummyOperator(
