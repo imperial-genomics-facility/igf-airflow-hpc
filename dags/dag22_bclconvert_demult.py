@@ -13,6 +13,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_f
 from igf_airflow.utils.dag22_bclconvert_demult_utils import get_samplesheet_from_portal_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_qc_page_for_project_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_globus_transfer_for_project_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -142,8 +143,19 @@ with dag:
                 python_callable=setup_qc_page_for_project_func)
         ## TASK - PROJECT
         setup_globus_transfer_for_project = \
-            DummyOperator(
-                task_id=f"setup_globus_transfer_for_project_{project_id}")
+            PythonOperator(
+                task_id=f"setup_globus_transfer_for_project_{project_id}",
+                dag=dag,
+                queue="hpc_4G",
+                params={
+                    'project_data_xcom_key': 'formatted_samplesheets',
+                    'project_data_xcom_task': 'format_and_split_samplesheet',
+                    'project_index_column': 'project_index',
+                    'project_index': project_id,
+                    'project_column': 'project',
+                    "globus_dir_xcom_key": "globus_root_dir"
+                },
+                python_callable=setup_globus_transfer_for_project_func)
         ## TASK - PROJECT
         get_lanes_for_project = \
             DummyOperator(
