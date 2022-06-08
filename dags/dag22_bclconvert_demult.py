@@ -17,6 +17,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_globus_transfe
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
 from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
 
 sample_groups = {
     1: { 			# project 1 index
@@ -205,7 +206,7 @@ with dag:
 						"lane_index_column": "lane_index",
 						"ig_index_column": "index_group_index",
 						"max_index_groups": len(sample_groups.get(project_id).get(lane_id)),
-						"ig_task_prefix": f"bclconvert_for_project_{project_id}_lane_{lane_id}_index_group_"},
+						"ig_task_prefix": f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_"},
 					python_callable=trigger_ig_jobs)
             ## TASK - LANE
             build_qc_page_for_project_lane = \
@@ -219,7 +220,7 @@ with dag:
                 ## TASK - INDEXGROUP
                 bclconvert_for_project_lane_index_group = \
                     PythonOperator(
-                        task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}",
+                        task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_64G16t",
                         params={
@@ -244,16 +245,22 @@ with dag:
 						python_callable=run_bclconvert_func)
                 ## TASK - INDEXGROUP
                 generate_demult_report_for_project_lane_index_group = \
-                    DummyOperator(
-                        task_id=f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}")
+                    PythonOperator(
+                        task_id=f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+							'xcom_key_for_reports': "bclconvert_reports",
+							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"},
+						python_callable=bclconvert_report_func)
                 ## TASK - INDEXGROUP
                 check_output_for_project_lane_index_group = \
                     DummyOperator(
-                        task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}")
+                        task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
                 ## TASK - INDEXGROUP
                 multiqc_for_project_lane_index_group = \
                     DummyOperator(
-                        task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_index_group_{index_id}")
+                        task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
@@ -261,6 +268,10 @@ with dag:
                 multiqc_for_project_lane_index_group >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
+                    ## TASK - INDEXGROUP
+                    get_samples_for_project_lane_ig = \
+                        DummyOperator(
+                            task_id=f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
                     ## LOOP - SAMPLE
                     for sample_id in range(1, sample_groups.get(project_id).get(lane_id).get(index_id) + 1):
                         ## TASK - SAMPLE
@@ -292,6 +303,7 @@ with dag:
                             DummyOperator(
                                 task_id=f"load_fastq_screen_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}")
                         ## PIPELINE - SAMPLE
+                        get_samples_for_project_lane_ig >> load_fastq_to_db
                         load_fastq_to_db >> copy_fastq_to_irods
                         load_fastq_to_db >> copy_fastq_to_globus
                         load_fastq_to_db >> fastqc
