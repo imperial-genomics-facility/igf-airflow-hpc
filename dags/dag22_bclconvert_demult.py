@@ -351,7 +351,7 @@ with dag:
 								'project_index': project_id,
 								'lane_index': lane_id,
 								'ig_index': index_id,
-								'next_task_prefix': f"calculate_md5_project_{project_id}_lane_{lane_id}_index_group_{index_id}_sample_{sample_id}"},
+								'next_task_prefix': f"sample_group_{project_id}_{lane_id}_{index_id}.calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_"},
 							python_callable=sample_known_qc_factory_func)
                     ## LOOP - SAMPLE
                     for sample_id in range(1, sample_groups.get(project_id).get(lane_id).get(index_id) + 1):
