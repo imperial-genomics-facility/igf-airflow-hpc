@@ -149,7 +149,7 @@ with dag:
             queue="hpc_4G",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
-                'next_task': 'fetch_samplesheet_for_run',
+                'next_task': 'format_and_split_samplesheet',
                 'last_task': 'no_work',
                 'seed_status': 'RUNNING',
                 'no_change_status': 'RUNNING',
