@@ -44,6 +44,7 @@
   "fastqc_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/fastqc/fastqc_0.11.9.sif",
   "fastqscreen_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/fastq_screen/fastqscreen_v0.15.0.sif",
   "fastqscreen_conf_path": "/project/tgu/software/fastq_screen/fastq_screen/fastq_screen_singularity.conf",
+  "fastqscreen_ref_dir": "/project/tgu/resources/reference/fastqscreen_reference",
   "pandoc_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/pandoc/pandoc.sif",
   "singlecell_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium-shared-sample-indexes-plate_20180301.json",
   "singlecell_dual_barcode_json": "/project/tgu/data2/airflow_v2/github/data-management-python/data/singlecell_data/chromium_dual_indexes_plate_TT_NT_20210209.json",
