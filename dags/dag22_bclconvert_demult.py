@@ -351,6 +351,10 @@ with dag:
 							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"},
 						python_callable=bclconvert_report_func)
                 ## TASK - INDEXGROUP
+                merge_single_cell_fastq_files = \
+                    DummyOperator(
+                        task_id=f"merge_single_cell_fastq_files_{project_id}_lane_{lane_id}_ig_{index_id}")
+                ## TASK - INDEXGROUP
                 check_output_for_project_lane_index_group = \
                     DummyOperator(
                         task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
@@ -361,7 +365,8 @@ with dag:
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
-                generate_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
+                generate_demult_report_for_project_lane_index_group >> merge_single_cell_fastq_files
+                merge_single_cell_fastq_files >> check_output_for_project_lane_index_group
                 multiqc_for_project_lane_index_group >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
