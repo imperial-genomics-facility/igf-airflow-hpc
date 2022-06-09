@@ -37,7 +37,7 @@ sample_groups = {
     }
 }
 """
-sample_group = {
+sample_groups = {
     1: {
         1: {
             1: 3}
