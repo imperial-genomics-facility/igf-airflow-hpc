@@ -24,6 +24,9 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import load_fastq_and_qc_to
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
 
+### DYNAMIC DAG DEFINITION
+## INPUT - seqrun_igf_id
+seqrun_igf_id = '220531_VH00972_15_AAC57FTM5'
 ## INPUT - sample group info
 """
 sample_groups = {
@@ -133,6 +136,7 @@ with dag:
             dag=dag,
             queue="hpc_4G",
             params={
+                'seqrun_igf_id': seqrun_igf_id,
                 'next_task_id': 'mark_seqrun_as_running',
                 'no_work_task': 'no_work'
             },
@@ -144,6 +148,7 @@ with dag:
             dag=dag,
             queue="hpc_4G",
             params={
+                'seqrun_igf_id': seqrun_igf_id,
                 'next_task': 'fetch_samplesheet_for_run',
                 'last_task': 'no_work',
                 'seed_status': 'RUNNING',
@@ -153,15 +158,16 @@ with dag:
             },
             python_callable=mark_seqrun_status_func)
     ## TASK
-    fetch_samplesheet_for_run = \
+    """ fetch_samplesheet_for_run = \
         PythonOperator(
             task_id="fetch_samplesheet_for_run",
             dag=dag,
             queue='hpc_4G',
             params={
+                'seqrun_igf_id': seqrun_igf_id,
                 'samplesheet_xcom_key': 'samplesheet_data',
             },
-            python_callable=get_samplesheet_from_portal_func)
+            python_callable=get_samplesheet_from_portal_func) """
     ## TASK
     format_and_split_samplesheet = \
         BranchPythonOperator(
@@ -169,6 +175,9 @@ with dag:
 			dag=dag,
 			queue="hpc_4G",
 			params={
+                'seqrun_igf_id': seqrun_igf_id,
+                'formatted_samplesheets': formatted_samplesheets,
+                'sample_groups': sample_groups,
                 'samplesheet_xcom_key': 'samplesheet_data',
                 'samplesheet_xcom_task': 'fetch_samplesheet_for_run',
 				'xcom_key': 'formatted_samplesheets',
@@ -182,9 +191,10 @@ with dag:
     ## PIPELINE
     find_seqrun >> mark_seqrun_as_running
     find_seqrun >> no_work
-    mark_seqrun_as_running >> fetch_samplesheet_for_run
+    # mark_seqrun_as_running >> fetch_samplesheet_for_run
     mark_seqrun_as_running >> no_work
-    fetch_samplesheet_for_run >> format_and_split_samplesheet
+    # fetch_samplesheet_for_run >> format_and_split_samplesheet
+    mark_seqrun_as_running >> format_and_split_samplesheet
     ## TASK
     mark_seqrun_as_finished = \
         PythonOperator(
@@ -192,6 +202,7 @@ with dag:
             dag=dag,
             queue="hpc_4G",
             params={
+                'seqrun_igf_id': seqrun_igf_id,
                 'seed_status': 'FINISHED',
                 'no_change_status': 'SEEDED',
                 'seed_table': 'seqrun'
@@ -206,6 +217,9 @@ with dag:
                 dag=dag,
                 queue="hpc_4G",
                 params={
+                    'seqrun_igf_id': seqrun_igf_id,
+                    'formatted_samplesheets': formatted_samplesheets,
+                    'sample_groups': sample_groups,
                     'project_data_xcom_key': 'formatted_samplesheets',
                     'project_data_xcom_task': 'format_and_split_samplesheet',
                     'project_index_column': 'project_index',
@@ -220,6 +234,9 @@ with dag:
                 dag=dag,
                 queue="hpc_4G",
                 params={
+                    'seqrun_igf_id': seqrun_igf_id,
+                    'formatted_samplesheets': formatted_samplesheets,
+                    'sample_groups': sample_groups,
                     'project_data_xcom_key': 'formatted_samplesheets',
                     'project_data_xcom_task': 'format_and_split_samplesheet',
                     'project_index_column': 'project_index',
@@ -235,6 +252,9 @@ with dag:
                 dag=dag,
 				queue="hpc_4G",
                 params={
+                    'seqrun_igf_id': seqrun_igf_id,
+                    'formatted_samplesheets': formatted_samplesheets,
+                    'sample_groups': sample_groups,
 					"xcom_key": "formatted_samplesheets",
 					"xcaom_task": "format_and_split_samplesheet",
 					"project_index": project_id,
@@ -266,6 +286,9 @@ with dag:
                     dag=dag,
 					queue="hpc_4G",
 				    params={
+                        'seqrun_igf_id': seqrun_igf_id,
+                        'formatted_samplesheets': formatted_samplesheets,
+                        'sample_groups': sample_groups,
 						"xcom_key": "formatted_samplesheets",
 						"xcaom_task": "format_and_split_samplesheet",
 						"project_index": project_id,
@@ -292,6 +315,9 @@ with dag:
                         dag=dag,
 						queue="hpc_64G16t",
                         params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
+                            'sample_groups': sample_groups,
 							'xcom_key': 'formatted_samplesheets',
 							'xcom_task': 'format_and_split_samplesheet',
 							'xcom_key_for_reports': 'bclconvert_reports',
@@ -318,6 +344,9 @@ with dag:
                         dag=dag,
 						queue="hpc_4G",
                         params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
+                            'sample_groups': sample_groups,
 							'xcom_key_for_reports': "bclconvert_reports",
 							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"},
 						python_callable=bclconvert_report_func)
@@ -343,6 +372,9 @@ with dag:
                             dag=dag,
 							queue="hpc_4G",
                             params={
+                                'seqrun_igf_id': seqrun_igf_id,
+                                'formatted_samplesheets': formatted_samplesheets,
+                                'sample_groups': sample_groups,
 								'xcom_key_for_bclconvert_output': 'bclconvert_output',
 								'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 								'xcom_key_for_sample_group': 'sample_group',
@@ -362,6 +394,9 @@ with dag:
 								dag=dag,
 								queue="hpc_4G",
 								params={
+                                    'seqrun_igf_id': seqrun_igf_id,
+                                    'formatted_samplesheets': formatted_samplesheets,
+                                    'sample_groups': sample_groups,
 									'xcom_key_for_bclconvert_output': 'bclconvert_output',
 									'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 									'xcom_key_for_sample_group': 'sample_group',
@@ -380,6 +415,9 @@ with dag:
                                 dag=dag,
 								queue="hpc_4G",
 								params={
+                                    'seqrun_igf_id': seqrun_igf_id,
+                                    'formatted_samplesheets': formatted_samplesheets,
+                                    'sample_groups': sample_groups,
 									"xcom_key_for_checksum_sample_group": "checksum_sample_group",
 									"xcom_task_for_checksum_sample_group": f"sample_group_{project_id}_{lane_id}_{index_id}.calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
 									"xcom_key_for_collection_group": "collection_group",
@@ -406,6 +444,9 @@ with dag:
                                 dag=dag,
 								queue="hpc_4G",
 								params={
+                                    'seqrun_igf_id': seqrun_igf_id,
+                                    'formatted_samplesheets': formatted_samplesheets,
+                                    'sample_groups': sample_groups,
 									'xcom_key_for_bclconvert_output': 'bclconvert_output',
 									'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 									"xcom_key_for_collection_group": "collection_group",
@@ -422,6 +463,9 @@ with dag:
                                 dag=dag,
 							    queue="hpc_4G",
 								params={
+                                    'seqrun_igf_id': seqrun_igf_id,
+                                    'formatted_samplesheets': formatted_samplesheets,
+                                    'sample_groups': sample_groups,
 								    'xcom_key_for_bclconvert_output': 'bclconvert_output',
 								    'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 								    "xcom_key_for_collection_group": "collection_group",
