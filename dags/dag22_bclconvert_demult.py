@@ -23,6 +23,8 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import calculate_fastq_md5_
 from igf_airflow.utils.dag22_bclconvert_demult_utils import load_fastq_and_qc_to_db_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import merge_single_cell_fastq_files_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_project_lane_index_group_func
 
 ### DYNAMIC DAG DEFINITION
 ## INPUT - seqrun_igf_id
@@ -351,13 +353,33 @@ with dag:
 							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"},
 						python_callable=bclconvert_report_func)
                 ## TASK - INDEXGROUP
-                merge_single_cell_fastq_files = \
-                    DummyOperator(
-                        task_id=f"merge_single_cell_fastq_files_{project_id}_lane_{lane_id}_ig_{index_id}")
-                ## TASK - INDEXGROUP
                 check_output_for_project_lane_index_group = \
-                    DummyOperator(
-                        task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
+                    PythonOperator(
+                        task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'xcom_key_bclconvert_reports': 'bclconvert_reports',
+                            'xcom_task_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'demult_stats_file_name': "Demultiplex_Stats.csv"
+                        },
+                        python_callable=check_output_for_project_lane_index_group_func)
+                ## TASK - INDEXGROUP
+                merge_single_cell_fastq_files = \
+                    PythonOperator(
+                        task_id=f"merge_single_cell_fastq_files_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'xcom_key_bclconvert_output': 'bclconvert_output',
+                            'xcom_task_for_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'xcom_key_bclconvert_reports': 'bclconvert_reports',
+                            'xcom_task_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'samplesheet_file_suffix': "SampleSheet.csv"
+                        },
+                        python_callable=merge_single_cell_fastq_files_func)
                 ## TASK - INDEXGROUP
                 multiqc_for_project_lane_index_group = \
                     DummyOperator(
@@ -365,8 +387,8 @@ with dag:
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
-                generate_demult_report_for_project_lane_index_group >> merge_single_cell_fastq_files
-                merge_single_cell_fastq_files >> check_output_for_project_lane_index_group
+                generate_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
+                check_output_for_project_lane_index_group >> merge_single_cell_fastq_files
                 multiqc_for_project_lane_index_group >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
@@ -489,5 +511,5 @@ with dag:
                         fastqc >> load_fastqc
                         load_fastqc >> fastq_screen
                         fastq_screen >> load_fastq_screen
-                    check_output_for_project_lane_index_group >> sample_group
+                    merge_single_cell_fastq_files >> sample_group
                     sample_group >> multiqc_for_project_lane_index_group
