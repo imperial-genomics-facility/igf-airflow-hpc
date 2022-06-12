@@ -381,6 +381,10 @@ with dag:
                         },
                         python_callable=merge_single_cell_fastq_files_func)
                 ## TASK - INDEXGROUP
+                collect_qc_reports_for_samples = \
+                    DummyOperator(
+                        task_id=f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}")
+                ## TASK - INDEXGROUP
                 multiqc_for_project_lane_index_group = \
                     DummyOperator(
                         task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
@@ -474,15 +478,12 @@ with dag:
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
                                     'sample_groups': sample_groups,
+                                    'xcom_key_for_fastqc_output': 'fastqc_output',
 									'xcom_key_for_bclconvert_output': 'bclconvert_output',
 									'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 									"xcom_key_for_collection_group": "collection_group",
 									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
 							    python_callable=fastqc_run_wrapper_for_known_samples_func)
-                        ## TASK - SAMPLE
-                        load_fastqc = \
-                            DummyOperator(
-                                task_id=f"load_fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         fastq_screen = \
                             PythonOperator(
@@ -493,23 +494,29 @@ with dag:
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
                                     'sample_groups': sample_groups,
+                                    'xcom_key_for_fastq_screen_output': 'fastq_screen_output',
 								    'xcom_key_for_bclconvert_output': 'bclconvert_output',
 								    'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
 								    "xcom_key_for_collection_group": "collection_group",
 									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
 								python_callable=fastqscreen_run_wrapper_for_known_samples_func)
-                        # TASK - SAMPLE
-                        load_fastq_screen = \
+                        ## TASK - SAMPLE
+                        copy_fastqc_to_ftp = \
                             DummyOperator(
-                                task_id=f"load_fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
+                                task_id=f"copy_fastqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
+                        ## TASK - SAMPLE
+                        copy_fastq_screen_to_ftp = \
+                            DummyOperator(
+                                task_id=f"copy_fastq_screen_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## PIPELINE - SAMPLE
                         get_samples_for_project_lane_ig >> calculate_md5_for_fastq
                         calculate_md5_for_fastq >> load_fastq_to_db
                         load_fastq_to_db >> copy_fastq_to_irods
                         load_fastq_to_db >> copy_fastq_to_globus
-                        load_fastq_to_db >> fastqc
-                        fastqc >> load_fastqc
-                        load_fastqc >> fastq_screen
-                        fastq_screen >> load_fastq_screen
+                        load_fastq_to_db >> fastqc >> copy_fastqc_to_ftp
+                        load_fastq_to_db >> fastq_screen >> copy_fastq_screen_to_ftp
+                        fastqc >> collect_qc_reports_for_samples
+                        fastq_screen >> collect_qc_reports_for_samples
                     merge_single_cell_fastq_files >> sample_group
-                    sample_group >> multiqc_for_project_lane_index_group
+                    bclconvert_for_project_lane_index_group >> collect_qc_reports_for_samples
+                    collect_qc_reports_for_samples >> multiqc_for_project_lane_index_group
