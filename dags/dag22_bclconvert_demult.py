@@ -25,7 +25,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_f
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import merge_single_cell_fastq_files_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_project_lane_index_group_func
-
+from igf_airflow.utils.dag22_bclconvert_demult_utils import collect_qc_reports_for_samples_func
 ### DYNAMIC DAG DEFINITION
 ## INPUT - seqrun_igf_id
 seqrun_igf_id = '220531_VH00972_15_AAC57FTM5'
@@ -382,8 +382,19 @@ with dag:
                         python_callable=merge_single_cell_fastq_files_func)
                 ## TASK - INDEXGROUP
                 collect_qc_reports_for_samples = \
-                    DummyOperator(
-                        task_id=f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}")
+                    PythonOperator(
+                        task_id=f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+                            "xcom_key_for_bclconvert_output": "bclconvert_output",
+                            "bclconvert_task_prefix": "bclconvert_",
+                            "fastqc_task_prefix": "fastqc_",
+                            "fastq_screen_task_prefix": "fastq_screen_",
+                            "xcom_key_for_fastqc_output": "fastqc_output",
+                            "xcom_key_for_fastq_screen_output": "fastq_screen_output"
+                        },
+                        python_callable=collect_qc_reports_for_samples_func)
                 ## TASK - INDEXGROUP
                 multiqc_for_project_lane_index_group = \
                     DummyOperator(
