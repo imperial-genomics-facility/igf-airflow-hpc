@@ -26,6 +26,9 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrap
 from igf_airflow.utils.dag22_bclconvert_demult_utils import merge_single_cell_fastq_files_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_project_lane_index_group_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import collect_qc_reports_for_samples_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_project_lane_index_group_func
+
+
 ### DYNAMIC DAG DEFINITION
 ## INPUT - seqrun_igf_id
 seqrun_igf_id = '220531_VH00972_15_AAC57FTM5'
@@ -397,14 +400,62 @@ with dag:
                         python_callable=collect_qc_reports_for_samples_func)
                 ## TASK - INDEXGROUP
                 multiqc_for_project_lane_index_group = \
+                    PythonOperator(
+                        task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
+                            'project_index_column': 'project_index',
+							'lane_index_column': 'lane_index',
+							'ig_index_column': 'index_group_index',
+							'project_column': 'project',
+							'lane_column': 'lane',
+							'index_group_column': 'index_group',
+							'project_index': project_id,
+							'lane_index': lane_id,
+							'index_group_index': index_id,
+                            "xcom_key_for_qc_file_list": "qc_file_list",
+                            "xcom_key_for_multiqc": "multiqc",
+                            "tool_order_list": ["bclconvert", "fastqc", "fastqscreen"],
+                            "multiqc_param_list": ["--zip-data-dir",],
+                            "status_tag": "known"
+                        },
+                        python_callable=multiqc_for_project_lane_index_group_func)
+                ##TASK - INDEXGROUP
+                fastqc_for_undetermined_reads = \
                     DummyOperator(
-                        task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}")
+                        task_id=f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
+                ## TASK - INDEXGROUP
+                fastq_screen_for_undetermined_reads = \
+                    DummyOperator(
+                        task_id=f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
+                ## TASK - INDEXGROUP
+                list_qc_files_for_undetermined_reads = \
+                    DummyOperator(
+                        task_id=f"list_qc_files_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
+                ## TASK - INDEXGROUP
+                multiqc_for_undetermined_reads = \
+                    DummyOperator(
+                        task_id=f"multiqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
                 generate_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
                 check_output_for_project_lane_index_group >> merge_single_cell_fastq_files
                 multiqc_for_project_lane_index_group >> build_qc_page_for_project_lane
+                merge_single_cell_fastq_files >> fastqc_for_undetermined_reads
+                merge_single_cell_fastq_files >> fastq_screen_for_undetermined_reads
+                fastqc_for_undetermined_reads >> list_qc_files_for_undetermined_reads
+                fastq_screen_for_undetermined_reads >> list_qc_files_for_undetermined_reads
+                bclconvert_for_project_lane_index_group >> list_qc_files_for_undetermined_reads
+                list_qc_files_for_undetermined_reads >> multiqc_for_undetermined_reads
+                multiqc_for_undetermined_reads >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
                     ## TASK - INDEXGROUP
