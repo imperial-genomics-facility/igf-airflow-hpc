@@ -424,6 +424,11 @@ with dag:
                         },
                         python_callable=multiqc_for_project_lane_index_group_func)
                 ##TASK - INDEXGROUP
+                copy_known_multiqc_to_ftp = \
+                    DummyOperator(
+                        task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
+                ##TASK - INDEXGROUP
                 fastqc_for_undetermined_reads = \
                     DummyOperator(
                         task_id=f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
@@ -448,7 +453,8 @@ with dag:
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
                 generate_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
                 check_output_for_project_lane_index_group >> merge_single_cell_fastq_files
-                multiqc_for_project_lane_index_group >> build_qc_page_for_project_lane
+                multiqc_for_project_lane_index_group >> copy_known_multiqc_to_ftp
+                copy_known_multiqc_to_ftp >> build_qc_page_for_project_lane
                 merge_single_cell_fastq_files >> fastqc_for_undetermined_reads
                 merge_single_cell_fastq_files >> fastq_screen_for_undetermined_reads
                 fastqc_for_undetermined_reads >> list_qc_files_for_undetermined_reads
