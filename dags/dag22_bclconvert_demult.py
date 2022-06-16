@@ -27,7 +27,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import merge_single_cell_fa
 from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_project_lane_index_group_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import collect_qc_reports_for_samples_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_project_lane_index_group_func
-
+from igf_airflow.utils.dag22_bclconvert_demult_utils import copy_qc_to_ftp_func
 
 ### DYNAMIC DAG DEFINITION
 ## INPUT - seqrun_igf_id
@@ -427,7 +427,14 @@ with dag:
                 copy_known_multiqc_to_ftp = \
                     DummyOperator(
                         task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
-                    )
+                        dag=dag,
+							    queue="hpc_4G",
+								params={
+                                    'remote_collection_type': 'FTP_MULTIQC_HTML_REPORT',
+                                    "xcom_key_for_qc_collection": "multiqc",
+                                    'xcom_task_for_qc_collection': f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
+                                },
+                                python_callable=copy_qc_to_ftp_func)
                 ##TASK - INDEXGROUP
                 fastqc_for_undetermined_reads = \
                     DummyOperator(
@@ -554,6 +561,18 @@ with dag:
 									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
 							    python_callable=fastqc_run_wrapper_for_known_samples_func)
                         ## TASK - SAMPLE
+                        copy_fastqc_to_ftp = \
+                            PythonOperator(
+                                task_id=f"copy_fastqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+                                dag=dag,
+							    queue="hpc_4G",
+								params={
+                                    'remote_collection_type': 'FTP_FASTQC_HTML_REPORT',
+                                    'xcom_key_for_qc_collection': 'fastqc_collection',
+                                    'xcom_task_for_qc_collection': f"fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
+                                },
+                                python_callable=copy_qc_to_ftp_func)
+                        ## TASK - SAMPLE
                         fastq_screen = \
                             PythonOperator(
                                 task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
@@ -571,13 +590,17 @@ with dag:
 									"xcom_task_for_collection_group": f"sample_group_{project_id}_{lane_id}_{index_id}.load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"},
 								python_callable=fastqscreen_run_wrapper_for_known_samples_func)
                         ## TASK - SAMPLE
-                        copy_fastqc_to_ftp = \
-                            DummyOperator(
-                                task_id=f"copy_fastqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
-                        ## TASK - SAMPLE
                         copy_fastq_screen_to_ftp = \
-                            DummyOperator(
-                                task_id=f"copy_fastq_screen_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
+                            PythonOperator(
+                                task_id=f"copy_fastq_screen_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
+                                dag=dag,
+							    queue="hpc_4G",
+								params={
+                                    'remote_collection_type': 'FTP_FASTQSCREEN_HTML_REPORT',
+                                    'xcom_key_for_qc_collection': 'fastq_screen_collection',
+                                    'xcom_task_for_qc_collection': f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
+                                },
+                                python_callable=copy_qc_to_ftp_func)
                         ## PIPELINE - SAMPLE
                         get_samples_for_project_lane_ig >> calculate_md5_for_fastq
                         calculate_md5_for_fastq >> load_fastq_to_db
