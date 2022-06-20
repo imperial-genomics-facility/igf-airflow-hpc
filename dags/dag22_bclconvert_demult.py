@@ -28,6 +28,9 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_pro
 from igf_airflow.utils.dag22_bclconvert_demult_utils import collect_qc_reports_for_samples_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_project_lane_index_group_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import copy_qc_to_ftp_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_data_for_project_lane_index_group_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_for_project_func
+
 
 ### DYNAMIC DAG DEFINITION
 ## INPUT - seqrun_igf_id
@@ -271,7 +274,21 @@ with dag:
         ## TASK - PROJECT
         build_qc_page_for_project = \
             DummyOperator(
-                task_id=f"build_qc_page_for_project_{project_id}")
+                task_id=f"build_qc_page_for_project_{project_id}",
+                dag=dag,
+				queue="hpc_4G",
+                params={
+                    "seqrun_igf_id": seqrun_igf_id,
+                    "formatted_samplesheets": formatted_samplesheets,
+                    "project_index_column": "project_index",
+					"lane_index_column": "lane_index",
+					"ig_index_column": "index_group_index",
+					"project_column": "project",
+					"lane_column": "lane",
+				    "index_group_column": "index_group",
+					"project_index": project_id,
+                },
+                python_callable=build_qc_page_for_project_func)
         ## TASK - PROJECT
         send_email_to_user_for_project = \
             DummyOperator(
@@ -428,13 +445,13 @@ with dag:
                     DummyOperator(
                         task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
-							    queue="hpc_4G",
-								params={
-                                    'remote_collection_type': 'FTP_MULTIQC_HTML_REPORT',
-                                    "xcom_key_for_qc_collection": "multiqc",
-                                    'xcom_task_for_qc_collection': f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
-                                },
-                                python_callable=copy_qc_to_ftp_func)
+						queue="hpc_4G",
+						params={
+                            "remote_collection_type": "FTP_MULTIQC_HTML_REPORT",
+                            "xcom_key_for_qc_collection": "multiqc",
+                            "xcom_task_for_qc_collection": f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
+                        },
+                        python_callable=copy_qc_to_ftp_func)
                 ##TASK - INDEXGROUP
                 fastqc_for_undetermined_reads = \
                     DummyOperator(
@@ -454,6 +471,32 @@ with dag:
                 multiqc_for_undetermined_reads = \
                     DummyOperator(
                         task_id=f"multiqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                    )
+                ## TASK - INDEXGROUP
+                build_qc_page_data_for_project_lane_index_group = \
+                    DummyOperator(
+                        task_id=f"build_qc_page_data_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+						queue="hpc_4G",
+                        params={
+                            "seqrun_igf_id": seqrun_igf_id,
+                            "formatted_samplesheets": formatted_samplesheets,
+                            "project_index_column": "project_index",
+							"lane_index_column": "lane_index",
+							"ig_index_column": "index_group_index",
+							"project_column": "project",
+							"lane_column": "lane",
+							"index_group_column": "index_group",
+							"project_index": project_id,
+							"lane_index": lane_id,
+							"index_group_index": index_id,
+                            "xcom_key_bclconvert_reports": "bclconvert_reports",
+                            "xcom_task_bclconvert_reports": f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            "samplesheet_file_suffix": "SampleSheet.csv",
+                            "ftp_path_prefix": "/www/html/",
+                            "ftp_url_prefix": "http://eliot.med.ic.ac.uk/"
+                        },
+                        python_callable=build_qc_page_data_for_project_lane_index_group_func
                     )
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
