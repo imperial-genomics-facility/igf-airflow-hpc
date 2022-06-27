@@ -387,12 +387,15 @@ with dag:
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
+                            'project_index': project_id,
+							'lane_index': lane_id,
+							'index_group_index': index_id,
                             'sample_groups': sample_groups,
                             'xcom_key_for_bclconvert_reports': "bclconvert_reports",
                             'xcom_task_for_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             'xcom_key_for_html_reports': "bclconvert_html_reports",
-                            'xcom_key_for_html_reports': f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
-                            },
+                            'xcom_task_for_html_reports': f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
+                        },
                         python_callable=load_bclconvert_report_func)
                 ## TASK - INDEXGROUP
                 check_output_for_project_lane_index_group = \
