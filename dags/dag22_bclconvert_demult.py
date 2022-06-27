@@ -274,7 +274,7 @@ with dag:
 					python_callable=trigger_lane_jobs)
         ## TASK - PROJECT
         build_qc_page_for_project = \
-            DummyOperator(
+            PythonOperator(
                 task_id=f"build_qc_page_for_project_{project_id}",
                 dag=dag,
 				queue="hpc_4G",
