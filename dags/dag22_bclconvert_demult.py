@@ -280,13 +280,17 @@ with dag:
                 params={
                     "seqrun_igf_id": seqrun_igf_id,
                     "formatted_samplesheets": formatted_samplesheets,
-                    "project_index_column": "project_index",
-					"lane_index_column": "lane_index",
-					"ig_index_column": "index_group_index",
-					"project_column": "project",
-					"lane_column": "lane",
-				    "index_group_column": "index_group",
 					"project_index": project_id,
+                    'ftp_path_prefix': '/www/html/',
+                    'ftp_url_prefix': 'http://eliot.med.ic.ac.uk/',
+                    'run_qc_page_name': 'index.html',
+                    'run_qc_template_name': 'run_level_qc.html',
+                    'known_multiqc_name_suffix': 'known',
+                    'undetermined_multiqc_name_suffix': 'undetermined',
+                    "samplereadcountfile": 'samplereadcountfile.json',
+                    "samplereadcountcsvfile": 'samplereadcountfile.csv',
+                    "seqruninfofile": 'seqruninfofile.json',
+                    "status_data_json": 'status_data.json',
                 },
                 python_callable=build_qc_page_for_project_func)
         ## TASK - PROJECT
