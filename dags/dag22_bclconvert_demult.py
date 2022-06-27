@@ -30,6 +30,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_project_
 from igf_airflow.utils.dag22_bclconvert_demult_utils import copy_qc_to_ftp_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_data_for_project_lane_index_group_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_for_project_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import load_bclconvert_report_func
 
 
 ### DYNAMIC DAG DEFINITION
@@ -374,8 +375,25 @@ with dag:
                             'formatted_samplesheets': formatted_samplesheets,
                             'sample_groups': sample_groups,
 							'xcom_key_for_reports': "bclconvert_reports",
-							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"},
+							'xcom_task_for_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'xcom_key_for_html_reports': "bclconvert_html_reports"},
 						python_callable=bclconvert_report_func)
+                ## TASK - INDEXGROUP
+                load_demult_report_for_project_lane_index_group = \
+                    PythonOperator(
+                        task_id=f"load_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+                        queue="hpc_4G",
+                        params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
+                            'sample_groups': sample_groups,
+                            'xcom_key_for_bclconvert_reports': "bclconvert_reports",
+                            'xcom_task_for_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'xcom_key_for_html_reports': "bclconvert_html_reports",
+                            'xcom_key_for_html_reports': f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}"
+                            },
+                        python_callable=load_bclconvert_report_func)
                 ## TASK - INDEXGROUP
                 check_output_for_project_lane_index_group = \
                     PythonOperator(
@@ -505,7 +523,8 @@ with dag:
                 ## PIPELINE - INDEXGROUP
                 get_igs_for_project_lane >> bclconvert_for_project_lane_index_group
                 bclconvert_for_project_lane_index_group >> generate_demult_report_for_project_lane_index_group
-                generate_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
+                generate_demult_report_for_project_lane_index_group >> load_demult_report_for_project_lane_index_group
+                load_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
                 check_output_for_project_lane_index_group >> merge_single_cell_fastq_files
                 multiqc_for_project_lane_index_group >> copy_known_multiqc_to_ftp
                 copy_known_multiqc_to_ftp >> build_qc_page_for_project_lane
