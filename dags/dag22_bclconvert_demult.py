@@ -531,7 +531,7 @@ with dag:
                     )
                 ## TASK - INDEXGROUP
                 build_qc_page_data_for_project_lane_index_group = \
-                    DummyOperator(
+                    PythonOperator(
                         task_id=f"build_qc_page_data_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
