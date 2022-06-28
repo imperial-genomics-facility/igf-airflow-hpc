@@ -424,6 +424,7 @@ with dag:
 							'lane_index': lane_id,
 							'index_group_index': index_id,
                             'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
                             'xcom_key_bclconvert_output': 'bclconvert_output',
                             'xcom_task_for_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             'xcom_key_bclconvert_reports': 'bclconvert_reports',
