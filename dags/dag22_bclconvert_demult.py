@@ -562,13 +562,14 @@ with dag:
                 load_demult_report_for_project_lane_index_group >> check_output_for_project_lane_index_group
                 check_output_for_project_lane_index_group >> merge_single_cell_fastq_files
                 multiqc_for_project_lane_index_group >> copy_known_multiqc_to_ftp
-                copy_known_multiqc_to_ftp >> build_qc_page_for_project_lane
+                copy_known_multiqc_to_ftp >> build_qc_page_data_for_project_lane_index_group
                 merge_single_cell_fastq_files >> fastqc_for_undetermined_reads
                 merge_single_cell_fastq_files >> fastq_screen_for_undetermined_reads
                 fastqc_for_undetermined_reads >> multiqc_for_undetermined_reads
                 fastq_screen_for_undetermined_reads >> multiqc_for_undetermined_reads
                 bclconvert_for_project_lane_index_group >> multiqc_for_undetermined_reads
-                multiqc_for_undetermined_reads >> build_qc_page_for_project_lane
+                multiqc_for_undetermined_reads >> build_qc_page_data_for_project_lane_index_group
+                build_qc_page_data_for_project_lane_index_group >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
                     ## TASK - INDEXGROUP
