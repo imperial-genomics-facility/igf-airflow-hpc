@@ -31,6 +31,9 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import copy_qc_to_ftp_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_data_for_project_lane_index_group_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_for_project_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import load_bclconvert_report_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_for_undetermined_reads_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import fastq_screen_for_undetermined_reads_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_undetermined_reads_func
 
 
 ### DYNAMIC DAG DEFINITION
@@ -467,7 +470,7 @@ with dag:
                         python_callable=multiqc_for_project_lane_index_group_func)
                 ##TASK - INDEXGROUP
                 copy_known_multiqc_to_ftp = \
-                    DummyOperator(
+                    PythonOperator(
                         task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
@@ -479,23 +482,52 @@ with dag:
                         python_callable=copy_qc_to_ftp_func)
                 ##TASK - INDEXGROUP
                 fastqc_for_undetermined_reads = \
-                    DummyOperator(
+                    PythonOperator(
                         task_id=f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
-                    )
+                        dag=dag,
+                        queue="hpc_4G",
+                        params={
+                            "xcom_key_for_undetermined_fastqc": "undetermined_fastqc",
+                            'xcom_key_for_bclconvert_output': 'bclconvert_output',
+							'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        },
+                        python_callable=fastqc_for_undetermined_reads_func)
                 ## TASK - INDEXGROUP
                 fastq_screen_for_undetermined_reads = \
-                    DummyOperator(
+                    PythonOperator(
                         task_id=f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
-                    )
-                ## TASK - INDEXGROUP
-                list_qc_files_for_undetermined_reads = \
-                    DummyOperator(
-                        task_id=f"list_qc_files_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+                        queue="hpc_4G",
+                        params={
+                            "xcom_key_for_undetermined_fastq_screen": "undetermined_fastq_screen",
+                            'xcom_key_for_bclconvert_output': 'bclconvert_output',
+							'xcom_task_for_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        },
+                        python_callable=fastq_screen_for_undetermined_reads_func
                     )
                 ## TASK - INDEXGROUP
                 multiqc_for_undetermined_reads = \
-                    DummyOperator(
+                    PythonOperator(
                         task_id=f"multiqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        dag=dag,
+                        queue="hpc_4G",
+                        params={
+                            'seqrun_igf_id': seqrun_igf_id,
+                            'formatted_samplesheets': formatted_samplesheets,
+                            'project_index': project_id,
+							'lane_index': lane_id,
+							'index_group_index': index_id,
+                            'tool_order_list': ['bclconvert', 'fastqc', 'fastqscreen'],
+                            'multiqc_param_list': ['--zip-data-dir'],
+                            'status_tag': 'undetermined',
+                            "xcom_key_for_undetermined_fastq_screen": "undetermined_fastq_screen",
+                            "xcom_task_for_undetermined_fastq_screen": f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            "xcom_key_for_undetermined_fastqc": "undetermined_fastqc",
+                            "xcom_task_for_undetermined_fastqc": f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'xcom_key_for_bclconvert_reports': 'bclconvert_reports',
+							'xcom_task_for_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                        },
+                        python_callable=multiqc_for_undetermined_reads_func
                     )
                 ## TASK - INDEXGROUP
                 build_qc_page_data_for_project_lane_index_group = \
@@ -533,10 +565,9 @@ with dag:
                 copy_known_multiqc_to_ftp >> build_qc_page_for_project_lane
                 merge_single_cell_fastq_files >> fastqc_for_undetermined_reads
                 merge_single_cell_fastq_files >> fastq_screen_for_undetermined_reads
-                fastqc_for_undetermined_reads >> list_qc_files_for_undetermined_reads
-                fastq_screen_for_undetermined_reads >> list_qc_files_for_undetermined_reads
-                bclconvert_for_project_lane_index_group >> list_qc_files_for_undetermined_reads
-                list_qc_files_for_undetermined_reads >> multiqc_for_undetermined_reads
+                fastqc_for_undetermined_reads >> multiqc_for_undetermined_reads
+                fastq_screen_for_undetermined_reads >> multiqc_for_undetermined_reads
+                bclconvert_for_project_lane_index_group >> multiqc_for_undetermined_reads
                 multiqc_for_undetermined_reads >> build_qc_page_for_project_lane
                 ## TASKGROUP - SAMPLE
                 with TaskGroup(group_id=f'sample_group_{project_id}_{lane_id}_{index_id}') as sample_group:
