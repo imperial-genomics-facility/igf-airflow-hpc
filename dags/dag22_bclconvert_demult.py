@@ -674,7 +674,7 @@ with dag:
 								params={
                                     'remote_collection_type': 'FTP_FASTQC_HTML_REPORT',
                                     'xcom_key_for_qc_collection': 'fastqc_collection',
-                                    'xcom_task_for_qc_collection': f"fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
+                                    'xcom_task_for_qc_collection': f"sample_group_{project_id}_{lane_id}_{index_id}.fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
                                 },
                                 python_callable=copy_qc_to_ftp_func)
                         ## TASK - SAMPLE
@@ -703,7 +703,7 @@ with dag:
 								params={
                                     'remote_collection_type': 'FTP_FASTQSCREEN_HTML_REPORT',
                                     'xcom_key_for_qc_collection': 'fastq_screen_collection',
-                                    'xcom_task_for_qc_collection': f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
+                                    'xcom_task_for_qc_collection': f"sample_group_{project_id}_{lane_id}_{index_id}.fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}"
                                 },
                                 python_callable=copy_qc_to_ftp_func)
                         ## PIPELINE - SAMPLE
