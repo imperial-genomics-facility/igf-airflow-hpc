@@ -683,7 +683,7 @@ with dag:
                             PythonOperator(
                                 task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
-							    queue="hpc_4G",
+							    queue="hpc_8G",
 								params={
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
