@@ -441,8 +441,8 @@ with dag:
                         params={
                             "xcom_key_for_bclconvert_output": "bclconvert_output",
                             "bclconvert_task_prefix": "bclconvert_",
-                            "fastqc_task_prefix": "fastqc_",
-                            "fastq_screen_task_prefix": "fastq_screen_",
+                            "fastqc_task_prefix": f"sample_group_{project_id}_{lane_id}_{index_id}.fastqc_",
+                            "fastq_screen_task_prefix": f"sample_group_{project_id}_{lane_id}_{index_id}.fastq_screen_",
                             "xcom_key_for_fastqc_output": "fastqc_output",
                             "xcom_key_for_fastq_screen_output": "fastq_screen_output"
                         },
