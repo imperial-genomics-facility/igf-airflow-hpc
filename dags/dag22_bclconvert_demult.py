@@ -81,8 +81,8 @@ formatted_samplesheets = [{'project': 'IGFQ001369_feldhahn_25-4-2022_Hi-C',
   'index_group_index': 1,
   'sample_counts': 3,
   'samplesheet_file': '/project/adatta17/test_dir/test127_demult2/formatted_dir/SampleSheet_IGFQ001369_feldhahn_25-4-2022_Hi-C_1_16_NA.csv',
-  'output_dir': '/rds/general/user/igf/ephemeral/tempm7k78bld'},
- {'project': 'IGFQ001374_matthews_12-5-2022_10x_Moffatt',
+  }, {
+  'project': 'IGFQ001374_matthews_12-5-2022_10x_Moffatt',
   'project_index': 2,
   'lane': 1,
   'lane_index': 1,
@@ -91,8 +91,8 @@ formatted_samplesheets = [{'project': 'IGFQ001369_feldhahn_25-4-2022_Hi-C',
   'index_group_index': 1,
   'sample_counts': 20,
   'samplesheet_file': '/project/adatta17/test_dir/test127_demult2/formatted_dir/SampleSheet_IGFQ001374_matthews_12-5-2022_10x_Moffatt_1_8_10X.csv',
-  'output_dir': '/rds/general/user/igf/ephemeral/temp88gd8iv3'},
- {'project': 'IGFQ001394_thurston_30-5-2022_CRISPRscreen',
+  }, {
+  'project': 'IGFQ001394_thurston_30-5-2022_CRISPRscreen',
   'project_index': 3,
   'lane': 1,
   'lane_index': 1,
@@ -101,8 +101,8 @@ formatted_samplesheets = [{'project': 'IGFQ001369_feldhahn_25-4-2022_Hi-C',
   'index_group_index': 1,
   'sample_counts': 3,
   'samplesheet_file': '/project/adatta17/test_dir/test127_demult2/formatted_dir/SampleSheet_IGFQ001394_thurston_30-5-2022_CRISPRscreen_1_8_NA.csv',
-  'output_dir': '/rds/general/user/igf/ephemeral/temp7u5k5oml'},
- {'project': 'IGFQ001395_mcneish_30-5-2022_sWGS',
+  }, {
+  'project': 'IGFQ001395_mcneish_30-5-2022_sWGS',
   'project_index': 4,
   'lane': 1,
   'lane_index': 1,
@@ -111,7 +111,7 @@ formatted_samplesheets = [{'project': 'IGFQ001369_feldhahn_25-4-2022_Hi-C',
   'index_group_index': 1,
   'sample_counts': 1,
   'samplesheet_file': '/project/adatta17/test_dir/test127_demult2/formatted_dir/SampleSheet_IGFQ001395_mcneish_30-5-2022_sWGS_1_16_NA.csv',
-  'output_dir': '/rds/general/user/igf/ephemeral/tempubs25ep4'}]
+  }]
 
 ## ARGS
 args = {
