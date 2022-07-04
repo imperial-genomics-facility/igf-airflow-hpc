@@ -89,7 +89,7 @@ formatted_samplesheets = [{'project': 'IGFQ001369_feldhahn_25-4-2022_Hi-C',
   'bases_mask': 'Y150N1;I8N2;N10;Y150N1',
   'index_group': '8_10X',
   'index_group_index': 1,
-  'sample_counts': 20,
+  'sample_counts': 5,
   'samplesheet_file': '/project/adatta17/test_dir/test127_demult2/formatted_dir/SampleSheet_IGFQ001374_matthews_12-5-2022_10x_Moffatt_1_8_10X.csv',
   }, {
   'project': 'IGFQ001394_thurston_30-5-2022_CRISPRscreen',
