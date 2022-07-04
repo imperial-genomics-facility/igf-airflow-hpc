@@ -120,7 +120,7 @@ def fetch_celery_worker_list(**context):
         raise IOError("Celery flower config file not found")
       with open(CELERY_FLOWER_CONFIG, 'r') as jp:
         flower_config = json.load(jp)
-        celery_url = flower_config.get('flower_url')
+        celery_url = '{0}/api/workers'.format(flower_config.get('flower_url'))
         flower_user = flower_config.get('flower_user')
         flower_pass = flower_config.get('flower_pass')
     else:
