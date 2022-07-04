@@ -213,6 +213,7 @@ with dag:
             task_id="mark_seqrun_as_finished",
             dag=dag,
             queue="hpc_4G",
+            trigger_rule="always",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
                 'seed_status': 'FINISHED',
