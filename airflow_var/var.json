@@ -1,5 +1,6 @@
 {
   "celery_flower_base_url": "http://airflow_flower_v2:5555",
+  "celery_flower_config": "/project/tgu/data2/airflow_v2/secrets/celery_flower.conf",
   "redis_conn_file": "/rds/general/user/igf/home/data2/airflow_v2/secrets/redis_conn.json",
   "igf_portal_conf": "/rds/general/user/igf/home/data2/airflow_v2/secrets/igf_portal_conf.json",
   "hpc_host": "login.hpc.ic.ac.uk",

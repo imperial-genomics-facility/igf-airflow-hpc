@@ -10,7 +10,9 @@ from airflow.contrib.operators.ssh_operator import SSHOperator
 from igf_airflow.celery.check_celery_queue import fetch_queue_list_from_redis_server
 from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
+
 CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url')
+CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
 
 args = {
     'owner':'airflow',
@@ -28,7 +30,7 @@ dag = DAG(
         max_active_runs=1,
         schedule_interval="*/3 * * * *",
         default_args=args,
-        tags=['igf-lims',]
+        tags=['igf-lims', 'wells']
       )
 
 
@@ -112,11 +114,23 @@ def fetch_celery_worker_list(**context):
   try:
     ti = context.get('ti')
     celery_worker_key = context['params'].get('celery_worker_key')
-    celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
-    if celery_basic_auth is None:
-      raise ValueError('Missing env for flower basic auth')
-    flower_user, flower_pass = celery_basic_auth.split(':')
-    celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+    celery_flower_config_file = CELERY_FLOWER_CONFIG
+    if celery_flower_config_file is not None:
+      ## new config file
+      if not os.path.exists(celery_flower_config_file):
+        raise IOError("Celery flower config file not found")
+      with open(celery_flower_config_file, 'r') as jp:
+        flower_config = json.load(jp)
+        celery_url = flower_config.get('flower_url')
+        flower_user = flower_config.get('flower_user')
+        flower_pass = flower_config.get('flower_pass')
+    else:
+      ## support for legacy config
+      celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+      celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
+      if celery_basic_auth is None:
+        raise ValueError('Missing env for flower basic auth')
+      flower_user, flower_pass = celery_basic_auth.split(':')
     res = requests.get(celery_url, auth=HTTPBasicAuth(flower_user, flower_pass))
     if res.status_code != 200:
       raise ValueError('Failed to fetch celery workers')
@@ -141,16 +155,35 @@ def stop_celery_workers(**context):
   try:
     ti = context.get('ti')
     empty_celery_worker_key = context['params'].get('empty_celery_worker_key')
-    celery_basic_auth = os.environ['AIRFLOW__CELERY__FLOWER_BASIC_AUTH']
-    flower_user, flower_pass = celery_basic_auth.split(':')
+    celery_flower_config_file = CELERY_FLOWER_CONFIG
+    if celery_flower_config_file is not None:
+      ## new config file
+      if not os.path.exists(celery_flower_config_file):
+        raise IOError("Celery flower config file not found")
+      with open(celery_flower_config_file, 'r') as jp:
+        flower_config = json.load(jp)
+        celery_url = flower_config.get('flower_url')
+        flower_user = flower_config.get('flower_user')
+        flower_pass = flower_config.get('flower_pass')
+    else:
+      ## support for legacy config
+      celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+      celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
+      if celery_basic_auth is None:
+        raise ValueError('Missing env for flower basic auth')
+      flower_user, flower_pass = celery_basic_auth.split(':')
+    # celery_basic_auth = os.environ['AIRFLOW__CELERY__FLOWER_BASIC_AUTH']
+    # flower_user, flower_pass = celery_basic_auth.split(':')
     celery_workers = \
 		  ti.xcom_pull(
         task_ids='calculate_new_worker_size_and_branch',
         key=empty_celery_worker_key)
     for worker_id in celery_workers:
+      # flower_shutdown_url = \
+      #   '{0}/api/worker/shutdown/{1}'.\
+      #     format(CELERY_FLOWER_BASE_URL, worker_id)
       flower_shutdown_url = \
-        '{0}/api/worker/shutdown/{1}'.\
-          format(CELERY_FLOWER_BASE_URL, worker_id)
+        f'{celery_url}/api/worker/shutdown/{worker_id}'
       res = requests.post(
               flower_shutdown_url,
               auth=HTTPBasicAuth(flower_user, flower_pass))
