@@ -502,7 +502,7 @@ with dag:
                     PythonOperator(
                         task_id=f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
-                        queue="hpc_4G",
+                        queue="hpc_8G",
                         params={
                             "xcom_key_for_undetermined_fastq_screen": "undetermined_fastq_screen",
                             'xcom_key_for_bclconvert_output': 'bclconvert_output',
