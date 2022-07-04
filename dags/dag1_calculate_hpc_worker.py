@@ -114,12 +114,11 @@ def fetch_celery_worker_list(**context):
   try:
     ti = context.get('ti')
     celery_worker_key = context['params'].get('celery_worker_key')
-    celery_flower_config_file = CELERY_FLOWER_CONFIG
-    if celery_flower_config_file is not None:
+    if CELERY_FLOWER_CONFIG is not None:
       ## new config file
-      if not os.path.exists(celery_flower_config_file):
+      if not os.path.exists(CELERY_FLOWER_CONFIG):
         raise IOError("Celery flower config file not found")
-      with open(celery_flower_config_file, 'r') as jp:
+      with open(CELERY_FLOWER_CONFIG, 'r') as jp:
         flower_config = json.load(jp)
         celery_url = flower_config.get('flower_url')
         flower_user = flower_config.get('flower_user')
@@ -155,12 +154,11 @@ def stop_celery_workers(**context):
   try:
     ti = context.get('ti')
     empty_celery_worker_key = context['params'].get('empty_celery_worker_key')
-    celery_flower_config_file = CELERY_FLOWER_CONFIG
-    if celery_flower_config_file is not None:
+    if CELERY_FLOWER_CONFIG is not None:
       ## new config file
-      if not os.path.exists(celery_flower_config_file):
+      if not os.path.exists(CELERY_FLOWER_CONFIG):
         raise IOError("Celery flower config file not found")
-      with open(celery_flower_config_file, 'r') as jp:
+      with open(CELERY_FLOWER_CONFIG, 'r') as jp:
         flower_config = json.load(jp)
         celery_url = flower_config.get('flower_url')
         flower_user = flower_config.get('flower_user')
