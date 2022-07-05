@@ -51,6 +51,11 @@ PRINT_DELETES = True
 ENABLE_DELETE = True
 # List of all the objects that will be deleted. Comment out the DB objects you
 # want to skip.
+# get dag model last schedule run
+try:
+    dag_model_last_scheduler_run = DagModel.last_scheduler_run
+except AttributeError:
+    dag_model_last_scheduler_run = DagModel.last_parsed_time
 DATABASE_OBJECTS = [
     {
         "airflow_db_model": BaseJob,
@@ -89,7 +94,7 @@ DATABASE_OBJECTS = [
     },
     {
         "airflow_db_model": DagModel,
-        "age_check_column": DagModel.last_parsed_time,
+        "age_check_column": dag_model_last_scheduler_run,
         "keep_last": False,
         "keep_last_filters": None,
         "keep_last_group_by": None
