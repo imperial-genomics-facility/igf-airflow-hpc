@@ -92,13 +92,14 @@ DATABASE_OBJECTS = [
         "keep_last_filters": None,
         "keep_last_group_by": None
     },
-    {
-        "airflow_db_model": DagModel,
-        "age_check_column": dag_model_last_scheduler_run,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
-    }]
+    ]
+# {
+#     "airflow_db_model": DagModel,
+#     "age_check_column": dag_model_last_scheduler_run,
+#     "keep_last": False,
+#     "keep_last_filters": None,
+#     "keep_last_group_by": None
+# }
 # Check for TaskReschedule model
 # try:
 #     from airflow.models import TaskReschedule
