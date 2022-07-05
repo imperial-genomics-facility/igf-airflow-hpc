@@ -67,13 +67,6 @@ DATABASE_OBJECTS = [
         "keep_last_group_by": DagRun.dag_id
     },
     {
-        "airflow_db_model": TaskInstance,
-        "age_check_column": TaskInstance.execution_date,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
-    },
-    {
         "airflow_db_model": Log,
         "age_check_column": Log.dttm,
         "keep_last": False,
@@ -102,17 +95,17 @@ DATABASE_OBJECTS = [
         "keep_last_group_by": None
     }]
 # Check for TaskReschedule model
-try:
-    from airflow.models import TaskReschedule
-    DATABASE_OBJECTS.append({
-        "airflow_db_model": TaskReschedule,
-        "age_check_column": TaskReschedule.execution_date,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
-    })
-except Exception as e:
-    logging.error(e)
+# try:
+#     from airflow.models import TaskReschedule
+#     DATABASE_OBJECTS.append({
+#         "airflow_db_model": TaskReschedule,
+#         "age_check_column": TaskReschedule.execution_date,
+#         "keep_last": False,
+#         "keep_last_filters": None,
+#         "keep_last_group_by": None
+#     })
+# except Exception as e:
+#     logging.error(e)
 
 # Check for TaskFail model
 try:
