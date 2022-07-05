@@ -128,3 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 dags/dag13_cleanup_pipeline_db.py:Zone.Identifier
+
+# dynamic dags
+dags/dynamic_dags
