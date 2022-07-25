@@ -361,7 +361,7 @@ with dag:
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
                             'xcom_key_bclconvert_output': 'bclconvert_output',
-                            'xcom_task_for_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            'xcom_task_bclconvert_output': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             'xcom_key_bclconvert_reports': 'bclconvert_reports',
                             'xcom_task_bclconvert_reports': f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             'samplesheet_file_suffix': "SampleSheet.csv"
