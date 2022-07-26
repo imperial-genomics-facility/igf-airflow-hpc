@@ -531,6 +531,35 @@ with dag:
 								'ig_index': index_id,
 								'next_task_prefix': f"sample_group_{project_id}_{lane_id}_{index_id}.calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_"},
 							python_callable=sample_known_qc_factory_func)
+                    ## TASK - INDEXGROUP
+                    prepare_globus_copy_for_project_lane_ig = \
+                        DummyOperator(
+                            task_id=f"prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            dag=dag,
+                            queue="hpc_4G")
+                    ## TASK - INDEXGROUP
+                    get_fastqs_and_copy_to_globus_for_project_lane_ig = \
+                        DummyOperator(
+                            task_id=f"get_fastqs_and_copy_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            dag=dag,
+                            queue="hpc_4G")
+                    ## TASK - INDEXGROUP
+                    dump_md5_for_project_lane_ig = \
+                        DummyOperator(
+                            task_id=f"dump_md5_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            dag=dag,
+                            queue="hpc_4G")
+                    ## TASK - INDEXGROUP
+                    copy_demult_reports_to_globus_for_project_lane_ig = \
+                        DummyOperator(
+                            task_id=f"copy_demult_reports_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                            dag=dag,
+                            queue="hpc_4G")
+                    ## PIPELINE - INDEXGROUP
+                    prepare_globus_copy_for_project_lane_ig >> get_fastqs_and_copy_to_globus_for_project_lane_ig
+                    get_fastqs_and_copy_to_globus_for_project_lane_ig >> dump_md5_for_project_lane_ig
+                    dump_md5_for_project_lane_ig >> copy_demult_reports_to_globus_for_project_lane_ig
+                    copy_demult_reports_to_globus_for_project_lane_ig >> collect_qc_reports_for_samples
                     ## LOOP - SAMPLE
                     for sample_id in range(1, sample_groups.get(project_id).get(lane_id).get(index_id) + 1):
                         ## TASK -SAMPLE
@@ -648,6 +677,7 @@ with dag:
                         load_fastq_to_db >> copy_fastq_to_globus
                         load_fastq_to_db >> fastqc >> copy_fastqc_to_ftp
                         load_fastq_to_db >> fastq_screen >> copy_fastq_screen_to_ftp
+                        load_fastq_to_db >> prepare_globus_copy_for_project_lane_ig
                         fastqc >> collect_qc_reports_for_samples
                         fastq_screen >> collect_qc_reports_for_samples
                     merge_single_cell_fastq_files >> sample_group
