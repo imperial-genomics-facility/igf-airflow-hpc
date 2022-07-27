@@ -8,20 +8,6 @@ class TestAllDagIntegrity(unittest.TestCase):
   LOAD_SECOND_THRESHOLD = 2
 
   def setUp(self):
-    self.dagbag = DagBag('dags')
-
-
-  def test_dag_import(self):
-    self.assertFalse(
-      len(self.dagbag.import_errors),
-      'DAG import errors: {}'.format(
-        self.dagbag.import_errors))
-
-class TestAllDagIntegrity2(unittest.TestCase):
-
-  LOAD_SECOND_THRESHOLD = 2
-
-  def setUp(self):
     template_file = \
       'dynamic_dag_templates/bclconvert_demult_template.py'
     output_file = \
@@ -118,10 +104,3 @@ if __name__=='__main__':
   unittest.\
     TextTestRunner(verbosity=1).\
       run(checks)
-  checks2 = \
-    unittest.\
-      TestLoader().\
-        loadTestsFromTestCase2(TestAllDagIntegrity)
-  unittest.\
-    TextTestRunner(verbosity=1).\
-      run(checks2)
