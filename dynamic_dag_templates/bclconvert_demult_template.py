@@ -34,6 +34,8 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import load_bclconvert_repo
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_for_undetermined_reads_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import fastq_screen_for_undetermined_reads_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_undetermined_reads_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import prepare_globus_copy_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import get_files_and_copy_to_globus_func
 
 
 ### DYNAMIC DAG DEFINITION
@@ -533,33 +535,42 @@ with dag:
 							python_callable=sample_known_qc_factory_func)
                     ## TASK - INDEXGROUP
                     prepare_globus_copy_for_project_lane_ig = \
-                        DummyOperator(
+                        PythonOperator(
                             task_id=f"prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
-                            queue="hpc_4G")
+                            queue="hpc_4G",
+                            params={
+                                "globus_dir_task": f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                                "globus_dir_key": "globus_root_dir",
+                                "globus_target_dir_key": "globus_target_dir",
+                                "project_index": project_id,
+                                "lane_index": lane_id,
+                                "index_group_index": index_id,
+                                "formatted_samplesheets": formatted_samplesheets,
+                                "seqrun_igf_id": seqrun_igf_id,
+                            },
+                            python_callable=prepare_globus_copy_func)
                     ## TASK - INDEXGROUP
-                    get_fastqs_and_copy_to_globus_for_project_lane_ig = \
-                        DummyOperator(
+                    get_files_and_copy_to_globus_for_project_lane_ig = \
+                        PythonOperator(
                             task_id=f"get_fastqs_and_copy_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
-                            queue="hpc_4G")
-                    ## TASK - INDEXGROUP
-                    dump_md5_for_project_lane_ig = \
-                        DummyOperator(
-                            task_id=f"dump_md5_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
-                            dag=dag,
-                            queue="hpc_4G")
-                    ## TASK - INDEXGROUP
-                    copy_demult_reports_to_globus_for_project_lane_ig = \
-                        DummyOperator(
-                            task_id=f"copy_demult_reports_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
-                            dag=dag,
-                            queue="hpc_4G")
+                            queue="hpc_4G",
+                            params={
+                                "target_dir_key": "target_dir",
+                                "target_dir_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                                "sample_groups_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                                "sample_groups_key": "sample_groups",
+                                "project_index": project_id,
+                                "lane_index": lane_id,
+                                "index_group_index": index_id,
+                                "formatted_samplesheets": formatted_samplesheets,
+                                "seqrun_igf_id": seqrun_igf_id,
+                            },
+                            python_callable=get_files_and_copy_to_globus_func)
                     ## PIPELINE - INDEXGROUP
-                    prepare_globus_copy_for_project_lane_ig >> get_fastqs_and_copy_to_globus_for_project_lane_ig
-                    get_fastqs_and_copy_to_globus_for_project_lane_ig >> dump_md5_for_project_lane_ig
-                    dump_md5_for_project_lane_ig >> copy_demult_reports_to_globus_for_project_lane_ig
-                    copy_demult_reports_to_globus_for_project_lane_ig >> collect_qc_reports_for_samples
+                    prepare_globus_copy_for_project_lane_ig >> get_files_and_copy_to_globus_for_project_lane_ig
+                    get_files_and_copy_to_globus_for_project_lane_ig >> collect_qc_reports_for_samples
                     ## LOOP - SAMPLE
                     for sample_id in range(1, sample_groups.get(project_id).get(lane_id).get(index_id) + 1):
                         ## TASK -SAMPLE
