@@ -25,8 +25,7 @@ class TestAllDagIntegrity2(unittest.TestCase):
     template_file = \
       'dynamic_dag_templates/bclconvert_demult_template.py'
     output_file = \
-      'dags2/bclconvert_demult.py'
-    os.makedirs('dags2')
+      'dags/bclconvert_demult.py'
     autoescape_list = ['txt',]
     template_env = \
       Environment(
@@ -103,7 +102,7 @@ class TestAllDagIntegrity2(unittest.TestCase):
     template.\
       stream(**data).\
       dump(output_file)
-    self.dagbag = DagBag('dags2')
+    self.dagbag = DagBag('dags')
 
   def test_dag_import(self):
     self.assertFalse(
