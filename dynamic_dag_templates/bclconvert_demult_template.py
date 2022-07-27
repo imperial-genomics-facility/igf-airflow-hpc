@@ -36,6 +36,7 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import fastq_screen_for_und
 from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_undetermined_reads_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import prepare_globus_copy_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import get_files_and_copy_to_globus_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import send_email_to_user_for_project_func
 
 
 ### DYNAMIC DAG DEFINITION
@@ -236,8 +237,16 @@ with dag:
                 python_callable=build_qc_page_for_project_func)
         ## TASK - PROJECT
         send_email_to_user_for_project = \
-            DummyOperator(
-                task_id=f"send_email_to_user_for_project_{project_id}")
+            PythonOperator(
+                task_id=f"send_email_to_user_for_project_{project_id}",
+                dag=dag,
+				queue="hpc_4G",
+                params={
+                    "project_index": project_id,
+                    "formatted_samplesheets": formatted_samplesheets,
+                    "seqrun_igf_id": seqrun_igf_id,
+                    "send_email_to_user": False},
+                python_callable=send_email_to_user_for_project_func)
         ## PIPELINE - PROJECT
         format_and_split_samplesheet >> setup_qc_page_for_project
         setup_qc_page_for_project >> setup_globus_transfer_for_project
