@@ -1,7 +1,30 @@
 import os
 import unittest
+from airflow import DAG
 from airflow.models import DagBag, Variable
 from jinja2 import Template, Environment, FileSystemLoader, select_autoescape
+
+def check_task_dependency(
+      source: dict,
+      dag: DAG,
+      flow: str = 'downstream') \
+        -> None:
+  try:
+    if flow == 'downstream':
+      for task_id, downstream_list in source.items():
+        assert dag.has_task(task_id)
+        task = dag.get_task(task_id)
+        assert task.downstream_task_ids == set(downstream_list)
+    elif flow == 'upstream':
+      for task_id, upstream_list in source.items():
+        assert dag.has_task(task_id)
+        task = dag.get_task(task_id)
+        assert task.upstream_task_ids == set(upstream_list)
+    else:
+      raise ValueError('flow must be either "downstream" or "upstream"')
+  except:
+    raise
+
 
 class TestDemultDag(unittest.TestCase):
 
@@ -109,39 +132,55 @@ class TestDemultDag(unittest.TestCase):
         dag.task_dict.keys()
     task_list = \
         list(task_list)
-    bclconvert_tasks = \
-        [task for task in task_list if task.startswith("bclconvert_")]
-    self.assertEqual(len(bclconvert_tasks), 5)
     self.assertTrue(dag.has_task('format_and_split_samplesheet'))
-    task = dag.get_task('format_and_split_samplesheet')
-    downstream_task_ids = task.downstream_task_ids
-    self.assertEqual(len(downstream_task_ids), 4)
-    self.assertTrue('setup_qc_page_for_project_4' in downstream_task_ids)
+    check_task_dependency({
+      'format_and_split_samplesheet': [
+        'setup_qc_page_for_project_1',
+        'setup_qc_page_for_project_2',
+        'setup_qc_page_for_project_3',
+        'setup_qc_page_for_project_4'
+      ]
+    }, dag, flow='downstream')
     self.assertTrue(dag.has_task('get_lanes_for_project_1'))
-    task = dag.get_task('get_lanes_for_project_1')
-    downstream_task_ids = task.downstream_task_ids
-    self.assertEqual(len(downstream_task_ids), 2)
-    self.assertTrue('get_igs_for_project_1_lane_2' in downstream_task_ids)
-    task = dag.get_task('get_igs_for_project_1_lane_2')
-    downstream_task_ids = task.downstream_task_ids
-    self.assertEqual(len(downstream_task_ids), 1)
-    self.assertTrue('bclconvert_for_project_1_lane_2_ig_1' in downstream_task_ids)
+    check_task_dependency({
+      'get_lanes_for_project_1': [
+        'get_igs_for_project_1_lane_1',
+        'get_igs_for_project_1_lane_2'
+      ]
+    }, dag, flow='downstream')
+    check_task_dependency({
+      'get_igs_for_project_1_lane_2': [
+        'bclconvert_for_project_1_lane_2_ig_1'
+      ]
+    }, dag, flow='downstream')
     self.assertTrue(dag.has_task('sample_group_1_2_1.get_samples_for_project_1_lane_2_ig_1'))
-    task = dag.get_task('sample_group_1_2_1.get_samples_for_project_1_lane_2_ig_1')
-    downstream_task_ids = task.downstream_task_ids
-    self.assertEqual(len(downstream_task_ids), 3)
-    self.assertTrue('sample_group_1_2_1.calculate_md5_project_1_lane_2_ig_1_sample_3' in downstream_task_ids)
+    check_task_dependency({
+      'sample_group_1_2_1.get_samples_for_project_1_lane_2_ig_1': [
+        'sample_group_1_2_1.calculate_md5_project_1_lane_2_ig_1_sample_1',
+        'sample_group_1_2_1.calculate_md5_project_1_lane_2_ig_1_sample_2',
+        'sample_group_1_2_1.calculate_md5_project_1_lane_2_ig_1_sample_3'
+      ]
+    }, dag, flow='downstream')
     self.assertTrue(dag.has_task('collect_qc_reports_project_1_lane_2_ig_1'))
-    task = dag.get_task('collect_qc_reports_project_1_lane_2_ig_1')
-    upstream_tasks_ids = task.upstream_task_ids
-    self.assertEqual(len(upstream_tasks_ids), 8)
-    self.assertTrue('bclconvert_for_project_1_lane_2_ig_1' in upstream_tasks_ids)
-    self.assertTrue('sample_group_1_2_1.get_fastqs_and_copy_to_globus_for_project_1_lane_2_ig_1' in upstream_tasks_ids)
+    check_task_dependency({
+      'collect_qc_reports_project_1_lane_2_ig_1': [
+        'bclconvert_for_project_1_lane_2_ig_1',
+        'sample_group_1_2_1.get_fastqs_and_copy_to_globus_for_project_1_lane_2_ig_1',
+        'sample_group_1_2_1.fastqc_project_1_lane_2_ig_1_sample_1',
+        'sample_group_1_2_1.fastqc_project_1_lane_2_ig_1_sample_2',
+        'sample_group_1_2_1.fastqc_project_1_lane_2_ig_1_sample_3',
+        'sample_group_1_2_1.fastq_screen_project_1_lane_2_ig_1_sample_1',
+        'sample_group_1_2_1.fastq_screen_project_1_lane_2_ig_1_sample_2',
+        'sample_group_1_2_1.fastq_screen_project_1_lane_2_ig_1_sample_3',
+      ]
+    }, dag, flow='upstream')
     self.assertTrue(dag.has_task('build_qc_page_for_project_1'))
-    task = dag.get_task('build_qc_page_for_project_1')
-    upstream_tasks_ids = task.upstream_task_ids
-    self.assertEqual(len(upstream_tasks_ids), 2)
-    self.assertTrue('build_qc_page_for_project_1_lane_1' in upstream_tasks_ids)
+    check_task_dependency({
+      'build_qc_page_for_project_1': [
+        'build_qc_page_for_project_1_lane_1',
+        'build_qc_page_for_project_1_lane_2'
+      ]
+    }, dag, flow='upstream')
 
 
 if __name__=='__main__':
