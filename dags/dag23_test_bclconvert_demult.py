@@ -40,7 +40,7 @@ dag = \
         dag_id=DAG_ID,
         schedule_interval=None,
         default_args=args,
-        default_view='graph',
+        default_view='tree',
         orientation='TB',
         tags=['hpc'])
 
