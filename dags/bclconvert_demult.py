@@ -44,10 +44,10 @@ from igf_airflow.utils.dag22_bclconvert_demult_utils import send_email_to_user_f
 seqrun_igf_id = 'SEQ00001'
 
 ## INPUT - sample group info
-sample_groups = {1: {1: {1: 3}}, 2: {1: {1: 5}}, 3: {1: {1: 3}}, 4: {1: {1: 1}}}
+sample_groups = {1: {1: {1: 3}, 2: {1: 3}}, 2: {1: {1: 5}}, 3: {1: {1: 3}}, 4: {1: {1: 1}}}
 
 ## INPUT - formatted samplesheets
-formatted_samplesheets = [{'project': 'P1', 'project_index': 1, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N2I8;Y150N1', 'index_group': '16_NA', 'index_group_index': 1, 'sample_counts': 3, 'samplesheet_file': 'SampleSheet_P1_1_16_NA.csv'}, {'project': 'P2', 'project_index': 2, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N10;Y150N1', 'index_group': '8_10X', 'index_group_index': 1, 'sample_counts': 5, 'samplesheet_file': 'SampleSheet_P2_1_8_10X.csv'}, {'project': 'P3', 'project_index': 3, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N10;Y150N1', 'index_group': '8_NA', 'index_group_index': 1, 'sample_counts': 3, 'samplesheet_file': 'SampleSheet_P3_1_8_NA.csv'}, {'project': 'P4', 'project_index': 4, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N2I8;Y150N1', 'index_group': '16_NA', 'index_group_index': 1, 'sample_counts': 1, 'samplesheet_file': 'SampleSheet_P4_1_16_NA.csv'}]
+formatted_samplesheets = [{'project': 'P1', 'project_index': 1, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N2I8;Y150N1', 'index_group': '16_NA', 'index_group_index': 1, 'sample_counts': 3, 'samplesheet_file': 'SampleSheet_P1_1_16_NA.csv'}, {'project': 'P1', 'project_index': 1, 'lane': 2, 'lane_index': 2, 'bases_mask': 'Y150N1;I8N2;N2I8;Y150N1', 'index_group': '16_NA', 'index_group_index': 1, 'sample_counts': 3, 'samplesheet_file': 'SampleSheet_P1_2_16_NA.csv'}, {'project': 'P2', 'project_index': 2, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N10;Y150N1', 'index_group': '8_10X', 'index_group_index': 1, 'sample_counts': 5, 'samplesheet_file': 'SampleSheet_P2_1_8_10X.csv'}, {'project': 'P3', 'project_index': 3, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N10;Y150N1', 'index_group': '8_NA', 'index_group_index': 1, 'sample_counts': 3, 'samplesheet_file': 'SampleSheet_P3_1_8_NA.csv'}, {'project': 'P4', 'project_index': 4, 'lane': 1, 'lane_index': 1, 'bases_mask': 'Y150N1;I8N2;N2I8;Y150N1', 'index_group': '16_NA', 'index_group_index': 1, 'sample_counts': 1, 'samplesheet_file': 'SampleSheet_P4_1_16_NA.csv'}]
 
 ## ARGS
 args = {
