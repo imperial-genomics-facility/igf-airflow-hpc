@@ -11,7 +11,7 @@ from igf_airflow.celery.check_celery_queue import fetch_queue_list_from_redis_se
 from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 
-CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url')
+CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
 
 args = {
