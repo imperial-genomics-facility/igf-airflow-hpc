@@ -99,6 +99,7 @@
   "ribosomal_interval_ref_path": "/project/tgu/resources/pipeline_resource/intervals/ribosomal",
   "cellranger_ref_path": "/project/tgu/resources/pipeline_resource/transcriptome/cellranger",
   "spark_lims_metadata_image": "/project/tgu/data2/test_dir/test64_db_patch/test3_lims/lims_metadata_parsing_v0.1.sif",
+  "globus_root_dir": "/rds/general/project/genomics-facility-archive-2019/ephemeral/GLOBUS_BASE_DIR/",
   "hpc_queue_list": {
     "hpc_1G": {
       "pbs_resource": "-lselect=1:ncpus=1:mem=1gb -lwalltime=12:00:00",
