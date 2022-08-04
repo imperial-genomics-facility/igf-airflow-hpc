@@ -566,8 +566,8 @@ with dag:
                             dag=dag,
                             queue="hpc_4G",
                             params={
-                                "target_dir_key": "target_dir",
-                                "target_dir_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                                "target_dir_key": "globus_target_dir",
+                                "target_dir_task": f"sample_group_{project_id}_{lane_id}_{index_id}.prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                                 "sample_groups_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                                 "sample_groups_key": "sample_group",
                                 "project_index": project_id,
