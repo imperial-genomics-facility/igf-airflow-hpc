@@ -569,7 +569,7 @@ with dag:
                                 "target_dir_key": "target_dir",
                                 "target_dir_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                                 "sample_groups_task": f"sample_group_{project_id}_{lane_id}_{index_id}.get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
-                                "sample_groups_key": "sample_groups",
+                                "sample_groups_key": "sample_group",
                                 "project_index": project_id,
                                 "lane_index": lane_id,
                                 "index_group_index": index_id,
