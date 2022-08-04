@@ -125,6 +125,9 @@ class TestDemultDag(unittest.TestCase):
       dump(output_file)
     self.dagbag = DagBag('dags')
 
+  def tearDown(self) -> None:
+    os.remove('dags/bclconvert_demult.py')
+
   def test_bclconvert_demult(self):
     dag = self.dagbag.get_dag(dag_id="bclconvert_demult")
     self.assertIsNotNone(dag)
