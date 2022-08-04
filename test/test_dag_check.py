@@ -90,6 +90,9 @@ class TestAllDagIntegrity(unittest.TestCase):
       dump(output_file)
     self.dagbag = DagBag('dags')
 
+  def tearDown(self) -> None:
+    os.remove('dags/bclconvert_demult.py')
+
   def test_dag_import(self):
     self.assertFalse(
       len(self.dagbag.import_errors),

@@ -549,7 +549,7 @@ with dag:
                             dag=dag,
                             queue="hpc_4G",
                             params={
-                                "globus_dir_task": f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
+                                "globus_dir_task": f"setup_globus_transfer_for_project_{project_id}",
                                 "globus_dir_key": "globus_root_dir",
                                 "globus_target_dir_key": "globus_target_dir",
                                 "project_index": project_id,
