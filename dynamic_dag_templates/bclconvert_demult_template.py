@@ -245,7 +245,7 @@ with dag:
                     "project_index": project_id,
                     "formatted_samplesheets": formatted_samplesheets,
                     "seqrun_igf_id": seqrun_igf_id,
-                    "send_email_to_user": False},
+                    "send_email_to_user": True},
                 python_callable=send_email_to_user_for_project_func)
         ## PIPELINE - PROJECT
         format_and_split_samplesheet >> setup_qc_page_for_project
