@@ -52,6 +52,7 @@ with dag:
             task_id='fetch_seqrun_data_from_portal',
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             params={
                 'samplesheet_info_key': 'samplesheet_info'
             },
