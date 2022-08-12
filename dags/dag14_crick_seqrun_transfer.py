@@ -73,7 +73,7 @@ with dag:
     find_and_split_md5 >> t
   ## TASK
   check_and_divide_run_for_remote_copy = \
-    PythonOperator(
+    BranchPythonOperator(
       task_id='check_and_divide_run_for_remote_copy',
       dag=dag,
       queue='hpc_4G',
