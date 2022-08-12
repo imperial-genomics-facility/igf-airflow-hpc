@@ -72,14 +72,14 @@ with dag:
     ## PIPELINE
     find_and_split_md5 >> t
   ## TASK
-  # check_and_divide_run_for_remote_copy = \
-  #   PythonOperator(
-  #     task_id='check_and_divide_run_for_remote_copy',
-  #     dag=dag,
-  #     queue='hpc_4G',
-  #     python_callable=check_and_divide_run_for_remote_copy_func)
+  check_and_divide_run_for_remote_copy = \
+    PythonOperator(
+      task_id='check_and_divide_run_for_remote_copy',
+      dag=dag,
+      queue='hpc_4G',
+      python_callable=check_and_divide_run_for_remote_copy_func)
   ## PIPELINE
-  # extract_tar_file >> check_and_divide_run_for_remote_copy
+  extract_tar_file >> check_and_divide_run_for_remote_copy
   ## TASK
   send_message_to_channels_with_mention = \
     PythonOperator(
@@ -88,32 +88,32 @@ with dag:
       queue='hpc_4G',
       python_callable=send_message_to_channels_with_mention_func)
   ## PIPELINE
-  extract_tar_file >> send_message_to_channels_with_mention
+  # extract_tar_file >> send_message_to_channels_with_mention
   ## TASK
-  # for i in range(1, 9):
-  #   t = \
-  #     PythonOperator(
-  #       task_id='copy_bcl_to_remote_for_lane{0}'.format(i),
-  #       dag=dag,
-  #       pool='orwell_scp_pool',
-  #       queue='hpc_4G',
-  #       params={'lane_id': i,
-  #               'xcom_task': 'check_and_divide_run_for_remote_copy',
-  #               'xcom_key': 'bcl_files'},
-  #       python_callable=copy_run_file_to_remote_func)
+  for i in range(1, 9):
+    t = \
+      PythonOperator(
+        task_id='copy_bcl_to_remote_for_lane{0}'.format(i),
+        dag=dag,
+        pool='wells_scp_pool',
+        queue='hpc_4G',
+        params={'lane_id': i,
+                'xcom_task': 'check_and_divide_run_for_remote_copy',
+                'xcom_key': 'bcl_files'},
+        python_callable=copy_run_file_to_remote_func)
     ## PIPELINE
-    # check_and_divide_run_for_remote_copy >> t >> send_message_to_channels_with_mention
-  # copy_additional_file_to_remote = \
-  #   PythonOperator(
-  #     task_id='copy_additional_file_to_remote',
-  #     dag=dag,
-  #     pool='orwell_scp_pool',
-  #     queue='hpc_4G',
-  #     params={'xcom_task': 'check_and_divide_run_for_remote_copy',
-  #             'xcom_key': 'additional_files'},
-  #     python_callable=copy_run_file_to_remote_func)
+    check_and_divide_run_for_remote_copy >> t >> send_message_to_channels_with_mention
+  copy_additional_file_to_remote = \
+    PythonOperator(
+      task_id='copy_additional_file_to_remote',
+      dag=dag,
+      pool='wells_scp_pool',
+      queue='hpc_4G',
+      params={'xcom_task': 'check_and_divide_run_for_remote_copy',
+              'xcom_key': 'additional_files'},
+      python_callable=copy_run_file_to_remote_func)
   ## PIPELINE
-  # check_and_divide_run_for_remote_copy >> copy_additional_file_to_remote
+  check_and_divide_run_for_remote_copy >> copy_additional_file_to_remote
   ## TASK
   generate_interop_dump = \
     PythonOperator(

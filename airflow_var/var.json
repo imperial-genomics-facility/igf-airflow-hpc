@@ -17,6 +17,7 @@
   "wiki_publication_page_id": 293602542,
   "wiki_publication_page_title": "Publications",
   "seqrun_base_path": "/home/igf/seqrun/illumina",
+  "wells_seqrun_base_path": "/data/igf/seqrun/illumina",
   "seqrun_server_user": "igf",
   "email_config": "/rds/general/user/igf/home/secret_keys/email_config.json",
   "seqrun_email_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/email_notification/seqrun_update_email_template.txt",
