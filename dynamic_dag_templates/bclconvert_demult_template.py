@@ -70,11 +70,11 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
+        schedule_interval='@once',
         default_args=args,
         default_view='graph',
         orientation='TB',
-        tags=['hpc', 'dynamic'])
+        tags=['hpc', 'dynamic', 'demult'])
 
 with dag:
 	## TASK
