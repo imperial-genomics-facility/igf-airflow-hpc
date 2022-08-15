@@ -201,6 +201,7 @@ with dag:
       dag=dag,
       python_callable=airflow_utils_for_redis,
       op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
+      pool='generic_pool',
       queue='generic')
   ## TASK
   check_hpc_queue = \
@@ -209,6 +210,7 @@ with dag:
       ssh_hook=hpc_hook,
       dag=dag,
       command='source /etc/bashrc;qstat',
+      pool='generic_pool',
       queue='generic')
   ## TASK
   fetch_active_jobs_from_hpc = \
@@ -216,6 +218,7 @@ with dag:
       task_id='fetch_active_jobs_from_hpc',
       ssh_hook=hpc_hook,
       dag=dag,
+      pool='generic_pool',
       command="""
         source /etc/bashrc;\
         source /project/tgu/data2/airflow_v2/secrets/hpc_env.sh;\
@@ -227,6 +230,7 @@ with dag:
     PythonOperator(
       task_id='fetch_celery_workers',
       dag=dag,
+      pool='generic_pool',
       queue='generic',
       python_callable=fetch_celery_worker_list,
       params={'celery_worker_key':'celery_workers'}
@@ -238,6 +242,7 @@ with dag:
       dag=dag,
       python_callable=get_new_workers,
       queue='generic',
+      pool='generic_pool',
       params={'celery_worker_key':'celery_workers',
               'empty_celery_worker_key':'empty_celery_worker',
               'base_queue':'generic'})
@@ -252,6 +257,7 @@ with dag:
       ssh_hook=hpc_hook,
       dag=dag,
       queue='generic',
+      pool='generic_pool',
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
         source /etc/bashrc; \
@@ -284,6 +290,7 @@ with dag:
       task_id='cleanup_celery_workers',
       dag=dag,
       queue='generic',
+      pool='generic_pool',
       params={'empty_celery_worker_key':'empty_celery_worker'},
       python_callable=stop_celery_workers)
   ## PIPELINE

@@ -46,6 +46,7 @@ with dag:
       task_id='run_hpc_scheduler',
       dag=dag,
       ssh_hook=hpc_hook,
+      pool='generic_pool',
       queue='generic',
       command="""
         source /etc/bashrc; \
@@ -57,6 +58,7 @@ with dag:
       task_id='restart_flower_server',
       dag=dag,
       ssh_hook=igf_lims_ssh_hook,
+      pool='generic_pool',
       queue='hpc_4G',
       command="docker restart airflow_flower_v2")
 
