@@ -93,6 +93,7 @@ with dag:
             task_id='mark_seqrun_finished',
             dag=dag,
             queue='hpc_4G',
+            trigger_rule='all_done',
             params={
                 'next_task': 'get_formatted_samplesheets',
                 'last_task': 'no_work',
