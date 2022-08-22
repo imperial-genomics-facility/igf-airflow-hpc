@@ -415,7 +415,8 @@ with dag:
                             "xcom_key_for_multiqc": "multiqc",
                             "tool_order_list": ["bclconvert", "fastqc", "fastqscreen"],
                             "multiqc_param_list": ["--zip-data-dir",],
-                            "status_tag": "known"
+                            "status_tag": "known",
+                            "xcom_task_for_qc_file_list": f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}"
                         },
                         python_callable=multiqc_for_project_lane_index_group_func)
                 ##TASK - INDEXGROUP
