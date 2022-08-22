@@ -41,7 +41,7 @@ wells_ssh_hook = \
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': days_ago(1),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -83,18 +83,18 @@ with dag:
             command="""
                 bash /home/igf/airflow_v2/seqrun_copy_scripts/check_new_runs.sh
             """)
-    # ## TASK
-    # get_new_seqrun_id_from_wells = \
-    #     BranchPythonOperator(
-    #         task_id='get_new_seqrun_id_from_wells',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         params={
-    #             'xcom_task': 'get_all_runs_from_wells',
-    #             'next_task': 'copy_run_to_wells',
-    #             'no_work_task': 'no_work'
-    #         },
-    #         python_callable=get_new_run_id_for_copy)
+    ## TASK
+    get_new_seqrun_id_from_wells = \
+        BranchPythonOperator(
+            task_id='get_new_seqrun_id_from_wells',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'xcom_task': 'get_all_runs_from_wells',
+                'next_task': 'copy_run_to_wells',
+                'no_work_task': 'no_work'
+            },
+            python_callable=get_new_run_id_for_copy)
     # ## TASK
     # copy_run_to_wells = \
     #     SSHOperator(
@@ -215,7 +215,7 @@ with dag:
     #         queue='hpc_4G')
     ## PIPELINE
     decide_server >> get_all_runs_from_wells
-    # get_all_runs_from_wells >> get_new_seqrun_id_from_wells
+    get_all_runs_from_wells >> get_new_seqrun_id_from_wells
     # get_new_seqrun_id_from_wells >> no_work
     # get_new_seqrun_id_from_wells >> copy_run_to_wells
     # copy_run_to_wells >> copy_run_from_wells_to_hpc
