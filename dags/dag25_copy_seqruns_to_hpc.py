@@ -141,69 +141,75 @@ with dag:
                   fi
                 fi
             """)
-    # ## TASK
-    # get_all_runs_from_orwell = \
-    #     SSHOperator(
-    #         task_id='get_all_runs_from_orwell',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         pool='orwell_ssh_pool',
-    #         ssh_hook=orwell_ssh_hook,
-    #         command="""
-    #             bash check_new_runs.sh
-    #         """)
-    # ## TASK
-    # get_new_seqrun_id_from_orwell = \
-    #     BranchPythonOperator(
-    #         task_id='get_new_seqrun_id_from_orwell',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         params={
-    #             'xcom_task': 'get_all_runs_from_orwell',
-    #             'next_task': 'copy_run_to_orwell',
-    #             'no_work_task': 'no_work',
-    #             'seqrun_id_xcom_key': 'seqrun_id'
-    #         },
-    #         python_callable=get_new_run_id_for_copy)
-    # ## TASK
-    # copy_run_to_orwell = \
-    #     SSHOperator(
-    #         task_id='copy_run_to_orwell',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         pool='wells_ssh_pool',
-    #         ssh_hook=wells_ssh_hook,
-    #         params={
-    #             'xcom_task': 'get_new_seqrun_id_from_orwell',
-    #             'xcom_key': 'seqrun_id'
-    #         },
-    #         command="""
-    #             bash copy_new_run_to_orwell.sh {{ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key)}}
-    #         """)
-    # ## TASK
-    # copy_run_from_orwell_to_hpc = \
-    #     BashOperator(
-    #         task_id='copy_run_from_orwell_to_hpc',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         params={
-    #             'server_hostname': ORWELL_SERVER_HOSTNAME,
-    #             'seqrun_path': ORWELL_BASE_PATH,
-    #             'hpc_seqrun_path': HPC_SEQRUN_PATH,
-    #             'remote_user': SEQRUN_SERVER_USER,
-    #             'hpc_ssh_key_file': HPC_SSH_KEY_FILE,
-    #             'xcom_task': 'get_new_seqrun_id_from_wells'
-    #         },
-    #         bash_command="""
-    #             if [-d {{ params.hpc_seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task) }} ];
-    #             then
-    #               echo "{{ ti.xcom_pull(task_ids=params.xcom_task) }} already present on hpc"; exit 1;
-    #             else
-    #               scp -i {{ params.hpc_ssh_key_file }} \
-    #                   -r {{ params.remote_user }}@{{ params.server_hostname }}:{{ params.seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task) }} \
-    #                   {{ params.hpc_seqrun_path }}/
-    #             fi
-    #         """)
+    ## TASK
+    get_all_runs_from_orwell = \
+        SSHOperator(
+            task_id='get_all_runs_from_orwell',
+            dag=dag,
+            queue='hpc_4G',
+            pool='orwell_ssh_pool',
+            ssh_hook=orwell_ssh_hook,
+            command="""
+                bash /home/igf/igf_code/seqrun_copy_scripts/check_new_runs.sh
+            """)
+    ## TASK
+    get_new_seqrun_id_from_orwell = \
+        BranchPythonOperator(
+            task_id='get_new_seqrun_id_from_orwell',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'xcom_task': 'get_all_runs_from_orwell',
+                'next_task': 'copy_run_to_orwell',
+                'no_work_task': 'no_work',
+                'seqrun_id_xcom_key': 'seqrun_id'
+            },
+            python_callable=get_new_run_id_for_copy)
+    ## TASK
+    copy_run_to_orwell = \
+        SSHOperator(
+            task_id='copy_run_to_orwell',
+            dag=dag,
+            queue='hpc_4G',
+            pool='orwell_ssh_pool',
+            ssh_hook=orwell_ssh_hook,
+            command="""
+                bash /home/igf/igf_code/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_orwell", key="seqrun_id") }}
+            """)
+    ## TASK
+    copy_run_from_orwell_to_hpc = \
+        BashOperator(
+            task_id='copy_run_from_orwell_to_hpc',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'server_hostname': ORWELL_SERVER_HOSTNAME,
+                'seqrun_path': ORWELL_BASE_PATH,
+                'hpc_seqrun_path': HPC_SEQRUN_PATH,
+                'remote_user': SEQRUN_SERVER_USER,
+                'hpc_ssh_key_file': HPC_SSH_KEY_FILE
+            },
+            bash_command="""
+                seqrun_id={{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_orwell", key="seqrun_id") }}
+                hpc_seqrun_path={{ params.hpc_seqrun_path }}
+                hpc_ssh_key_file={{ params.hpc_ssh_key_file }}
+                remote_user={{ params.remote_user }}
+                server_hostname={{ params.server_hostname }}
+                seqrun_path={{ params.seqrun_path }}
+                if [-d {{ params.hpc_seqrun_path }}/$seqrun_id ];
+                then
+                  echo 1>&2 "${seqrun_id} already present on hpc"; exit 1;
+                else
+                  echo "Copying ${seqrun_id} from ${server_hostname}"
+                  scp -i $hpc_ssh_key_file \
+                      -r $remote_user@$server_hostname:$seqrun_path/$seqrun_id \
+                      $hpc_seqrun_path/
+                  if [ ! -e $hpc_seqrun_path/$seqrun_id/RunInfo.xml ];
+                  then
+                    echo 1>&2 "Failed to copy ${seqrun_id} from ${server_hostname}"; exit1;
+                  fi
+                fi
+            """)
     ## TASK
     register_run_to_db_and_portal = \
         PythonOperator(
@@ -213,7 +219,7 @@ with dag:
             trigger_rule='none_failed_min_one_success',
             params={
                 'server_in_use': SERVER_IN_USE,
-                'wells_xcom_task': 'get_all_runs_from_wells',
+                'wells_xcom_task': 'get_new_seqrun_id_from_wells',
                 'orwell_xcom_task': 'get_new_seqrun_id_from_orwell',
                 'xcom_key': 'seqrun_id'
             },
@@ -231,9 +237,9 @@ with dag:
     get_new_seqrun_id_from_wells >> copy_run_to_wells
     copy_run_to_wells >> copy_run_from_wells_to_hpc
     copy_run_from_wells_to_hpc >> register_run_to_db_and_portal
-    # decide_server >> get_all_runs_from_orwell
-    # get_all_runs_from_orwell >> get_new_seqrun_id_from_orwell
-    # get_new_seqrun_id_from_orwell >> no_work
-    # get_new_seqrun_id_from_orwell>> copy_run_to_orwell
-    # copy_run_to_orwell >> copy_run_from_orwell_to_hpc
-    # copy_run_from_orwell_to_hpc >> register_run_to_db_and_portal
+    decide_server >> get_all_runs_from_orwell
+    get_all_runs_from_orwell >> get_new_seqrun_id_from_orwell
+    get_new_seqrun_id_from_orwell >> no_work
+    get_new_seqrun_id_from_orwell>> copy_run_to_orwell
+    copy_run_to_orwell >> copy_run_from_orwell_to_hpc
+    copy_run_from_orwell_to_hpc >> register_run_to_db_and_portal
