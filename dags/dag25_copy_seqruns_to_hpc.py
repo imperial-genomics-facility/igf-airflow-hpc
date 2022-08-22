@@ -91,7 +91,7 @@ with dag:
             queue='hpc_4G',
             params={
                 'xcom_task': 'get_all_runs_from_wells',
-                'next_task': 'copy_run_to_wells',
+                'next_task': 'no_work',#'copy_run_to_wells',
                 'no_work_task': 'no_work'
             },
             python_callable=get_new_run_id_for_copy)
@@ -208,11 +208,11 @@ with dag:
     #         },
     #         python_callable=register_run_to_db_and_portal_func)
     # ## TASK
-    # no_work = \
-    #     DummyOperator(
-    #         task_id='no_work',
-    #         dag=dag,
-    #         queue='hpc_4G')
+    no_work = \
+        DummyOperator(
+            task_id='no_work',
+            dag=dag,
+            queue='hpc_4G')
     ## PIPELINE
     decide_server >> get_all_runs_from_wells
     get_all_runs_from_wells >> get_new_seqrun_id_from_wells
