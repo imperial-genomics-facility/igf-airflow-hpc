@@ -104,12 +104,8 @@ with dag:
             queue='hpc_4G',
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
-             params={
-                'xcom_task': 'get_new_seqrun_id_from_wells',
-                'xcom_key': 'seqrun_id'
-            },
             command="""
-                bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }}
+                bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_wells", key="seqrun_id") }}
             """)
     ## TASK
     copy_run_from_wells_to_hpc = \
@@ -122,18 +118,27 @@ with dag:
                 'seqrun_path': WELLS_SEQRUN_BASE_PATH,
                 'hpc_seqrun_path': HPC_SEQRUN_PATH,
                 'remote_user': SEQRUN_SERVER_USER,
-                'hpc_ssh_key_file': HPC_SSH_KEY_FILE,
-                'xcom_task': 'get_new_seqrun_id_from_wells',
-                'xcom_key': 'seqrun_id'
+                'hpc_ssh_key_file': HPC_SSH_KEY_FILE
             },
             bash_command="""
-                if [-d {{ params.hpc_seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }} ];
+                seqrun_id={{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_wells", key="seqrun_id") }}
+                hpc_seqrun_path={{ params.hpc_seqrun_path }}
+                hpc_ssh_key_file={{ params.hpc_ssh_key_file }}
+                remote_user={{ params.remote_user }}
+                server_hostname={{ params.server_hostname }}
+                seqrun_path={{ params.seqrun_path }}
+                if [-d {{ params.hpc_seqrun_path }}/$seqrun_id ];
                 then
-                  echo "{{ ti.xcom_pull(task_ids=params.xcom_task) }} already present on hpc"; exit 1;
+                  echo 1>&2 "${seqrun_id} already present on hpc"; exit 1;
                 else
-                  scp -i {{ params.hpc_ssh_key_file }} \
-                      -r {{ params.remote_user }}@{{ params.server_hostname }}:{{ params.seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }} \
-                      {{ params.hpc_seqrun_path }}/
+                  echo "Copying ${seqrun_id} from ${server_hostname}"
+                  scp -i $hpc_ssh_key_file \
+                      -r $remote_user@$server_hostname:$seqrun_path/$seqrun_id \
+                      $hpc_seqrun_path/
+                  if [ ! -e $hpc_seqrun_path/$seqrun_id/RunInfo.xml ];
+                  then
+                    echo 1>&2 "Failed to copy ${seqrun_id} from ${server_hostname}"; exit1;
+                  fi
                 fi
             """)
     # ## TASK
