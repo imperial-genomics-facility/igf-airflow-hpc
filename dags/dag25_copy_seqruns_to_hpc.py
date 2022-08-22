@@ -91,49 +91,51 @@ with dag:
             queue='hpc_4G',
             params={
                 'xcom_task': 'get_all_runs_from_wells',
-                'next_task': 'no_work',#'copy_run_to_wells',
+                'next_task': 'copy_run_to_wells',
                 'no_work_task': 'no_work',
                 'seqrun_id_xcom_key': 'seqrun_id'
             },
             python_callable=get_new_run_id_for_copy)
     # ## TASK
-    # copy_run_to_wells = \
-    #     SSHOperator(
-    #         task_id='copy_run_to_wells',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         pool='wells_ssh_pool',
-    #         ssh_hook=wells_ssh_hook,
-    #          params={
-    #             'xcom_task': 'get_new_seqrun_id_from_wells'
-    #         },
-    #         command="""
-    #             bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids=params.xcom_task) }}
-    #         """)
+    copy_run_to_wells = \
+        SSHOperator(
+            task_id='copy_run_to_wells',
+            dag=dag,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            ssh_hook=wells_ssh_hook,
+             params={
+                'xcom_task': 'get_new_seqrun_id_from_wells'
+                'xcom_key': 'seqrun_id'
+            },
+            command="""
+                bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }}
+            """)
     # ## TASK
-    # copy_run_from_wells_to_hpc = \
-    #    BashOperator(
-    #         task_id='copy_run_from_wells_to_hpc',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         params={
-    #             'server_hostname': WELLS_SERVER_HOSTNAME,
-    #             'seqrun_path': WELLS_SEQRUN_BASE_PATH,
-    #             'hpc_seqrun_path': HPC_SEQRUN_PATH,
-    #             'remote_user': SEQRUN_SERVER_USER,
-    #             'hpc_ssh_key_file': HPC_SSH_KEY_FILE,
-    #             'xcom_task': 'get_new_seqrun_id_from_wells'
-    #         },
-    #         bash_command="""
-    #             if [-d {{ params.hpc_seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task) }} ];
-    #             then
-    #               echo "{{ ti.xcom_pull(task_ids=params.xcom_task) }} already present on hpc"; exit 1;
-    #             else
-    #               scp -i {{ params.hpc_ssh_key_file }} \
-    #                   -r {{ params.remote_user }}@{{ params.server_hostname }}:{{ params.seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task) }} \
-    #                   {{ params.hpc_seqrun_path }}/
-    #             fi
-    #         """)
+    copy_run_from_wells_to_hpc = \
+       BashOperator(
+            task_id='copy_run_from_wells_to_hpc',
+            dag=dag,
+            queue='hpc_4G',
+            params={
+                'server_hostname': WELLS_SERVER_HOSTNAME,
+                'seqrun_path': WELLS_SEQRUN_BASE_PATH,
+                'hpc_seqrun_path': HPC_SEQRUN_PATH,
+                'remote_user': SEQRUN_SERVER_USER,
+                'hpc_ssh_key_file': HPC_SSH_KEY_FILE,
+                'xcom_task': 'get_new_seqrun_id_from_wells',
+                'xcom_key': 'seqrun_id'
+            },
+            bash_command="""
+                if [-d {{ params.hpc_seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }} ];
+                then
+                  echo "{{ ti.xcom_pull(task_ids=params.xcom_task) }} already present on hpc"; exit 1;
+                else
+                  scp -i {{ params.hpc_ssh_key_file }} \
+                      -r {{ params.remote_user }}@{{ params.server_hostname }}:{{ params.seqrun_path }}/{{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }} \
+                      {{ params.hpc_seqrun_path }}/
+                fi
+            """)
     # ## TASK
     # get_all_runs_from_orwell = \
     #     SSHOperator(
@@ -155,7 +157,7 @@ with dag:
     #             'xcom_task': 'get_all_runs_from_orwell',
     #             'next_task': 'copy_run_to_orwell',
     #             'no_work_task': 'no_work',
-    # 'seqrun_id_xcom_key': 'seqrun_id'
+    #             'seqrun_id_xcom_key': 'seqrun_id'
     #         },
     #         python_callable=get_new_run_id_for_copy)
     # ## TASK
@@ -167,10 +169,11 @@ with dag:
     #         pool='wells_ssh_pool',
     #         ssh_hook=wells_ssh_hook,
     #         params={
-    #             'xcom_task': 'get_new_seqrun_id_from_orwell'
+    #             'xcom_task': 'get_new_seqrun_id_from_orwell',
+    #             'xcom_key': 'seqrun_id'
     #         },
     #         command="""
-    #             bash copy_new_run_to_orwell.sh {{ti.xcom_pull(task_ids=params.xcom_task)}}
+    #             bash copy_new_run_to_orwell.sh {{ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key)}}
     #         """)
     # ## TASK
     # copy_run_from_orwell_to_hpc = \
@@ -196,20 +199,21 @@ with dag:
     #                   {{ params.hpc_seqrun_path }}/
     #             fi
     #         """)
-    # ## TASK
-    # register_run_to_db_and_portal = \
-    #     PythonOperator(
-    #         task_id='register_run_to_db_and_portal',
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         trigger_rule='none_failed_min_one_success',
-    #         params={
-    #             'server_in_use': SERVER_IN_USE,
-    #             'wells_xcom_task': 'get_all_runs_from_wells',
-    #             'orwell_xcom_task': 'get_new_seqrun_id_from_orwell'
-    #         },
-    #         python_callable=register_run_to_db_and_portal_func)
-    # ## TASK
+    ## TASK
+    register_run_to_db_and_portal = \
+        PythonOperator(
+            task_id='register_run_to_db_and_portal',
+            dag=dag,
+            queue='hpc_4G',
+            trigger_rule='none_failed_min_one_success',
+            params={
+                'server_in_use': SERVER_IN_USE,
+                'wells_xcom_task': 'get_all_runs_from_wells',
+                'orwell_xcom_task': 'get_new_seqrun_id_from_orwell',
+                'xcom_key': 'seqrun_id'
+            },
+            python_callable=register_run_to_db_and_portal_func)
+    ## TASK
     no_work = \
         DummyOperator(
             task_id='no_work',
@@ -219,9 +223,9 @@ with dag:
     decide_server >> get_all_runs_from_wells
     get_all_runs_from_wells >> get_new_seqrun_id_from_wells
     get_new_seqrun_id_from_wells >> no_work
-    # get_new_seqrun_id_from_wells >> copy_run_to_wells
-    # copy_run_to_wells >> copy_run_from_wells_to_hpc
-    # copy_run_from_wells_to_hpc >> register_run_to_db_and_portal
+    get_new_seqrun_id_from_wells >> copy_run_to_wells
+    copy_run_to_wells >> copy_run_from_wells_to_hpc
+    copy_run_from_wells_to_hpc >> register_run_to_db_and_portal
     # decide_server >> get_all_runs_from_orwell
     # get_all_runs_from_orwell >> get_new_seqrun_id_from_orwell
     # get_new_seqrun_id_from_orwell >> no_work
