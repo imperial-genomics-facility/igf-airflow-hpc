@@ -151,7 +151,7 @@ with dag:
             dag=dag,
             queue='hpc_4G',
             params={
-                'xcom_task': 'get_all_runs_from_orwell'
+                'xcom_task': 'get_all_runs_from_orwell',
                 'next_task': 'copy_run_to_orwell',
                 'no_work_task': 'no_work'
             },
