@@ -16,7 +16,7 @@ SEQRUN_SERVER_USER = Variable.get('seqrun_server_user', default_var=None)
 ORWELL_SERVER_HOSTNAME = Variable.get('orwell_server_hostname',  default_var="")
 ORWELL_BASE_PATH = Variable.get('seqrun_base_path', default_var=None)
 WELLS_SERVER_HOSTNAME = Variable.get('wells_server_hostname', default_var=None)
-WELLS_SEQRUN_BASE_PATH = Variable.get('wells_seqrun_base_path', default=None)
+WELLS_SEQRUN_BASE_PATH = Variable.get('wells_seqrun_base_path', default_var=None)
 HPC_SEQRUN_PATH = Variable.get('hpc_seqrun_path', default_var=None)
 HPC_SSH_KEY_FILE = Variable.get('hpc_ssh_key_file', default_var=None)
 SERVER_IN_USE = 'wells'
