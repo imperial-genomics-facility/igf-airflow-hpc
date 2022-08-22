@@ -92,7 +92,8 @@ with dag:
             params={
                 'xcom_task': 'get_all_runs_from_wells',
                 'next_task': 'no_work',#'copy_run_to_wells',
-                'no_work_task': 'no_work'
+                'no_work_task': 'no_work',
+                'seqrun_id_xcom_key': 'seqrun_id'
             },
             python_callable=get_new_run_id_for_copy)
     # ## TASK
@@ -153,7 +154,8 @@ with dag:
     #         params={
     #             'xcom_task': 'get_all_runs_from_orwell',
     #             'next_task': 'copy_run_to_orwell',
-    #             'no_work_task': 'no_work'
+    #             'no_work_task': 'no_work',
+    # 'seqrun_id_xcom_key': 'seqrun_id'
     #         },
     #         python_callable=get_new_run_id_for_copy)
     # ## TASK
