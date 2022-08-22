@@ -216,7 +216,7 @@ with dag:
     ## PIPELINE
     decide_server >> get_all_runs_from_wells
     get_all_runs_from_wells >> get_new_seqrun_id_from_wells
-    # get_new_seqrun_id_from_wells >> no_work
+    get_new_seqrun_id_from_wells >> no_work
     # get_new_seqrun_id_from_wells >> copy_run_to_wells
     # copy_run_to_wells >> copy_run_from_wells_to_hpc
     # copy_run_from_wells_to_hpc >> register_run_to_db_and_portal
