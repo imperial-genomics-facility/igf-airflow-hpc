@@ -96,7 +96,7 @@ with dag:
                 'seqrun_id_xcom_key': 'seqrun_id'
             },
             python_callable=get_new_run_id_for_copy)
-    # ## TASK
+    ## TASK
     copy_run_to_wells = \
         SSHOperator(
             task_id='copy_run_to_wells',
@@ -105,13 +105,13 @@ with dag:
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
              params={
-                'xcom_task': 'get_new_seqrun_id_from_wells'
+                'xcom_task': 'get_new_seqrun_id_from_wells',
                 'xcom_key': 'seqrun_id'
             },
             command="""
                 bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids=params.xcom_task, key=params.xcom_key) }}
             """)
-    # ## TASK
+    ## TASK
     copy_run_from_wells_to_hpc = \
        BashOperator(
             task_id='copy_run_from_wells_to_hpc',
