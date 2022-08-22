@@ -173,7 +173,7 @@ with dag:
     ## TASK
     copy_run_from_orwell_to_hpc = \
         BashOperator(
-            task_id='copy_run_from_wells_to_hpc',
+            task_id='copy_run_from_orwell_to_hpc',
             dag=dag,
             queue='hpc_4G',
             params={
