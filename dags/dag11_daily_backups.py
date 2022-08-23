@@ -32,5 +32,13 @@ with dag:
       queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/secret_keys/get_dump.sh ')
 
+  # ## TASK
+  # backup_portl_db = \
+  #   BashOperator(
+  #     task_id='backup_portal_db',
+  #     dag=dag,
+  #     queue='hpc_4G',
+  #     bash_command='bash /rds/general/user/igf/home/secret_keys/get_portal_dump.sh ')
+
   ## PIPELINE
   backup_prod_db
