@@ -62,5 +62,15 @@ with dag:
       queue='hpc_4G',
       command="docker restart airflow_flower_v2")
 
+  ## TASK
+  restart_portal_flower_server = \
+    SSHOperator(
+      task_id='restart_flower_server',
+      dag=dag,
+      ssh_hook=igf_lims_ssh_hook,
+      pool='generic_pool',
+      queue='hpc_4G',
+      command="docker restart celery_flower")
+
   ## PIPELNE
-  run_hpc_scheduler >> restart_flower_server
+  run_hpc_scheduler >> restart_flower_server >> restart_portal_flower_server
