@@ -4,6 +4,7 @@ import queue
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
 from igf_airflow.utils.dag20_portal_metadata_utils import get_metadata_dump_from_pipeline_db_func
@@ -13,7 +14,7 @@ from igf_airflow.utils.dag20_portal_metadata_utils import get_known_projects_fun
 from igf_airflow.utils.dag20_portal_metadata_utils import create_raw_metadata_for_new_projects_func
 from igf_airflow.utils.dag20_portal_metadata_utils import get_formatted_metadata_files_func
 from igf_airflow.utils.dag20_portal_metadata_utils import upload_raw_metadata_to_portal_func
-
+from igf_airflow.utils.dag20_portal_metadata_utils import fetch_validated_metadata_from_portal_and_load_func
 
 args = {
     'owner': 'airflow',
@@ -56,10 +57,10 @@ with dag:
             pool="orwell_scp_pool",
             params={
                 'xcom_key': 'quota_xlsx',
-                'hpc_ssh_key_file': Variable.get('hpc_ssh_key_file',  default_var=""),
-                'source_address': Variable.get("seqrun_server", default_var=""),
-                'source_user': Variable.get("seqrun_server_user", default_var=""),
-                'source_path': '/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'},
+                'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
+                'source_address': None, #Variable.get("seqrun_server", default_var=""),
+                'source_user': None, #Variable.get("seqrun_server_user", default_var=""),
+                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'}, #'/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'},
             python_callable=copy_remote_file_to_hpc_func)
     ## TASK
     copy_access_db = \
@@ -70,10 +71,10 @@ with dag:
             pool="orwell_scp_pool",
             params={
                 'xcom_key': 'access_db',
-                'hpc_ssh_key_file': Variable.get('hpc_ssh_key_file',  default_var=""),
-                'source_address': Variable.get("seqrun_server", default_var=""),
-                'source_user': Variable.get("seqrun_server_user", default_var=""),
-                'source_path': '/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'},
+                'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
+                'source_address': None, #Variable.get("seqrun_server", default_var=""),
+                'source_user': None, #Variable.get("seqrun_server_user", default_var=""),
+                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'}, #'/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'},
             python_callable=copy_remote_file_to_hpc_func)
     ## TASK
     get_known_projects = \
@@ -129,23 +130,31 @@ with dag:
             },
             python_callable=upload_raw_metadata_to_portal_func)
     ## TASK
+    # fetch_validated_metadata_from_portal_and_load = \
+    #     BashOperator(
+    #         task_id="fetch_validated_metadata_from_portal_and_load",
+    #         dag=dag,
+    #         queue='hpc_4G',
+    #         #pool='igf_portal_pool',
+    #         #ssh_hook=orwell_ssh_hook,
+    #         command="""
+    #             #source /home/igf/igf_code/IGF-cron-scripts/orwell/env.sh;
+    #             python /project/tgu/data2/airflow_v2/githun/data-management-python/scripts/seqrun_processing/find_and_register_project_metadata_from_portal_db.py \
+    #                 --portal_db_conf_file $PORTAL_CONF_FILE \
+    #                 --dbconfig $DBCONF \
+    #                 --user_account_template /home/igf/igf_code/data-management-python/template/email_notification/send_new_account_info.txt \
+    #                 --log_slack \
+    #                 --slack_config $SLACKCONF \
+    #                 --notify_user""")
+    ## TASK
     fetch_validated_metadata_from_portal_and_load = \
-        SSHOperator(
+        PythonOperator(
             task_id="fetch_validated_metadata_from_portal_and_load",
             dag=dag,
             queue='hpc_4G',
-            pool='igf_portal_pool',
-            ssh_hook=orwell_ssh_hook,
-            command="""
-                source /home/igf/igf_code/IGF-cron-scripts/orwell/env.sh;
-                python /home/igf/igf_code/data-management-python/scripts/seqrun_processing/find_and_register_project_metadata_from_portal_db.py \
-                    --portal_db_conf_file $PORTAL_CONF_FILE \
-                    --dbconfig $DBCONF \
-                    --user_account_template /home/igf/igf_code/data-management-python/template/email_notification/send_new_account_info.txt \
-                    --log_slack \
-                    --slack_config $SLACKCONF \
-                    --setup_irods \
-                    --notify_user""")
+            params={},
+            python_callable=fetch_validated_metadata_from_portal_and_load_func
+        )
     ## TASK
     get_metadata_dump_from_pipeline_db = \
         PythonOperator(

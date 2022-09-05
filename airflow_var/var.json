@@ -21,6 +21,7 @@
   "seqrun_server_user": "igf",
   "email_config": "/rds/general/user/igf/home/secret_keys/email_config.json",
   "seqrun_email_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/email_notification/seqrun_update_email_template.txt",
+  "user_account_creation_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/email_notification/send_new_account_info.txt",
   "default_email_user": "igf@imperial.ac.uk",
   "database_config_file": "/rds/general/user/igf/home/secret_keys/dbconfig.json",
   "test_database_config_file": "/rds/general/user/igf/home/secret_keys/testdbconfig.json",
