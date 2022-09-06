@@ -51,6 +51,11 @@ PRINT_DELETES = True
 ENABLE_DELETE = True
 # List of all the objects that will be deleted. Comment out the DB objects you
 # want to skip.
+# get dag model last schedule run
+try:
+    dag_model_last_scheduler_run = DagModel.last_scheduler_run
+except AttributeError:
+    dag_model_last_scheduler_run = DagModel.last_parsed_time
 DATABASE_OBJECTS = [
     {
         "airflow_db_model": BaseJob,
@@ -65,13 +70,6 @@ DATABASE_OBJECTS = [
         "keep_last": True,
         "keep_last_filters": [DagRun.external_trigger.is_(False)],
         "keep_last_group_by": DagRun.dag_id
-    },
-    {
-        "airflow_db_model": TaskInstance,
-        "age_check_column": TaskInstance.execution_date,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
     },
     {
         "airflow_db_model": Log,
@@ -94,25 +92,26 @@ DATABASE_OBJECTS = [
         "keep_last_filters": None,
         "keep_last_group_by": None
     },
-    {
-        "airflow_db_model": DagModel,
-        "age_check_column": DagModel.last_scheduler_run,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
-    }]
+    ]
+# {
+#     "airflow_db_model": DagModel,
+#     "age_check_column": dag_model_last_scheduler_run,
+#     "keep_last": False,
+#     "keep_last_filters": None,
+#     "keep_last_group_by": None
+# }
 # Check for TaskReschedule model
-try:
-    from airflow.models import TaskReschedule
-    DATABASE_OBJECTS.append({
-        "airflow_db_model": TaskReschedule,
-        "age_check_column": TaskReschedule.execution_date,
-        "keep_last": False,
-        "keep_last_filters": None,
-        "keep_last_group_by": None
-    })
-except Exception as e:
-    logging.error(e)
+# try:
+#     from airflow.models import TaskReschedule
+#     DATABASE_OBJECTS.append({
+#         "airflow_db_model": TaskReschedule,
+#         "age_check_column": TaskReschedule.execution_date,
+#         "keep_last": False,
+#         "keep_last_filters": None,
+#         "keep_last_group_by": None
+#     })
+# except Exception as e:
+#     logging.error(e)
 
 # Check for TaskFail model
 try:
@@ -232,6 +231,7 @@ def print_configuration_function(**context):
 
 print_configuration = PythonOperator(
     task_id='print_configuration',
+    queue='hpc_4G',
     python_callable=print_configuration_function,
     provide_context=True,
     dag=dag)
@@ -342,6 +342,7 @@ for db_object in DATABASE_OBJECTS:
     cleanup_op = PythonOperator(
         task_id='cleanup_' + str(db_object["airflow_db_model"].__name__),
         python_callable=cleanup_function,
+        queue='hpc_4G',
         params=db_object,
         provide_context=True,
         dag=dag

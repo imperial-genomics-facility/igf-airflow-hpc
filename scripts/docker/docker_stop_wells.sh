@@ -1,0 +1,1 @@
+docker-compose -f /home/igf/airflow_v2/github/igf-airflow-hpc/docker/docker-compose-wells.yml -p airflow-v2 down

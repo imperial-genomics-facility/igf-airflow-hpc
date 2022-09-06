@@ -1,13 +1,13 @@
 from datetime import timedelta
 import os,json,logging,subprocess
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
-from airflow.operators.dummy_operator import DummyOperator
 from igf_airflow.logging.upload_log_msg import send_log_to_channels,log_success,log_failure,log_sleep
 from igf_airflow.utils.dag8_copy_ongoing_seqrun_utils import get_ongoing_seqrun_list
 from igf_airflow.utils.dag8_copy_ongoing_seqrun_utils import copy_seqrun_manifest_file
@@ -156,7 +156,7 @@ with dag:
       DummyOperator(
         task_id='wait_for_copy_chunk_run_{0}'.format(i),
         dag=dag,
-        trigger_rule='none_failed_or_skipped',
+        trigger_rule='none_failed_min_one_success',
         queue='hpc_4G')
     ## PIPELINE
     copy_seqrun_files >> wait_for_copy_chunk

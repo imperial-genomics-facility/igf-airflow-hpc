@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.bash import BashOperator
 
 ## ARGS
 default_args = {
@@ -34,12 +34,12 @@ with dag:
       queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_demultiplexing_pipeline.sh ')
   ## TASK
-  run_primary_analysis_pipeline = \
-    BashOperator(
-      task_id='run_primary_analysis_pipeline',
-      dag=dag,
-      queue='hpc_4G',
-      bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_primary_analysis_pipeline.sh ')
+  # run_primary_analysis_pipeline = \
+  #   BashOperator(
+  #     task_id='run_primary_analysis_pipeline',
+  #     dag=dag,
+  #     queue='hpc_4G',
+  #     bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/run_primary_analysis_pipeline.sh ')
 
   ## PIPELINE
-  run_demultiplexing_pipeline >> run_primary_analysis_pipeline
+  run_demultiplexing_pipeline #>> run_primary_analysis_pipeline

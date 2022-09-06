@@ -1,8 +1,8 @@
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import check_and_transfer_run_func
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import extract_tar_file_func
 from igf_airflow.utils.dag14_crick_seqrun_transfer_utils import find_and_split_md5_func
@@ -47,7 +47,7 @@ with dag:
     PythonOperator(
       task_id='extract_tar_file',
       dag=dag,
-      queue='hpc_4G',
+      queue='hpc_4G_long',
       python_callable=extract_tar_file_func)
   ## TASK
   find_and_split_md5 = \
@@ -73,7 +73,7 @@ with dag:
     find_and_split_md5 >> t
   ## TASK
   check_and_divide_run_for_remote_copy = \
-    PythonOperator(
+    BranchPythonOperator(
       task_id='check_and_divide_run_for_remote_copy',
       dag=dag,
       queue='hpc_4G',
@@ -87,13 +87,15 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=send_message_to_channels_with_mention_func)
+  ## PIPELINE
+  # extract_tar_file >> send_message_to_channels_with_mention
   ## TASK
   for i in range(1, 9):
     t = \
       PythonOperator(
         task_id='copy_bcl_to_remote_for_lane{0}'.format(i),
         dag=dag,
-        pool='orwell_scp_pool',
+        pool='wells_scp_pool',
         queue='hpc_4G',
         params={'lane_id': i,
                 'xcom_task': 'check_and_divide_run_for_remote_copy',
@@ -105,7 +107,7 @@ with dag:
     PythonOperator(
       task_id='copy_additional_file_to_remote',
       dag=dag,
-      pool='orwell_scp_pool',
+      pool='wells_scp_pool',
       queue='hpc_4G',
       params={'xcom_task': 'check_and_divide_run_for_remote_copy',
               'xcom_key': 'additional_files'},

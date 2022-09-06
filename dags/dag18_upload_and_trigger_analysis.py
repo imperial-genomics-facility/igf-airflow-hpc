@@ -2,11 +2,11 @@ import os, logging
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-#from airflow.operators.trigger_dagrun import TriggerDagRunOperator # FIX for v2
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+#from airflow.operators.dagrun_operator import TriggerDagRunOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator # FIX for v2
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_designs_func
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import load_analysis_design_func
 from igf_airflow.utils.dag18_upload_and_trigger_analysis_utils import find_analysis_to_trigger_dags_func
@@ -85,7 +85,7 @@ with dag:
                 "analysis_limit": 40,
                 "xcom_key": "analysis_list",
                 "trigger_task_prefix": "trigger"},
-            trigger_rule='none_failed_or_skipped',
+            trigger_rule='none_failed_min_one_success',
             python_callable=find_analysis_to_trigger_dags_func)
     ## TASK
     no_trigger = \
@@ -101,9 +101,8 @@ with dag:
                 dag=dag)
         for i in range(0, 40):
             t = \
-                TriggerDagRunOperator(
+                PythonOperator(
                     task_id="trigger_{0}_{1}".format(analysis_name, i),
-                    trigger_dag_id=analysis_name,
                     dag=dag,
                     queue='hpc_4G',
                     params={
@@ -124,7 +123,7 @@ with dag:
             params={
                 "xcom_key": "analysis_list",
                 "xcom_task": "find_analysis_to_trigger_dags"},
-            trigger_rule='none_failed_or_skipped',
+            trigger_rule='none_failed_min_one_success',
             python_callable=send_log_and_reset_trigger_file_func)
     ## PIPELINE
     find_analysis_designs >> load_analysis_design_tasks 

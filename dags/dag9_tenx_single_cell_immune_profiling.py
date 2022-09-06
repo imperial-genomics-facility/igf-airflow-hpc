@@ -1,10 +1,10 @@
 from datetime import timedelta
 import os,json,logging,subprocess
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import fetch_analysis_info_and_branch_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import configure_cellranger_run_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_sc_read_trimmming_func
@@ -53,8 +53,8 @@ dag = \
     schedule_interval=None,
     tags=['hpc', 'analysis', 'tenx', 'sc'],
     default_args=default_args,
-    concurrency=100,
-    max_active_runs=5,
+    max_active_tasks=100,
+    max_active_runs=40,
     orientation='LR')
 
 with dag:
@@ -75,24 +75,24 @@ with dag:
       task_id='configure_cellranger_run',
       dag=dag,
       queue='hpc_4G',
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={
         'xcom_pull_task_id': 'fetch_analysis_info',
         'analysis_description_xcom_key': 'analysis_description',
         'analysis_info_xcom_key': 'analysis_info',
         'library_csv_xcom_key': 'cellranger_library_csv'},
       python_callable=configure_cellranger_run_func)
-  for analysis_name in FEATURE_TYPE_LIST.keys():
+  for feature_name in FEATURE_TYPE_LIST.keys():
     ## TASK
     task_branch = \
       BranchPythonOperator(
-        task_id=analysis_name,
+        task_id=feature_name,
         dag=dag,
         queue='hpc_4G',
         params={
           'xcom_pull_task_id': 'fetch_analysis_info',
           'analysis_info_xcom_key': 'analysis_info',
-          'analysis_name': analysis_name,
+          'feature_name': feature_name,
           'task_prefix': 'run_trim'},
         python_callable=task_branch_function)
     run_trim_list = list()
@@ -100,14 +100,14 @@ with dag:
       ## TASK
       t = \
         PythonOperator(
-          task_id='run_trim_{0}_{1}'.format(analysis_name, run_id),
+          task_id='run_trim_{0}_{1}'.format(feature_name, run_id),
           dag=dag,
           queue='hpc_4G',
           params={
             'xcom_pull_task_id': 'fetch_analysis_info',
             'analysis_info_xcom_key': 'analysis_info',
             'analysis_description_xcom_key': 'analysis_description',
-            'analysis_name': analysis_name,
+            'feature_name': feature_name,
             'run_id': run_id,
             'r1-length': 0,
             'r2-length': 0,
@@ -119,8 +119,8 @@ with dag:
     ## TASK
     collect_trimmed_files = \
       DummyOperator(
-        task_id='collect_trimmed_files_{0}'.format(analysis_name),
-        trigger_rule='none_failed_or_skipped',
+        task_id='collect_trimmed_files_{0}'.format(feature_name),
+        trigger_rule='none_failed_min_one_success',
         dag=dag)
     ## PIPELINE
     fetch_analysis_info_and_branch >> task_branch
@@ -186,7 +186,7 @@ with dag:
         'collection_table': 'sample',
         'xcom_collection_name_key': 'sample_igf_id',
         'genome_column': 'genome_build',
-        'analysis_name': 'cellranger_multi',
+        'sc_analysis_name': 'cellranger_multi',
         'output_xcom_key': 'loaded_output_files',
         'html_xcom_key': 'html_report_file',
         'html_report_file_name': 'web_summary.html'})
@@ -225,7 +225,7 @@ with dag:
         'xcom_pull_files_key': 'loaded_output_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'cellranger_multi'})
+        'sc_analysis_name': 'cellranger_multi'})
   ## PIPELINE
   decide_analysis_branch >> load_cellranger_result_to_db
   load_cellranger_result_to_db >> upload_cellranger_report_to_ftp
@@ -245,7 +245,7 @@ with dag:
         'allow_errors': False,
         'kernel_name': 'python3',
         'count_dir': 'count',
-        'analysis_name': 'scanpy',
+        'sc_analysis_name': 'scanpy',
         'output_notebook_key': 'scanpy_notebook',
         'output_cellbrowser_key': 'cellbrowser_dirs',
         'output_scanpy_h5ad_key': 'scanpy_h5ad',
@@ -276,7 +276,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scanpy_for_sc_5p',
         'file_name_key': 'scanpy_notebook',
-        'analysis_name': 'scanpy_5p',
+        'sc_analysis_name': 'scanpy_5p',
         'collection_type': 'SCANPY_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -338,7 +338,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'python3',
-        'analysis_name': 'scirpy',
+        'sc_analysis_name': 'scirpy',
         'vdj_dir': 'vdj_b',
         'count_dir': 'count',
         'output_notebook_key': 'scirpy_notebook',
@@ -369,7 +369,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scirpy_for_vdj_b',
         'file_name_key': 'scirpy_notebook',
-        'analysis_name': 'scirpy_vdj_b',
+        'sc_analysis_name': 'scirpy_vdj_b',
         'collection_type': 'SCIRPY_VDJ_B_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -416,7 +416,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'python3',
-        'analysis_name': 'scirpy',
+        'sc_analysis_name': 'scirpy',
         'vdj_dir': 'vdj_t',
         'count_dir': 'count',
         'output_notebook_key': 'scirpy_notebook',
@@ -447,7 +447,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scirpy_for_vdj_t',
         'file_name_key': 'scirpy_notebook',
-        'analysis_name': 'scirpy_vdj_t',
+        'sc_analysis_name': 'scirpy_vdj_t',
         'collection_type': 'SCIRPY_VDJ_T_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -494,7 +494,7 @@ with dag:
         'scanpy_timeout': 1200,
         'allow_errors': False,
         'kernel_name': 'ir',
-        'analysis_name': 'seurat',
+        'sc_analysis_name': 'seurat',
         'vdj_dir': 'vdj',
         'count_dir': 'count',
         'output_notebook_key': 'seurat_notebook',
@@ -511,7 +511,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_seurat_for_sc_5p',
         'file_name_key': 'seurat_notebook',
-        'analysis_name': 'seurat_5p',
+        'sc_analysis_name': 'seurat_5p',
         'collection_type': 'SEURAT_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -559,7 +559,7 @@ with dag:
         'use_ephemeral_space': True,
         'threads': 4,
         'cellranger_bam_path': 'count/sample_alignments.bam',
-        'analysis_name': 'cellranger',
+        'sc_analysis_name': 'cellranger',
         'collection_type': 'ANALYSIS_CRAM',
         'collection_table': 'sample',
         'cram_files_xcom_key': 'cram_files'})
@@ -582,7 +582,7 @@ with dag:
   run_velocyto = \
     PythonOperator(
       task_id='run_velocyto',
-      queue='hpc_16G_long',
+      queue='hpc_64G16t',
       python_callable=run_velocyto_func,
       params={
         'xcom_pull_task': 'run_cellranger',
@@ -620,7 +620,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_velocyto',
         'file_name_key': 'loom_output',
-        'analysis_name': 'velocyto_5p',
+        'sc_analysis_name': 'velocyto_5p',
         'collection_type': 'VELOCYTO_LOOM',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -635,7 +635,7 @@ with dag:
         'xcom_pull_files_key': 'output_db_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'velocyto_loom'})
+        'sc_analysis_name': 'velocyto_loom'})
   load_scvelo_report_to_rds = \
     PythonOperator(
       task_id='load_scvelo_report_to_rds',
@@ -647,7 +647,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_scvelo_for_sc_5p',
         'file_name_key': 'scvelo_notebook',
-        'analysis_name': 'scvelo_5p',
+        'sc_analysis_name': 'scvelo_5p',
         'collection_type': 'SCVELO_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -715,7 +715,7 @@ with dag:
         'xcom_pull_files_key': 'cram_files',
         'collection_name_key': 'sample_igf_id',
         'collection_name_task': 'load_cellranger_result_to_db',
-        'analysis_name': 'cellranger_multi'})
+        'sc_analysis_name': 'cellranger_multi'})
   ## PIPELINE
   #convert_cellranger_bam_to_cram >> copy_bam_for_parallel_runs                  # we need to load metrics to cram
   generate_cell_sorted_bam >> copy_bam_for_parallel_runs
@@ -1032,7 +1032,7 @@ with dag:
       task_id='run_multiqc',
       dag=dag,
       queue='hpc_4G',
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       python_callable=run_multiqc_for_cellranger,
       params={
         'list_of_analysis_xcoms_and_tasks': {
@@ -1069,7 +1069,7 @@ with dag:
         'collection_name_key': 'sample_igf_id',
         'file_name_task': 'run_multiqc',
         'file_name_key': 'multiqc_html',
-        'analysis_name': 'multiqc',
+        'sc_analysis_name': 'multiqc',
         'collection_type': 'MULTIQC_HTML',
         'collection_table': 'sample',
         'output_files_key': 'output_db_files'})
@@ -1112,7 +1112,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=change_pipeline_status,
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={
         'new_status': 'FINISHED',
         'no_change_status': 'SEEDED'})

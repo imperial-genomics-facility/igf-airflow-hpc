@@ -1,7 +1,7 @@
 from datetime import timedelta
-from airflow.models import DAG,Variable
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.bash import BashOperator
 
 ## ARGS
 default_args = {
@@ -19,7 +19,7 @@ dag = \
   DAG(
     dag_id='dag4_lims_metadata',
     catchup=False,
-    schedule_interval='@daily',
+    schedule_interval=None,
     max_active_runs=1,
     tags=['hpc'],
     default_args=default_args)
@@ -30,7 +30,6 @@ with dag:
     BashOperator(
       task_id='submit_metadata_fetch_job',
       dag=dag,
-      xcom_push=False,
       queue='hpc_4G',
       bash_command='bash /rds/general/user/igf/home/git_repo/IGF-cron-scripts/hpc/lims_metadata/fetch_lims_metadata_qsub.sh ')
 

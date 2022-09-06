@@ -1,10 +1,10 @@
 from datetime import timedelta
-import os,json,logging,subprocess
-from airflow.models import DAG,Variable
+import os, json, logging, subprocess
+from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline_utils import fetch_nextflow_analysis_info_and_branch_func
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline_utils import prep_nf_run_func
 from igf_airflow.utils.dag10_nextflow_atacseq_pipeline_utils import run_nf_command_func
@@ -68,7 +68,7 @@ with dag:
       dag=dag,
       queue='hpc_4G',
       python_callable=change_pipeline_status,
-      trigger_rule='none_failed_or_skipped',
+      trigger_rule='none_failed_min_one_success',
       params={'new_status':'FINISHED',
               'no_change_status':'SEEDED'})
   ## PIPELINE

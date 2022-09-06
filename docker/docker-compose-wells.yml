@@ -1,41 +1,43 @@
-version: '2.2'
+version: '3.4'
 networks:
-    airflow_network:
+    airflow_network_v2:
         driver: bridge
 services:
-    airflow_scheduler:
-        image: apache/airflow:1.10.12
+    airflow_scheduler_v2:
+        image: apache/airflow:2.2.2
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
+        user: "${AIRFLOW_UID:-50000}:0"
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         restart: always
         command: scheduler
-        container_name: airflow_scheduler
+        container_name: airflow_scheduler_v2
         networks:
-               - airflow_network
-    airflow_worker:
-        image: apache/airflow:1.10.12
-        depends_on:
-                - airflow_scheduler
+               - airflow_network_v2
+    airflow_worker_v2:
+        image: apache/airflow:2.2.2
         env_file:
-                - /home/igf/airflow_test/secrets/airflow_env
+                - /home/igf/airflow_v2/secrets/airflow_env
+        links:
+                - airflow_scheduler_v2
+        depends_on:
+                - airflow_scheduler_v2
+        user: "${AIRFLOW_UID:-50000}:0"
         ports:
-                - "8793:8793"
+                - "8794:8794"
         volumes:
-                - /home/igf/airflow_test/logs:/rds/general/user/igf/ephemeral/airflow_logs/logs:rw
-                - /home/igf/airflow_test/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_test/github/igf-airflow-hpc:ro
-                - /home/igf/airflow_test/github/data-management-python:/rds/general/user/igf/home/data2/airflow_test/github/data-management-python:ro
-                - /home/igf/airflow_test/secrets:/rds/general/user/igf/home/data2/airflow_test/secrets:ro
-                - /home/igf/airflow_test/plugin:/rds/general/user/igf/home/data2/airflow_test/plugin:ro
-                - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
-                - /data/igf:/rds/general/user/igf/ephemeral:rw
+                - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
+                - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
+                - /home/igf/airflow_v2/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v2/github/data-management-python:ro
+                - /home/igf/airflow_v2/secrets:/rds/general/user/igf/home/data2/airflow_v2/secrets:ro
+                - /home/igf/airflow_v2/plugin:/rds/general/user/igf/home/data2/airflow_v2/plugin:ro
         restart: always
-        command: worker -q wells,generic --celery_hostname wells
-        container_name: airflow_worker
+        command: celery worker -q generic --celery-hostname wells
+        container_name: airflow_worker_v2
         networks:
-               - airflow_network
+               - airflow_network_v2

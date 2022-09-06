@@ -1,16 +1,18 @@
-import os, json, logging, requests
+import os, json, logging, requests, base64
 from datetime import timedelta
 from requests.auth import HTTPBasicAuth
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.contrib.hooks.ssh_hook import SSHHook
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from igf_airflow.celery.check_celery_queue import fetch_queue_list_from_redis_server
 from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
-CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url')
+
+CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
+CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
 
 args = {
     'owner':'airflow',
@@ -26,9 +28,9 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
-        schedule_interval="*/5 * * * *",
+        schedule_interval="*/3 * * * *",
         default_args=args,
-        tags=['igf-lims',]
+        tags=['igf-lims', 'wells']
       )
 
 
@@ -60,7 +62,14 @@ def get_new_workers(**kwargs):
       raise ValueError('ti not present in kwargs')
     ti = kwargs.get('ti')
     active_tasks = ti.xcom_pull(task_ids='fetch_active_jobs_from_hpc')
-    active_tasks = active_tasks.decode()
+    if isinstance(active_tasks, str):
+      active_tasks = \
+        base64.b64decode(
+          active_tasks.encode('ascii')).\
+        decode('utf-8').\
+        strip()
+    elif isinstance(active_tasks, bytes):
+      active_tasks = active_tasks.decode('utf-8')
     active_tasks = json.loads(active_tasks)
     queued_tasks = ti.xcom_pull(task_ids='fetch_queue_list_from_redis')
     worker_to_submit,unique_queue_list = \
@@ -105,11 +114,22 @@ def fetch_celery_worker_list(**context):
   try:
     ti = context.get('ti')
     celery_worker_key = context['params'].get('celery_worker_key')
-    celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
-    if celery_basic_auth is None:
-      raise ValueError('Missing env for flower basic auth')
-    flower_user, flower_pass = celery_basic_auth.split(':')
-    celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+    if CELERY_FLOWER_CONFIG is not None:
+      ## new config file
+      if not os.path.exists(CELERY_FLOWER_CONFIG):
+        raise IOError("Celery flower config file not found")
+      with open(CELERY_FLOWER_CONFIG, 'r') as jp:
+        flower_config = json.load(jp)
+        celery_url = '{0}/api/workers'.format(flower_config.get('flower_url'))
+        flower_user = flower_config.get('flower_user')
+        flower_pass = flower_config.get('flower_pass')
+    else:
+      ## support for legacy config
+      celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+      celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
+      if celery_basic_auth is None:
+        raise ValueError('Missing env for flower basic auth')
+      flower_user, flower_pass = celery_basic_auth.split(':')
     res = requests.get(celery_url, auth=HTTPBasicAuth(flower_user, flower_pass))
     if res.status_code != 200:
       raise ValueError('Failed to fetch celery workers')
@@ -134,16 +154,34 @@ def stop_celery_workers(**context):
   try:
     ti = context.get('ti')
     empty_celery_worker_key = context['params'].get('empty_celery_worker_key')
-    celery_basic_auth = os.environ['AIRFLOW__CELERY__FLOWER_BASIC_AUTH']
-    flower_user, flower_pass = celery_basic_auth.split(':')
+    if CELERY_FLOWER_CONFIG is not None:
+      ## new config file
+      if not os.path.exists(CELERY_FLOWER_CONFIG):
+        raise IOError("Celery flower config file not found")
+      with open(CELERY_FLOWER_CONFIG, 'r') as jp:
+        flower_config = json.load(jp)
+        celery_url = flower_config.get('flower_url')
+        flower_user = flower_config.get('flower_user')
+        flower_pass = flower_config.get('flower_pass')
+    else:
+      ## support for legacy config
+      celery_url = '{0}/api/workers'.format(CELERY_FLOWER_BASE_URL)
+      celery_basic_auth = os.environ.get('AIRFLOW__CELERY__FLOWER_BASIC_AUTH')
+      if celery_basic_auth is None:
+        raise ValueError('Missing env for flower basic auth')
+      flower_user, flower_pass = celery_basic_auth.split(':')
+    # celery_basic_auth = os.environ['AIRFLOW__CELERY__FLOWER_BASIC_AUTH']
+    # flower_user, flower_pass = celery_basic_auth.split(':')
     celery_workers = \
 		  ti.xcom_pull(
         task_ids='calculate_new_worker_size_and_branch',
         key=empty_celery_worker_key)
     for worker_id in celery_workers:
+      # flower_shutdown_url = \
+      #   '{0}/api/worker/shutdown/{1}'.\
+      #     format(CELERY_FLOWER_BASE_URL, worker_id)
       flower_shutdown_url = \
-        '{0}/api/worker/shutdown/{1}'.\
-          format(CELERY_FLOWER_BASE_URL, worker_id)
+        f'{celery_url}/api/worker/shutdown/{worker_id}'
       res = requests.post(
               flower_shutdown_url,
               auth=HTTPBasicAuth(flower_user, flower_pass))
@@ -163,6 +201,7 @@ with dag:
       dag=dag,
       python_callable=airflow_utils_for_redis,
       op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
+      pool='generic_pool',
       queue='generic')
   ## TASK
   check_hpc_queue = \
@@ -171,6 +210,7 @@ with dag:
       ssh_hook=hpc_hook,
       dag=dag,
       command='source /etc/bashrc;qstat',
+      pool='generic_pool',
       queue='generic')
   ## TASK
   fetch_active_jobs_from_hpc = \
@@ -178,10 +218,11 @@ with dag:
       task_id='fetch_active_jobs_from_hpc',
       ssh_hook=hpc_hook,
       dag=dag,
+      pool='generic_pool',
       command="""
         source /etc/bashrc;\
-        source /project/tgu/data2/airflow_test/secrets/hpc_env.sh;\
-        python /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
+        source /project/tgu/data2/airflow_v2/secrets/hpc_env.sh;\
+        python /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       queue='generic')
   ## TASK
@@ -189,6 +230,7 @@ with dag:
     PythonOperator(
       task_id='fetch_celery_workers',
       dag=dag,
+      pool='generic_pool',
       queue='generic',
       python_callable=fetch_celery_worker_list,
       params={'celery_worker_key':'celery_workers'}
@@ -200,6 +242,7 @@ with dag:
       dag=dag,
       python_callable=get_new_workers,
       queue='generic',
+      pool='generic_pool',
       params={'celery_worker_key':'celery_workers',
               'empty_celery_worker_key':'empty_celery_worker',
               'base_queue':'generic'})
@@ -214,6 +257,7 @@ with dag:
       ssh_hook=hpc_hook,
       dag=dag,
       queue='generic',
+      pool='generic_pool',
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
         source /etc/bashrc; \
@@ -223,7 +267,7 @@ with dag:
           -k n -m n \
           -N {{ params.job_name }} \
           -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% else %}
         source /etc/bashrc;\
         qsub \
@@ -231,7 +275,7 @@ with dag:
           -e /dev/null \
           -k n -m n \
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_test/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% endif %}
       """,
       params={'pbs_resource':pbs_resource,
@@ -246,6 +290,7 @@ with dag:
       task_id='cleanup_celery_workers',
       dag=dag,
       queue='generic',
+      pool='generic_pool',
       params={'empty_celery_worker_key':'empty_celery_worker'},
       python_callable=stop_celery_workers)
   ## PIPELINE

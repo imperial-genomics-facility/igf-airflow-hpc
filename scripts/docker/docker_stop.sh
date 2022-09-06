@@ -1,1 +1,1 @@
-docker-compose -f /home/igf/airflow_test/github/igf-airflow-hpc/docker/docker-compose.yml -p airflow-test down
+docker-compose -f /home/igf/airflow_v2/github/igf-airflow-hpc/docker/docker-compose.yml -p airflow-v2 down

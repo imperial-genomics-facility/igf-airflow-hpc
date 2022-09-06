@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, airflow_v2.2.2 ]
   pull_request:
     branches: [ master ]
 
@@ -28,22 +28,24 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exclude *template.py --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --count --exit-zero --exclude *template.py --max-complexity=10 --max-line-length=127 --statistics
     - name: Checkout other repo
       uses: actions/checkout@v2
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: cellranger_v6
+        ref: master
         path: data-management-python
     - name: Test with pytest
       run: |
-        airflow upgradedb
+        airflow db upgrade
         pytest --log-cli-level=10 test/
       env:
         PYTHONPATH: /home/runner/work/igf-airflow-hpc/igf-airflow-hpc/data-management-python
         AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 20
+        AIRFLOW__LOGGING__LOGGING_LEVEL: WARNING
+        AIRFLOW__CORE__LOAD_EXAMPLES: False
         AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
         AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"airflow_var/var.json","connections_file_path":"airflow_var/conn.json"}'
     - name: Send custom JSON data to Slack workflow
