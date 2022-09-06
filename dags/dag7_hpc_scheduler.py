@@ -65,7 +65,7 @@ with dag:
   ## TASK
   restart_portal_flower_server = \
     SSHOperator(
-      task_id='restart_flower_server',
+      task_id='restart_portal_flower_server',
       dag=dag,
       ssh_hook=igf_lims_ssh_hook,
       pool='generic_pool',
