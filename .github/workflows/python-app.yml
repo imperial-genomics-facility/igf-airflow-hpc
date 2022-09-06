@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: airflow_v2
+        ref: master
         path: data-management-python
     - name: Test with pytest
       run: |
