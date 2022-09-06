@@ -54,7 +54,7 @@ with dag:
             task_id="copy_quota_xlsx",
             dag=dag,
             queue='hpc_4G',
-            pool="orwell_scp_pool",
+            #pool="orwell_scp_pool",
             params={
                 'xcom_key': 'quota_xlsx',
                 'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
@@ -68,7 +68,7 @@ with dag:
             task_id="copy_access_db",
             dag=dag,
             queue='hpc_4G',
-            pool="orwell_scp_pool",
+            #pool="orwell_scp_pool",
             params={
                 'xcom_key': 'access_db',
                 'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
