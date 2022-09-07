@@ -19,13 +19,12 @@ from igf_airflow.utils.dag20_portal_metadata_utils import fetch_validated_metada
 args = {
     'owner': 'airflow',
     'start_date': days_ago(2),
-    'retries': 1,
+    'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
     'email_on_failure': False,
     'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 1}
+    'catchup': False}
 
 DAG_ID = \
     os.path.basename(__file__).\
@@ -46,6 +45,7 @@ dag = \
         schedule_interval="@hourly",
         default_args=args,
         catchup=False,
+        max_active_runs=1,
         tags=['hpc'])
 with dag:
     ## TASK

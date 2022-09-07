@@ -53,13 +53,12 @@ formatted_samplesheets = {{ FORMATTED_SAMPLESHEETS|safe }}
 args = {
     'owner': 'airflow',
     'start_date': days_ago(2),
-    'retries': 1,
+    'retries': 10,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
     'email_on_failure': False,
     'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 1}
+    'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -74,6 +73,8 @@ dag = \
         default_args=args,
         default_view='graph',
         orientation='TB',
+        max_active_runs=1,
+        is_paused_upon_creation=False,
         tags=['hpc', 'dynamic', 'demult'])
 
 with dag:

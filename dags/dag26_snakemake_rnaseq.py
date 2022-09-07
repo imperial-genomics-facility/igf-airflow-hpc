@@ -13,13 +13,12 @@ from airflow.utils.dates import days_ago
 args = {
     'owner': 'airflow',
     'start_date': days_ago(1),
-    'retries': 1,
+    'retries': 10,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
     'email_on_failure': False,
     'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 10}
+    'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -33,6 +32,7 @@ dag = \
         default_args=args,
         default_view='tree',
         orientation='TB',
+        max_active_runs=10,
         tags=['hpc', 'snakemake', 'rnaseq'])
 
 with dag:

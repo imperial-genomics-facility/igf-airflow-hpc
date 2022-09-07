@@ -15,7 +15,7 @@ from igf_airflow.utils.dag21_portal_admin_view_utils import create_merged_json_a
 args = {
     'owner': 'airflow',
     'start_date': days_ago(2),
-    'retries': 1,
+    'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
     'email_on_failure': False,
@@ -65,6 +65,7 @@ dag = \
         schedule_interval="@hourly",
         default_args=args,
         catchup=False,
+        max_active_runs=1,
         tags=['hpc'])
 with dag:
     ## TASK
