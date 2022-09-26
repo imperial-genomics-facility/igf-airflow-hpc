@@ -106,6 +106,8 @@
   "cellranger_ref_path": "/project/tgu/resources/pipeline_resource/transcriptome/cellranger",
   "spark_lims_metadata_image": "/project/tgu/data2/test_dir/test64_db_patch/test3_lims/lims_metadata_parsing_v0.1.sif",
   "globus_root_dir": "/rds/general/project/genomics-facility-archive-2019/ephemeral/GLOBUS_BASE_DIR/",
+  "snakemake_rnaseq_runner_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/snakemake/rna-seq-star-deseq2/snakemake_runner_v0.0.1.sh",
+  "snakemake_rnaseq_report_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/snakemake/rna-seq-star-deseq2/snakemake_report_v0.0.1.sh",
   "hpc_queue_list": {
     "hpc_1G": {
       "pbs_resource": "-lselect=1:ncpus=1:mem=1gb -lwalltime=12:00:00",

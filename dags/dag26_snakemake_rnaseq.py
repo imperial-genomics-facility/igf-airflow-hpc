@@ -7,6 +7,11 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import change_analysis_seed_status_func
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import prepare_snakemake_inputs_func
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import load_analysis_to_disk_func
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_globus_dir_func
+
 
 
 ## ARGS
@@ -38,10 +43,17 @@ dag = \
 with dag:
 	## TASK
     mark_analysis_seed_as_running = \
-        DummyOperator(
+        BranchPythonOperator(
             task_id="mark_analysis_seed_as_running",
             dag=dag,
             queue='hpc_4G',
+            params={
+                'new_status': 'RUNNING',
+                'no_change_status': ['RUNNING', 'FAILED', 'FINISHED', 'UNKNOWN'],
+                'next_task': 'prepare_snakemake_inputs',
+                'last_task': 'no_task'
+            },
+            python_callable=change_analysis_seed_status_func
         )
     ## TASK
     no_task = \
@@ -52,24 +64,45 @@ with dag:
         )
     ## TASK
     mark_analysis_seed_as_finished = \
-        DummyOperator(
+        PythonOperator(
             task_id="mark_analysis_seed_as_finished",
             dag=dag,
             queue='hpc_4G',
+            params={
+                'new_status': 'FINISHED',
+                'no_change_status': ['SEEDED', 'FAILED'],
+                'next_task': 'prepare_snakemake_inputs',
+                'last_task': 'no_task'
+            },
+            python_callable=change_analysis_seed_status_func
         )
     ## TASK
     prepare_snakemake_inputs = \
-        DummyOperator(
+        PythonOperator(
             task_id="prepare_snakemake_inputs",
             dag=dag,
             queue='hpc_4G',
+            params={
+                "snakemake_command_key": "snakemake_command",
+                "snakemake_report_key": "snakemake_report",
+                "snakemake_workdir_key": "snakemake_workdir"
+            },
+            python_callable=prepare_snakemake_inputs_func
         )
     ## TASK
     run_snakemake_pipeline = \
-        DummyOperator(
+        BashOperator(
             task_id="run_snakemake_pipeline",
             dag=dag,
-            queue='hpc_4G',
+            queue='hpc_4G_long',
+            do_xcom_push=False,
+            params={
+                "task_key": "snakemake_command",
+                "task_id": "prepare_snakemake_inputs"
+            },
+            bash_command="""
+              bash {{ ti.xcom_pull(key=params.task_key, task_ids=params.task_id ) }}
+            """
         )
     ## TASK
     create_snakemake_report = \
@@ -77,20 +110,43 @@ with dag:
             task_id="create_snakemake_report",
             dag=dag,
             queue='hpc_4G',
+            do_xcom_push=False,
+             params={
+                "task_key": "snakemake_report",
+                "task_id": "prepare_snakemake_inputs"
+            },
+            bash_command="""
+              bash {{ ti.xcom_pull(key=params.task_key, task_ids=params.task_id ) }}
+            """
         )
     ## TASK
     load_analysis_to_disk = \
-        DummyOperator(
+        PythonOperator(
             task_id="load_analysis_to_disk",
             dag=dag,
             queue='hpc_4G',
+            params={
+                "analysis_dir_key": "snakemake_workdir",
+                "analysis_dir_task": "prepare_snakemake_inputs",
+                "result_dir_name": "results",
+                "analysis_collection_dir_key": "analysis_collection_dir",
+                "date_tag_key": "date_tag"
+            },
+            python_callable=load_analysis_to_disk_func
         )
     ## TASK
     copy_analysis_to_globus_dir = \
-        DummyOperator(
+        PythonOperator(
             task_id="copy_analysis_to_globus_dir",
             dag=dag,
             queue='hpc_4G',
+            params={
+                "date_tag_key": "date_tag",
+                "date_tag_task": "load_analysis_to_disk",
+                "analysis_collection_dir_key": "analysis_collection_dir",
+                "analysis_collection_dir_task": "load_analysis_to_disk"
+            },
+            python_callable=copy_analysis_to_globus_dir_func
         )
     ## PIPELINE
     mark_analysis_seed_as_running >> no_task
