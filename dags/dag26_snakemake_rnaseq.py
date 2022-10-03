@@ -95,6 +95,7 @@ with dag:
             task_id="run_snakemake_pipeline",
             dag=dag,
             queue='hpc_4G_long',
+            pool='batch_job',
             do_xcom_push=False,
             params={
                 "task_key": "snakemake_command",
