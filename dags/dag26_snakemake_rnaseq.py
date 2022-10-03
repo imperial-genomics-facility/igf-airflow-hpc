@@ -107,7 +107,7 @@ with dag:
         )
     ## TASK
     create_snakemake_report = \
-        DummyOperator(
+        BashOperator(
             task_id="create_snakemake_report",
             dag=dag,
             queue='hpc_4G',
