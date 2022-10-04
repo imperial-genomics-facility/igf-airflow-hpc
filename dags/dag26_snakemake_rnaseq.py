@@ -51,7 +51,8 @@ with dag:
                 'new_status': 'RUNNING',
                 'no_change_status': ['RUNNING', 'FAILED', 'FINISHED', 'UNKNOWN'],
                 'next_task': 'prepare_snakemake_inputs',
-                'last_task': 'no_task'
+                'last_task': 'no_task',
+                'seed_table': 'analysis'
             },
             python_callable=change_analysis_seed_status_func
         )
@@ -71,8 +72,7 @@ with dag:
             params={
                 'new_status': 'FINISHED',
                 'no_change_status': ['SEEDED', 'FAILED'],
-                'next_task': 'prepare_snakemake_inputs',
-                'last_task': 'no_task'
+                'seed_table': 'analysis'
             },
             python_callable=change_analysis_seed_status_func
         )
