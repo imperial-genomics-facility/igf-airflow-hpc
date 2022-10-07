@@ -51,6 +51,7 @@ with dag:
             task_id='get_samplesheet_from_portal',
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             params={
                 'samplesheet_xcom_key': 'samplesheet_data',
             },
