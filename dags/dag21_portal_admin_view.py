@@ -146,7 +146,7 @@ with dag:
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
             command="""
-                df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 3,4,7
+                df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,8
                 """)
     ## TASK
     woolf_root_space = \
