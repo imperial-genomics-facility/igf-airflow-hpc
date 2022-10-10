@@ -96,6 +96,15 @@ with dag:
             pool='wells_ssh_pool',
             command='df /home|grep -w "/home"|cut -d " " -f 3,4,8')
     ## TASK
+    nextseq1_root_space = \
+        SSHOperator(
+            task_id='nextseq1_root_space',
+            dag=dag,
+            ssh_hook=wells_ssh_hook,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
+    ## TASK
     wells_data_space = \
         SSHOperator(
             task_id='wells_data_space',
@@ -196,6 +205,7 @@ with dag:
                 'orwell_home': 'orwell_home_space',
                 'wells_home': 'wells_home_space',
                 'wells_data': 'wells_data_space',
+                'nextseq1_data': 'nextseq1_root_space',
                 'eliot_root': 'eliot_root_space',
                 'eliot_data': 'eliot_data_space',
                 'eliot_data2': 'eliot_data2_space',
@@ -210,6 +220,7 @@ with dag:
     orwell_home_space >> prepare_storage_plot
     wells_home_space >> prepare_storage_plot
     wells_data_space >> prepare_storage_plot
+    nextseq1_root_space >> prepare_storage_plot
     eliot_root_space >> prepare_storage_plot
     eliot_data_space >> prepare_storage_plot
     eliot_data2_space >> prepare_storage_plot
