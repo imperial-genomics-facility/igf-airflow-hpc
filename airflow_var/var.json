@@ -92,6 +92,8 @@
   "samtools_singularity_image": "/project/tgu/resources/pipeline_resource/singularity_images/samtools/htslib_v1.11.sif",
   "igenome_base_path": "/project/tgu/resources/pipeline_resource",
   "nextflow_template_file": "/project/tgu/data2/airflow_v2/github/data-management-python/igf_nextflow/config/nextflow.cfg_template",
+  "nextflow_runner_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/nextflow_template/nfcore_generic_runner_v0.0.1.sh",
+  "nextflow_conf_template": "/project/tgu/data2/airflow_v2/github/data-management-python/template/nextflow_template/nextflow_generic_conf_v0.0.1.conf",
   "nextflow_exe": "/project/tgu/software/nextflow/nextflow",
   "nextflow_singularity_cache_dir": "/project/tgu/resources/pipeline_resource/nextflow_singularity_cachedir",
   "seqrun_demult_notebook_template": "/project/tgu/software/interop-notebook-image/templates/demult_report_v0.0.1.ipynb",
