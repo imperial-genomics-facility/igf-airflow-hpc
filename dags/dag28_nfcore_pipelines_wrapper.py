@@ -10,6 +10,7 @@ from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import change_analysis_seed_status_func
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import load_analysis_to_disk_func
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_globus_dir_func
+from igf_airflow.utils.dag28_nfcore_pipelines_wrapper_utils import prepare_nfcore_pipeline_inputs
 
 ## ARGS
 args = {
@@ -96,9 +97,10 @@ with dag:
             params={
                 "nextflow_command_key": "nextflow_command",
                 "nextflow_workdir_key": "nextflow_workdir",
+                "next_task": "run_nfcore_pipeline",
                 "last_task": "mark_analysis_seed_as_failed"
             },
-            python_callable=None
+            python_callable=prepare_nfcore_pipeline_inputs
         )
     ## TASK
     run_nfcore_pipeline = \
