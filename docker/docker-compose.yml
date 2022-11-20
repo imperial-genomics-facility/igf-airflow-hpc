@@ -15,7 +15,6 @@ services:
         container_name: airflow_db_v2
         networks:
                - airflow_network_v2
-
     airflow_pgbouncer_v2:
         image: pgbouncer:v1.7.0
         volumes:
@@ -27,6 +26,7 @@ services:
             airflow_db_v2:
                 condition: service_started
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
+        container_name: airflow_pgbouncer_v2
         ports:
             - "5435:5432"
         networks:
