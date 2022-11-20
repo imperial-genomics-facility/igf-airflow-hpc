@@ -17,7 +17,7 @@ services:
                - airflow_network_v2
 
     airflow_pgbouncer_v2:
-        image: postgres:13
+        image: pgbouncer:v1.7.0
         volumes:
             - /home/igf/airflow_v2/pgbouncer:/opt/pgbouncer
         restart: always
