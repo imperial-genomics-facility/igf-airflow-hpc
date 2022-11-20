@@ -29,6 +29,8 @@ services:
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
         ports:
             - "5435:5432"
+        networks:
+               - airflow_network_v2
 
     airflow_results_db_v2:
         image: postgres:14
