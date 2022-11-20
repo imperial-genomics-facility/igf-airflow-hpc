@@ -64,6 +64,7 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         ports:
                 - "8083:8080"
         user: "${AIRFLOW_UID:-50000}:0"
@@ -99,6 +100,7 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         depends_on:
             airflow_db_v2:
                 condition: service_started
@@ -136,6 +138,7 @@ services:
                 - redis-server_v2
                 - airflow_scheduler_v2
                 - airflow_flower_v2
+                - airflow_pgbouncer_v2
         depends_on:
             airflow_db_v2:
                 condition: service_started
@@ -175,6 +178,7 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         ports:
                 - "5555:5555"
         depends_on:
@@ -215,6 +219,7 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         depends_on:
             airflow_db_v2:
                 condition: service_started
