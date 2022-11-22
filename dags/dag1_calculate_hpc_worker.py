@@ -13,6 +13,7 @@ from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
+HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
 
 args = {
     'owner':'airflow',
@@ -79,7 +80,8 @@ def get_new_workers(**kwargs):
         max_workers_per_queue=Variable.get('hpc_max_workers_per_queue'),
         max_total_workers=Variable.get('hpc_max_total_workers'))
     for key,value in worker_to_submit.items():
-      ti.xcom_push(key=key,value=value)
+      if key in HPC_QUEUE_LIST:
+        ti.xcom_push(key=key,value=value)
     unique_queue_list = \
       [q for q in unique_queue_list if q.startswith('hpc')]
     celery_worker_key = kwargs['params'].get('celery_worker_key')
