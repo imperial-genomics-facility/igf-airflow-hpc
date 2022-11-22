@@ -250,8 +250,7 @@ with dag:
               'base_queue':'generic'})
   ## TASK
   queue_tasks = list()
-  hpc_queue_list = Variable.get('hpc_queue_list')
-  for q,data in hpc_queue_list.items():
+  for q,data in HPC_QUEUE_LIST.items():
     pbs_resource = data.get('pbs_resource')
     airflow_queue = data.get('airflow_queue')
     t = SSHOperator(
