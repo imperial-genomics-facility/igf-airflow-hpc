@@ -119,6 +119,24 @@ with dag:
             """
         )
     ## TASK
+    create_md5sum_for_analysis = \
+        BashOperator(
+            task_id="create_md5sum_for_analysis",
+            dag=dag,
+            queue='hpc_4G',
+            do_xcom_push=False,
+            params={
+                "task_key": "nextflow_workdir",
+                "task_id": "prepare_nfcore_pipeline_inputs"
+                "result_dir_name": "results",
+            },
+            bash_command="""
+              cd {{ ti.xcom_pull(key=params.task_key, task_ids=params.task_id ) }}
+              find {{ result_dir_name }} -type f -exec md5sum {} \; > file_manifest.md5
+              mv file_manifest.md5 {{ result_dir_name }}/file_manifest.md5
+            """
+        )
+    ## TASK
     load_analysis_to_disk = \
         PythonOperator(
             task_id="load_analysis_to_disk",
@@ -152,6 +170,7 @@ with dag:
     mark_analysis_seed_as_running >> prepare_nfcore_pipeline_inputs
     prepare_nfcore_pipeline_inputs >> mark_analysis_seed_as_failed
     prepare_nfcore_pipeline_inputs >> run_nfcore_pipeline
-    run_nfcore_pipeline >> load_analysis_to_disk
+    run_nfcore_pipeline >> create_md5sum_for_analysis
+    create_md5sum_for_analysis >> load_analysis_to_disk
     load_analysis_to_disk >> copy_analysis_to_globus_dir
     copy_analysis_to_globus_dir >> mark_analysis_seed_as_finished
