@@ -84,6 +84,7 @@ with dag:
             task_id="find_seqrun",
             dag=dag,
             queue="hpc_4G",
+            pool="demultiplexing",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
                 'next_task_id': 'mark_seqrun_as_running',
@@ -96,6 +97,7 @@ with dag:
             task_id="mark_seqrun_as_running",
             dag=dag,
             queue="hpc_4G",
+            pool="demultiplexing",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
                 'next_task': 'format_and_split_samplesheet',
@@ -112,6 +114,7 @@ with dag:
             task_id="fetch_samplesheet_for_run",
             dag=dag,
             queue='hpc_4G',
+            pool="demultiplexing",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
                 'samplesheet_xcom_key': 'samplesheet_data',
@@ -123,6 +126,7 @@ with dag:
 			task_id="format_and_split_samplesheet",
 			dag=dag,
 			queue="hpc_4G",
+            pool="demultiplexing",
 			params={
                 'seqrun_igf_id': seqrun_igf_id,
                 'formatted_samplesheets': formatted_samplesheets,
@@ -150,6 +154,7 @@ with dag:
             task_id="mark_seqrun_as_finished",
             dag=dag,
             queue="hpc_4G",
+            pool="demultiplexing",
             trigger_rule="all_done",
             params={
                 'seqrun_igf_id': seqrun_igf_id,
@@ -166,6 +171,7 @@ with dag:
                 task_id=f"setup_qc_page_for_project_{project_id}",
                 dag=dag,
                 queue="hpc_4G",
+                pool="demultiplexing",
                 params={
                     'seqrun_igf_id': seqrun_igf_id,
                     'formatted_samplesheets': formatted_samplesheets,
@@ -183,6 +189,7 @@ with dag:
                 task_id=f"setup_globus_transfer_for_project_{project_id}",
                 dag=dag,
                 queue="hpc_4G",
+                pool="demultiplexing",
                 params={
                     'seqrun_igf_id': seqrun_igf_id,
                     'formatted_samplesheets': formatted_samplesheets,
@@ -201,6 +208,7 @@ with dag:
                 task_id=f"get_lanes_for_project_{project_id}",
                 dag=dag,
 				queue="hpc_4G",
+                pool="demultiplexing",
                 params={
                     'seqrun_igf_id': seqrun_igf_id,
                     'formatted_samplesheets': formatted_samplesheets,
@@ -219,6 +227,7 @@ with dag:
                 task_id=f"build_qc_page_for_project_{project_id}",
                 dag=dag,
 				queue="hpc_4G",
+                pool="demultiplexing",
                 params={
                     "seqrun_igf_id": seqrun_igf_id,
                     "formatted_samplesheets": formatted_samplesheets,
@@ -242,6 +251,7 @@ with dag:
                 task_id=f"send_email_to_user_for_project_{project_id}",
                 dag=dag,
 				queue="hpc_4G",
+                pool="demultiplexing",
                 params={
                     "project_index": project_id,
                     "formatted_samplesheets": formatted_samplesheets,
@@ -262,6 +272,7 @@ with dag:
                     task_id=f"get_igs_for_project_{project_id}_lane_{lane_id}",
                     dag=dag,
 					queue="hpc_4G",
+                    pool="demultiplexing",
 				    params={
                         'seqrun_igf_id': seqrun_igf_id,
                         'formatted_samplesheets': formatted_samplesheets,
@@ -291,6 +302,7 @@ with dag:
                         task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_64G16t",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
@@ -320,6 +332,7 @@ with dag:
                         task_id=f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
@@ -334,6 +347,7 @@ with dag:
                         task_id=f"load_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
                         queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
@@ -353,6 +367,7 @@ with dag:
                         task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'xcom_key_bclconvert_reports': 'bclconvert_reports',
@@ -366,6 +381,7 @@ with dag:
                         task_id=f"merge_single_cell_fastq_files_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'project_index': project_id,
 							'lane_index': lane_id,
@@ -385,6 +401,7 @@ with dag:
                         task_id=f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             "xcom_key_for_bclconvert_output": "bclconvert_output",
                             "bclconvert_task_prefix": "bclconvert_",
@@ -400,6 +417,7 @@ with dag:
                         task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
@@ -426,6 +444,7 @@ with dag:
                         task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
 						params={
                             "remote_collection_type": "FTP_MULTIQC_HTML_REPORT",
                             "xcom_key_for_qc_collection": "multiqc",
@@ -438,6 +457,7 @@ with dag:
                         task_id=f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
                         queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             "xcom_key_for_undetermined_fastqc": "undetermined_fastqc",
                             'xcom_key_for_bclconvert_output': 'bclconvert_output',
@@ -450,6 +470,7 @@ with dag:
                         task_id=f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
                         queue="hpc_8G",
+                        pool="demultiplexing",
                         params={
                             "xcom_key_for_undetermined_fastq_screen": "undetermined_fastq_screen",
                             'xcom_key_for_bclconvert_output': 'bclconvert_output',
@@ -463,6 +484,7 @@ with dag:
                         task_id=f"multiqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
                         queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
                             'formatted_samplesheets': formatted_samplesheets,
@@ -487,6 +509,7 @@ with dag:
                         task_id=f"build_qc_page_data_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
 						queue="hpc_4G",
+                        pool="demultiplexing",
                         params={
                             "seqrun_igf_id": seqrun_igf_id,
                             "formatted_samplesheets": formatted_samplesheets,
@@ -530,6 +553,7 @@ with dag:
                             task_id=f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
 							queue="hpc_4G",
+                            pool="demultiplexing",
                             params={
                                 'seqrun_igf_id': seqrun_igf_id,
                                 'formatted_samplesheets': formatted_samplesheets,
@@ -550,6 +574,7 @@ with dag:
                             task_id=f"prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
                             queue="hpc_4G",
+                            pool="demultiplexing",
                             params={
                                 "globus_dir_task": f"setup_globus_transfer_for_project_{project_id}",
                                 "globus_dir_key": "globus_root_dir",
@@ -567,6 +592,7 @@ with dag:
                             task_id=f"get_fastqs_and_copy_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
                             queue="hpc_4G",
+                            pool="demultiplexing",
                             params={
                                 "target_dir_key": "globus_target_dir",
                                 "target_dir_task": f"sample_group_{project_id}_{lane_id}_{index_id}.prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
@@ -590,6 +616,7 @@ with dag:
 								task_id=f"calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
 								dag=dag,
 								queue="hpc_4G",
+                                pool="demultiplexing",
 								params={
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
@@ -611,6 +638,7 @@ with dag:
                                 task_id=f"load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
 								queue="hpc_4G",
+                                pool="demultiplexing",
 								params={
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
@@ -640,6 +668,7 @@ with dag:
                                 task_id=f"fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
 								queue="hpc_4G",
+                                pool="demultiplexing",
 								params={
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
@@ -657,6 +686,7 @@ with dag:
                                 task_id=f"copy_fastqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
 							    queue="hpc_4G",
+                                pool="demultiplexing",
 								params={
                                     'remote_collection_type': 'FTP_FASTQC_HTML_REPORT',
                                     'xcom_key_for_qc_collection': 'fastqc_collection',
@@ -669,6 +699,7 @@ with dag:
                                 task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
 							    queue="hpc_8G",
+                                pool="demultiplexing",
 								params={
                                     'seqrun_igf_id': seqrun_igf_id,
                                     'formatted_samplesheets': formatted_samplesheets,
@@ -686,6 +717,7 @@ with dag:
                                 task_id=f"copy_fastq_screen_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
 							    queue="hpc_4G",
+                                pool="demultiplexing",
 								params={
                                     'remote_collection_type': 'FTP_FASTQSCREEN_HTML_REPORT',
                                     'xcom_key_for_qc_collection': 'fastq_screen_collection',
