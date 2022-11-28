@@ -127,7 +127,7 @@ with dag:
             do_xcom_push=False,
             params={
                 "task_key": "nextflow_workdir",
-                "task_id": "prepare_nfcore_pipeline_inputs"
+                "task_id": "prepare_nfcore_pipeline_inputs",
                 "result_dir_name": "results",
             },
             bash_command="""
