@@ -132,8 +132,8 @@ with dag:
             },
             bash_command="""
               cd {{ ti.xcom_pull(key=params.task_key, task_ids=params.task_id ) }}
-              find {{ result_dir_name }} -type f -exec md5sum {} \; > file_manifest.md5
-              mv file_manifest.md5 {{ result_dir_name }}/file_manifest.md5
+              find {{ params.result_dir_name }} -type f -exec md5sum {} \; > file_manifest.md5
+              mv file_manifest.md5 {{ params.result_dir_name }}/file_manifest.md5
             """
         )
     ## TASK
