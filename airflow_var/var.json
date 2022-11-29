@@ -44,7 +44,7 @@
   "box_config_file": "/rds/general/user/igf/home/secret_keys/boxconfig.json",
   "bcl2fastq_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/igf-demultiplexing-image/igf-demultiplexing-image_v0.0.1.sif",
   "bclconvert_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/bclconvert/bclconvert_v4.0.3.sif",
-  "bclconvert_report_template": "/project/tgu/software/demultiplexing_report/template/bclconvert_report_v0.02.ipynb",
+  "bclconvert_report_template": "/project/tgu/software/demultiplexing_report/template/bclconvert_report_v0.03.ipynb",
   "bclconvert_report_library": "/project/tgu/software/demultiplexing_report",
   "hpc_base_raw_data_path": "/project/tgu/data2/rawdata/",
   "fastqc_image_path": "/project/tgu/resources/pipeline_resource/singularity_images/fastqc/fastqc_0.11.9.sif",
