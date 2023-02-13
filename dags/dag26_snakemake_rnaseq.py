@@ -128,7 +128,7 @@ with dag:
             queue='hpc_4G',
             do_xcom_push=False,
             params={
-                "task_key": "snakemake_workdir_key",
+                "task_key": "snakemake_workdir",
                 "task_id": "prepare_snakemake_inputs",
                 "result_dir_name": "results"
             },
