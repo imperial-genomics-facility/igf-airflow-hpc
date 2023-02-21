@@ -86,7 +86,7 @@ with dag:
             queue='hpc_4G',
             pool='orwell_exe_pool',
             command="""
-                df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $2 " " $3 " " $4 }'
+                df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
                 """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
     ## TASK
     wells_home_space = \
@@ -97,7 +97,7 @@ with dag:
             queue='hpc_4G',
             pool='wells_ssh_pool',
             command="""
-                df -Pk /home|grep ol-home|awk '{print $2 " " $3 " " $4 }'
+                df -Pk /home|grep ol-home|awk '{print $3 " " $4 " " $6 }'
                 """) #cut -d " " -f 3,4,8')
     ## TASK
     nextseq1_root_space = \
@@ -117,7 +117,7 @@ with dag:
             queue='hpc_4G',
             pool='wells_ssh_pool',
             command="""
-                df |grep wellsvg-datavol1|awk '{print $2 " " $3 " " $4 }'
+                df |grep wellsvg-datavol1|awk '{print $3 " " $4 " " $6 }'
             """
             )#'df /data|grep -w "/data"|cut -d " " -f 3,4,8')
     ## TASK
@@ -129,7 +129,7 @@ with dag:
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df -Pk |grep vg_eliot-lv_root|awk '{print $2 " " $3 " " $4 }'
+                df -Pk |grep vg_eliot-lv_root|awk '{print $3 " " $4 " " $6 }'
                 #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,4,7
                 """)
     ## TASK
@@ -141,7 +141,7 @@ with dag:
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df -Pk |grep eliotVG1-dataLV1|awk '{print $2 " " $3 " " $4 }'
+                df -Pk |grep eliotVG1-dataLV1|awk '{print $3 " " $4 " " $6 }'
                 #df /data|grep -w "/data"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                 """)
     ## TASK
@@ -153,7 +153,7 @@ with dag:
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df -Pk |grep eliotVG2-dataLV2|awk '{print $2 " " $3 " " $4 }'
+                df -Pk |grep eliotVG2-dataLV2|awk '{print $3 " " $4 " " $6 }'
                 #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,7
                 """)
     ## TASK
@@ -165,7 +165,7 @@ with dag:
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
             command="""
-                df |grep vg_igflims-lv_root|awk '{print $2 " " $3 " " $4 }'
+                df |grep vg_igflims-lv_root|awk '{print $3 " " $4 " " $6 }'
                 #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,9
                 """)
     ## TASK
@@ -177,7 +177,7 @@ with dag:
             queue='hpc_4G',
             pool='woolf_ssh_pool',
             command="""
-                df -Pk|grep sda2|awk '{print $2 " " $3 " " $4 }'
+                df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
                 #df /|grep -w "/"|cut -d " " -f 8,9,12
                 """)
     ## TASK
@@ -189,7 +189,7 @@ with dag:
             queue='hpc_4G',
             pool='woolf_ssh_pool',
             command="""
-                df -Pk|grep vg_woolf_data1-data1|awk '{print $2 " " $3 " " $4 }'
+                df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
                 #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                 """)
     ## TASK
@@ -201,7 +201,7 @@ with dag:
             queue='hpc_4G',
             pool='woolf_ssh_pool',
             command="""
-                df -Pk|grep vg_woolf_data2-data2|awk '{print $2 " " $3 " " $4 }'
+                df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
                 #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                 """)
     ## TASK
