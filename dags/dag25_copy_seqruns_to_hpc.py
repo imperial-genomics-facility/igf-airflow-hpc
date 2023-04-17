@@ -62,6 +62,7 @@ dag = \
         default_args=args,
         default_view='tree',
         orientation='TB',
+        catchup=False,
         max_active_runs=1,
         tags=['hpc',])
 
