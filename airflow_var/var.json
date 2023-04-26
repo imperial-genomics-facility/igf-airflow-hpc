@@ -60,6 +60,7 @@
   "woolf_server_hostname": "woolf.med.ic.ac.uk",
   "eliot_server_hostname": "eliot.med.ic.ac.uk",
   "igf_lims_server_hostname": "igf-lims.cc.ic.ac.uk",
+  "igfportal_server_hostname": "igfportal.mdr.ic.ac.uk",
   "wells_server_hostname": "wells.mdr.ic.ac.uk",
   "wells_dynamic_dag_dir": "/home/igf/airflow_v2/github/igf-airflow-hpc/dags/dynamic_dags",
   "igf_lims_dynamic_dag_dir": "/home/igf/airflow_v2/github/igf-airflow-hpc/dags/dynamic_dags",

@@ -14,3 +14,4 @@ wells_scp_pool,10
 wells_ssh_pool,10
 woolf_ssh_pool,10
 demultiplexing,20
+igfportal_ssh_pool,2
