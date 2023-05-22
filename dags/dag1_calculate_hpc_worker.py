@@ -30,6 +30,7 @@ dag = DAG(
         catchup=False,
         max_active_runs=1,
         schedule_interval="*/3 * * * *",
+        dagrun_timeout=timedelta(minutes=10),
         default_args=args,
         tags=['igf-lims', 'wells']
       )
