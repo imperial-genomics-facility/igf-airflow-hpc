@@ -24,7 +24,6 @@ DAG_ID = \
 dag = \
   DAG(
     dag_id=DAG_ID,
-    catchup=False,
     schedule_interval="*/30 * * * *",
     dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
