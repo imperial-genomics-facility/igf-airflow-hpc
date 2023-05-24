@@ -23,6 +23,7 @@ dag = \
     schedule_interval="*/30 * * * *",
     dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
+    catchup=False,
     tags=['igf-lims','hpc'],
     default_args=default_args)
 
