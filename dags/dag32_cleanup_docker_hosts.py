@@ -19,11 +19,6 @@ default_args = {
     'email_on_retry': False,
     'catchup': False}
 
-DAG_ID = \
-    os.path.basename(__file__).\
-        replace(".pyc", "").\
-        replace(".py", "")
-
 igfportal_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
@@ -37,9 +32,13 @@ igf_lims_ssh_hook = \
     remote_host=Variable.get('igf_lims_server_hostname'))
 
 ## DAG
+DAG_ID = \
+    os.path.basename(__file__).\
+        replace(".pyc", "").\
+        replace(".py", "")
 dag = \
   DAG(
-    dag_id='dag7_hpc_scheduler',
+    dag_id=DAG_ID,
     catchup=False,
     schedule_interval="0 4 * * *",
     dagrun_timeout=timedelta(minutes=10),

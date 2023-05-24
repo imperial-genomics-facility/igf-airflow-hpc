@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
@@ -16,9 +17,13 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 ## DAG
+DAG_ID = \
+    os.path.basename(__file__).\
+        replace(".pyc", "").\
+        replace(".py", "")
 dag = \
   DAG(
-    dag_id='dag7_hpc_scheduler',
+    dag_id=DAG_ID,
     catchup=False,
     schedule_interval="*/30 * * * *",
     dagrun_timeout=timedelta(minutes=10),
