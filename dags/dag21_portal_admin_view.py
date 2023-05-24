@@ -1,16 +1,17 @@
 import os
 from datetime import timedelta
-import queue
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.operators.bash import BashOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
-from igf_airflow.utils.dag21_portal_admin_view_utils import get_seqrun_counts_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import prepare_storage_plot_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import get_pipeline_stats_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import create_merged_json_and_upload_to_portal_func
+from igf_airflow.utils.dag21_portal_admin_view_utils import (
+    get_seqrun_counts_func,
+    prepare_storage_plot_func,
+    prepare_storage_plot_generic,
+    get_pipeline_stats_func,
+    create_merged_json_and_upload_to_portal_func)
 
 args = {
     'owner': 'airflow',
@@ -86,7 +87,7 @@ with dag:
     ## TASK
     orwell_home_space = \
         SSHOperator(
-            task_id='orwell_home_space',
+            task_id='orwell_home',
             dag=dag,
             ssh_hook=orwell_ssh_hook,
             queue='hpc_4G',
@@ -97,7 +98,7 @@ with dag:
     ## TASK
     wells_home_space = \
         SSHOperator(
-            task_id='wells_home_space',
+            task_id='wells_home',
             dag=dag,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
@@ -108,7 +109,7 @@ with dag:
     ## TASK
     nextseq1_root_space = \
         SSHOperator(
-            task_id='nextseq1_root_space',
+            task_id='nextseq1_root',
             dag=dag,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
@@ -117,7 +118,7 @@ with dag:
     ## TASK
     wells_data_space = \
         SSHOperator(
-            task_id='wells_data_space',
+            task_id='wells_data',
             dag=dag,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
@@ -129,7 +130,7 @@ with dag:
     ## TASK
     eliot_root_space = \
         SSHOperator(
-            task_id='eliot_root_space',
+            task_id='eliot_root',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
@@ -141,7 +142,7 @@ with dag:
     ## TASK
     eliot_data_space = \
         SSHOperator(
-            task_id='eliot_data_space',
+            task_id='eliot_data',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
@@ -153,7 +154,7 @@ with dag:
     ## TASK
     eliot_data2_space = \
         SSHOperator(
-            task_id='eliot_data2_space',
+            task_id='eliot_data2',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
@@ -165,7 +166,7 @@ with dag:
     ## TASK
     igf_lims_root_space = \
         SSHOperator(
-            task_id='igf_lims_root_space',
+            task_id='igf-lims_root',
             dag=dag,
             ssh_hook=igf_lims_ssh_hook,
             queue='hpc_4G',
@@ -177,7 +178,7 @@ with dag:
     ## TASK
     woolf_root_space = \
         SSHOperator(
-            task_id='woolf_root_space',
+            task_id='woolf_root',
             dag=dag,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
@@ -189,7 +190,7 @@ with dag:
     ## TASK
     woolf_data1_space = \
         SSHOperator(
-            task_id='woolf_data1_space',
+            task_id='woolf_data1',
             dag=dag,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
@@ -201,7 +202,7 @@ with dag:
     ## TASK
     woolf_data2_space = \
         SSHOperator(
-            task_id='woolf_data2_space',
+            task_id='woolf_data2',
             dag=dag,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
@@ -213,7 +214,7 @@ with dag:
     ## TASK
     igfportal_root_space = \
         SSHOperator(
-            task_id='igfportal_root_space',
+            task_id='igfportal_root',
             dag=dag,
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
@@ -224,7 +225,7 @@ with dag:
     ## TASK
     hpc_rds_space = \
         BashOperator(
-            task_id="hpc_rds_space",
+            task_id="hpc_rds",
             dag=dag,
             queue='hpc_4G',
             bash_command='cat /rds/general/sys-info/quotas/user/igf|grep -w "genomics-facility-archive-2019" -A1|grep Live|cut -d " " -f13,15')
@@ -234,22 +235,25 @@ with dag:
             task_id="prepare_storage_plot",
             dag=dag,
             queue='hpc_4G',
+            # params={
+            #     'orwell_home': 'orwell_home_space',
+            #     'wells_home': 'wells_home_space',
+            #     'wells_data': 'wells_data_space',
+            #     'nextseq1_data': 'nextseq1_root_space',
+            #     'eliot_root': 'eliot_root_space',
+            #     'eliot_data': 'eliot_data_space',
+            #     'eliot_data2': 'eliot_data2_space',
+            #     'igf_lims_root': 'igf_lims_root_space',
+            #     'woolf_root': 'woolf_root_space',
+            #     'woolf_data1': 'woolf_data1_space',
+            #     'woolf_data2': 'woolf_data2_space',
+            #     'igfportal_data': 'igfportal_root_space',
+            #     'hpc_rds': 'hpc_rds_space',
+            #     'xcom_key': 'storage_stat_json'},
             params={
-                'orwell_home': 'orwell_home_space',
-                'wells_home': 'wells_home_space',
-                'wells_data': 'wells_data_space',
-                'nextseq1_data': 'nextseq1_root_space',
-                'eliot_root': 'eliot_root_space',
-                'eliot_data': 'eliot_data_space',
-                'eliot_data2': 'eliot_data2_space',
-                'igf_lims_root': 'igf_lims_root_space',
-                'woolf_root': 'woolf_root_space',
-                'woolf_data1': 'woolf_data1_space',
-                'woolf_data2': 'woolf_data2_space',
-                'igfportal_data': 'igfportal_root_space',
-                'hpc_rds': 'hpc_rds_space',
+                'hpc_rds': 'hpc_rds',
                 'xcom_key': 'storage_stat_json'},
-            python_callable=prepare_storage_plot_func)
+            python_callable=prepare_storage_plot_generic)  #prepare_storage_plot_func)
     ## PIPELINE
     orwell_home_space >> prepare_storage_plot
     wells_home_space >> prepare_storage_plot
