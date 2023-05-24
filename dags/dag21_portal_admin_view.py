@@ -246,7 +246,7 @@ with dag:
                 'woolf_root': 'woolf_root_space',
                 'woolf_data1': 'woolf_data1_space',
                 'woolf_data2': 'woolf_data2_space',
-                'igfportal_data': 'prepare_storage_plot',
+                'igfportal_data': 'igfportal_root_space',
                 'hpc_rds': 'hpc_rds_space',
                 'xcom_key': 'storage_stat_json'},
             python_callable=prepare_storage_plot_func)
