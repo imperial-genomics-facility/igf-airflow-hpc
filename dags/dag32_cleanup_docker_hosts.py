@@ -68,7 +68,7 @@ with dag:
   ## TASK
   cleanup_igf_portal = \
     SSHOperator(
-      task_id='cleanup_igf_lims',
+      task_id='cleanup_igf_portal',
       dag=dag,
       ssh_hook=igfportal_ssh_hook,
       pool='igfportal_ssh_pool',
