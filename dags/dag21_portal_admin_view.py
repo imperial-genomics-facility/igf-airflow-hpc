@@ -58,7 +58,13 @@ wells_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('wells_server_hostname'))
-
+## SSH HOOK
+igfportal_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfportal_server_hostname'))
+## DAG
 dag = \
     DAG(
         dag_id=DAG_ID,
@@ -205,6 +211,17 @@ with dag:
                 #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                 """)
     ## TASK
+    igfportal_root_space = \
+        SSHOperator(
+            task_id='igfportal_root_space',
+            dag=dag,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="""
+                df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
+                """)
+    ## TASK
     hpc_rds_space = \
         BashOperator(
             task_id="hpc_rds_space",
@@ -229,6 +246,7 @@ with dag:
                 'woolf_root': 'woolf_root_space',
                 'woolf_data1': 'woolf_data1_space',
                 'woolf_data2': 'woolf_data2_space',
+                'igfportal_data': 'prepare_storage_plot',
                 'hpc_rds': 'hpc_rds_space',
                 'xcom_key': 'storage_stat_json'},
             python_callable=prepare_storage_plot_func)
@@ -244,6 +262,7 @@ with dag:
     woolf_root_space >> prepare_storage_plot
     woolf_data1_space >> prepare_storage_plot
     woolf_data2_space >> prepare_storage_plot
+    igfportal_root_space >> prepare_storage_plot
     hpc_rds_space >> prepare_storage_plot
     ## TASK
     get_pipeline_stats = \
