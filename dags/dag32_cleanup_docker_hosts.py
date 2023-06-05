@@ -48,13 +48,6 @@ dag = \
 
 with dag:
   ## TASK
-  dummy_task = \
-    DummyOperator(
-      task_id='dummy_task',
-      dag=dag,
-      queue='hpc_4G')
-
-  ## TASK
   cleanup_igf_lims = \
     SSHOperator(
       task_id='cleanup_igf_lims',
@@ -75,5 +68,4 @@ with dag:
       command="/home/igf/scripts/docker_prune_script.sh ")
 
   ## PIPELNE
-  dummy_task >> cleanup_igf_lims
-  dummy_task >> cleanup_igf_portal
+  cleanup_igf_lims >> cleanup_igf_portal
