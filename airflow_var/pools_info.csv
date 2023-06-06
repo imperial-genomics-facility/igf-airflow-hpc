@@ -1,0 +1,17 @@
+pool_name,slots
+batch_job,2
+box_task_pool,2
+crick_ftp_pool,1
+default_pool,50
+eliot_ssh_pool,10
+generic_pool,4
+igf_lims_ssh_pool,10
+igf_portal_pool,4
+nextflow_hpc,1
+orwell_exe_pool,10
+orwell_scp_pool,10
+wells_scp_pool,10
+wells_ssh_pool,10
+woolf_ssh_pool,10
+demultiplexing,20
+igfportal_ssh_pool,2

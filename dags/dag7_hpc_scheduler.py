@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
@@ -16,12 +17,17 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 ## DAG
+DAG_ID = \
+    os.path.basename(__file__).\
+        replace(".pyc", "").\
+        replace(".py", "")
 dag = \
   DAG(
-    dag_id='dag7_hpc_scheduler',
-    catchup=False,
+    dag_id=DAG_ID,
     schedule_interval="*/30 * * * *",
+    dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
+    catchup=False,
     tags=['igf-lims','hpc'],
     default_args=default_args)
 
@@ -33,6 +39,13 @@ igf_lims_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('igf_lims_server_hostname'))
+
+igfportal_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfportal_server_hostname'))
+
 wells_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
@@ -63,12 +76,20 @@ with dag:
       command="docker restart airflow_flower_v2")
 
   ## TASK
+  # restart_portal_flower_server = \
+  #   SSHOperator(
+  #     task_id='restart_portal_flower_server',
+  #     dag=dag,
+  #     ssh_hook=igf_lims_ssh_hook,
+  #     pool='generic_pool',
+  #     queue='hpc_4G',
+  #     command="docker restart celery_flower")
   restart_portal_flower_server = \
     SSHOperator(
       task_id='restart_portal_flower_server',
       dag=dag,
-      ssh_hook=igf_lims_ssh_hook,
-      pool='generic_pool',
+      ssh_hook=igfportal_ssh_hook,
+      pool='igfportal_ssh_pool',
       queue='hpc_4G',
       command="docker restart celery_flower")
 

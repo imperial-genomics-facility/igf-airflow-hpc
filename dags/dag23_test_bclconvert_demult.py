@@ -5,15 +5,17 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import get_samplesheet_from_portal_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import mark_seqrun_status_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import get_formatted_samplesheets_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import calculate_override_bases_mask_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import bcl_convert_run_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import generate_report_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import upload_report_to_box_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import generate_merged_report_func
-from igf_airflow.utils.dag23_test_bclconvert_demult_utils import copy_report_to_rds_func
+from igf_airflow.utils.dag23_test_bclconvert_demult_utils import (
+    get_samplesheet_from_portal_func,
+    mark_seqrun_status_func,
+    get_formatted_samplesheets_func,
+    calculate_override_bases_mask_func,
+    bcl_convert_run_func,
+    generate_report_func,
+    upload_report_to_box_func,
+    generate_merged_report_func,
+    copy_report_to_rds_func,
+    upload_report_to_portal_func)
 
 ## DEFAULTS
 MAX_SAMPLESHEETS = 30
@@ -51,6 +53,7 @@ with dag:
             task_id='get_samplesheet_from_portal',
             dag=dag,
             queue='hpc_4G',
+            pool='igf_portal_pool',
             params={
                 'samplesheet_xcom_key': 'samplesheet_data',
             },
@@ -185,12 +188,30 @@ with dag:
                 },
                 python_callable=copy_report_to_rds_func)
         ## TASK
-        upload_report_to_box = \
+        # upload_report_to_box = \
+        #     PythonOperator(
+        #         task_id=f'upload_report_to_box{samplesheet_id}',
+        #         dag=dag,
+        #         queue='hpc_4G',
+        #         pool='box_task_pool',
+        #         params={
+        #             'index_column': 'index',
+        #             'lane_column': 'lane',
+        #             'tag_column': 'tag',
+        #             'samplesheet_index': samplesheet_id,
+        #             'demult_report_key': 'demult_report',
+        #             'demult_report_task': f'generate_report_{samplesheet_id}',
+        #             'formatted_samplesheet_xcom_task': 'get_formatted_samplesheets',
+        #             'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
+        #         },
+        #         python_callable=upload_report_to_box_func)
+        ## TASK
+        upload_report_to_portal = \
             PythonOperator(
-                task_id=f'upload_report_to_box{samplesheet_id}',
+                task_id=f'upload_report_to_portal{samplesheet_id}',
                 dag=dag,
                 queue='hpc_4G',
-                pool='box_task_pool',
+                pool='igf_portal_pool',
                 params={
                     'index_column': 'index',
                     'lane_column': 'lane',
@@ -201,13 +222,15 @@ with dag:
                     'formatted_samplesheet_xcom_task': 'get_formatted_samplesheets',
                     'formatted_samplesheet_xcom_key': 'formatted_samplesheet_data',
                 },
-                python_callable=upload_report_to_box_func)
+                python_callable=upload_report_to_portal_func
+            )
         ## PIPELINE
         get_formatted_samplesheets >> calculate_override_bases_mask
         calculate_override_bases_mask >> bcl_convert_run
         bcl_convert_run >> generate_report
-        generate_report >> upload_report_to_box
+        # generate_report >> upload_report_to_box
         generate_report >> copy_report_to_rds
+        generate_report >> upload_report_to_portal
         copy_report_to_rds >> generate_merged_report
     ## PIPELINE
     generate_merged_report >> upload_merged_report_to_portal

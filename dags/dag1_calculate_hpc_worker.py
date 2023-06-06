@@ -13,6 +13,7 @@ from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
+HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
 
 args = {
     'owner':'airflow',
@@ -29,6 +30,7 @@ dag = DAG(
         catchup=False,
         max_active_runs=1,
         schedule_interval="*/3 * * * *",
+        dagrun_timeout=timedelta(minutes=10),
         default_args=args,
         tags=['igf-lims', 'wells']
       )
@@ -79,7 +81,8 @@ def get_new_workers(**kwargs):
         max_workers_per_queue=Variable.get('hpc_max_workers_per_queue'),
         max_total_workers=Variable.get('hpc_max_total_workers'))
     for key,value in worker_to_submit.items():
-      ti.xcom_push(key=key,value=value)
+      if key in HPC_QUEUE_LIST:
+        ti.xcom_push(key=key,value=value)
     unique_queue_list = \
       [q for q in unique_queue_list if q.startswith('hpc')]
     celery_worker_key = kwargs['params'].get('celery_worker_key')
@@ -248,8 +251,7 @@ with dag:
               'base_queue':'generic'})
   ## TASK
   queue_tasks = list()
-  hpc_queue_list = Variable.get('hpc_queue_list')
-  for q,data in hpc_queue_list.items():
+  for q,data in HPC_QUEUE_LIST.items():
     pbs_resource = data.get('pbs_resource')
     airflow_queue = data.get('airflow_queue')
     t = SSHOperator(

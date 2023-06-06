@@ -6,15 +6,21 @@ from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
+from airflow.operators.dummy import DummyOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
-from igf_airflow.utils.dag20_portal_metadata_utils import get_metadata_dump_from_pipeline_db_func
-from igf_airflow.utils.dag20_portal_metadata_utils import upload_metadata_to_portal_db_func
-from igf_airflow.utils.dag20_portal_metadata_utils import copy_remote_file_to_hpc_func
-from igf_airflow.utils.dag20_portal_metadata_utils import get_known_projects_func
-from igf_airflow.utils.dag20_portal_metadata_utils import create_raw_metadata_for_new_projects_func
-from igf_airflow.utils.dag20_portal_metadata_utils import get_formatted_metadata_files_func
-from igf_airflow.utils.dag20_portal_metadata_utils import upload_raw_metadata_to_portal_func
-from igf_airflow.utils.dag20_portal_metadata_utils import fetch_validated_metadata_from_portal_and_load_func
+from igf_airflow.utils.dag20_portal_metadata_utils import (
+    get_metadata_dump_from_pipeline_db_func,
+    upload_metadata_to_portal_db_func,
+    copy_remote_file_to_hpc_func,
+    get_known_projects_func,
+    create_raw_metadata_for_new_projects_func,
+    get_formatted_metadata_files_func,
+    upload_raw_metadata_to_portal_func,
+    fetch_validated_metadata_from_portal_and_load_func)
+from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
+    fetch_raw_analysis_queue_func,
+    process_raw_analysis_queue_func)
+
 
 args = {
     'owner': 'airflow',
@@ -38,6 +44,12 @@ orwell_ssh_hook = \
     username=Variable.get('hpc_user',  default_var=""),
     remote_host=Variable.get('orwell_server_hostname',  default_var=""))
 
+igfportal_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfportal_server_hostname'))
+
 
 dag = \
     DAG(
@@ -46,7 +58,9 @@ dag = \
         default_args=args,
         catchup=False,
         max_active_runs=1,
-        tags=['hpc'])
+        default_view='tree',
+        orientation='TB',
+        tags=['hpc', 'portal', 'raw_metadata', 'raw_analysis', 'db', 'backup'])
 with dag:
     ## TASK
     copy_quota_xlsx = \
@@ -54,13 +68,12 @@ with dag:
             task_id="copy_quota_xlsx",
             dag=dag,
             queue='hpc_4G',
-            #pool="orwell_scp_pool",
             params={
                 'xcom_key': 'quota_xlsx',
-                'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
-                'source_address': None, #Variable.get("seqrun_server", default_var=""),
-                'source_user': None, #Variable.get("seqrun_server_user", default_var=""),
-                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'}, #'/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'},
+                'hpc_ssh_key_file': None,
+                'source_address': None,
+                'source_user': None,
+                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'},
             python_callable=copy_remote_file_to_hpc_func)
     ## TASK
     copy_access_db = \
@@ -68,13 +81,12 @@ with dag:
             task_id="copy_access_db",
             dag=dag,
             queue='hpc_4G',
-            #pool="orwell_scp_pool",
             params={
                 'xcom_key': 'access_db',
-                'hpc_ssh_key_file': None, #Variable.get('hpc_ssh_key_file',  default_var=""),
-                'source_address': None, #Variable.get("seqrun_server", default_var=""),
-                'source_user': None, #Variable.get("seqrun_server_user", default_var=""),
-                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'}, #'/home/igf/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'},
+                'hpc_ssh_key_file': None,
+                'source_address': None,
+                'source_user': None,
+                'source_path': '/rds/general/project/genomics-facility-archive-2019/live/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'},
             python_callable=copy_remote_file_to_hpc_func)
     ## TASK
     get_known_projects = \
@@ -130,23 +142,6 @@ with dag:
             },
             python_callable=upload_raw_metadata_to_portal_func)
     ## TASK
-    # fetch_validated_metadata_from_portal_and_load = \
-    #     BashOperator(
-    #         task_id="fetch_validated_metadata_from_portal_and_load",
-    #         dag=dag,
-    #         queue='hpc_4G',
-    #         #pool='igf_portal_pool',
-    #         #ssh_hook=orwell_ssh_hook,
-    #         command="""
-    #             #source /home/igf/igf_code/IGF-cron-scripts/orwell/env.sh;
-    #             python /project/tgu/data2/airflow_v2/githun/data-management-python/scripts/seqrun_processing/find_and_register_project_metadata_from_portal_db.py \
-    #                 --portal_db_conf_file $PORTAL_CONF_FILE \
-    #                 --dbconfig $DBCONF \
-    #                 --user_account_template /home/igf/igf_code/data-management-python/template/email_notification/send_new_account_info.txt \
-    #                 --log_slack \
-    #                 --slack_config $SLACKCONF \
-    #                 --notify_user""")
-    ## TASK
     fetch_validated_metadata_from_portal_and_load = \
         PythonOperator(
             task_id="fetch_validated_metadata_from_portal_and_load",
@@ -155,6 +150,61 @@ with dag:
             params={},
             python_callable=fetch_validated_metadata_from_portal_and_load_func
         )
+    ## TASK
+    fetch_raw_analysis_queue = \
+        PythonOperator(
+            task_id="fetch_raw_analysis_queue",
+            dag=dag,
+            queue='hpc_4G',
+            pool='igf_portal_pool',
+            params={
+                'new_raw_analysis_list_key': 'new_raw_analysis_list'
+            },
+            python_callable=fetch_raw_analysis_queue_func
+        )
+    ## TASK
+    process_raw_analysis_queue = \
+        PythonOperator(
+            task_id="process_raw_analysis_queue",
+            dag=dag,
+            queue='hpc_4G',
+            pool='igf_portal_pool',
+            params={
+                "new_raw_analysis_list_key": "new_raw_analysis_list",
+                "new_raw_analysis_list_task": "fetch_raw_analysis_queue"
+            },
+            python_callable=process_raw_analysis_queue_func
+        )
+    ## TASK
+    backup_prod_db = \
+        BashOperator(
+            task_id='backup_prod_db',
+            dag=dag,
+            queue='hpc_4G',
+            bash_command='bash /rds/general/user/igf/home/secret_keys/get_hourly_prod_db_dump.sh ')
+    ## TASK
+    backup_portal_db = \
+        SSHOperator(
+            task_id='backup_portal_db',
+            dag=dag,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/dev/backup_cmd.sh ")
+    ## TASK
+    load_data_to_legacy_prod_db = \
+        BashOperator(
+            task_id="load_data_to_legacy_prod_db",
+            dag=dag,
+            queue='hpc_4G',
+            bash_command='bash /rds/general/user/igf/home/secret_keys/update_legacy_prod_db.sh ')
+    ## TASK
+    copy_portal_backup_to_hpc = \
+        BashOperator(
+            task_id="copy_portal_backup_to_hpc",
+            dag=dag,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_dump.sh ")
     ## TASK
     get_metadata_dump_from_pipeline_db = \
         PythonOperator(
@@ -183,5 +233,14 @@ with dag:
     create_raw_metadata_for_new_projects >> get_formatted_metadata_files
     get_formatted_metadata_files >> upload_raw_metadata_to_portal
     upload_raw_metadata_to_portal >> fetch_validated_metadata_from_portal_and_load
+    upload_raw_metadata_to_portal >> fetch_raw_analysis_queue
+    fetch_raw_analysis_queue >> process_raw_analysis_queue
     fetch_validated_metadata_from_portal_and_load >> get_metadata_dump_from_pipeline_db
+    process_raw_analysis_queue >> get_metadata_dump_from_pipeline_db
+    fetch_validated_metadata_from_portal_and_load >> backup_prod_db
+    process_raw_analysis_queue >> backup_prod_db
     get_metadata_dump_from_pipeline_db >> upload_metadata_to_portal_db
+    backup_prod_db >> backup_portal_db
+    backup_prod_db >> load_data_to_legacy_prod_db
+    backup_portal_db >> copy_portal_backup_to_hpc
+    backup_portal_db >> upload_metadata_to_portal_db

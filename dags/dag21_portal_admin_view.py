@@ -1,21 +1,22 @@
 import os
 from datetime import timedelta
-import queue
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.contrib.operators.ssh_operator import SSHOperator
 from airflow.operators.bash import BashOperator
 from airflow.contrib.hooks.ssh_hook import SSHHook
-from igf_airflow.utils.dag21_portal_admin_view_utils import get_seqrun_counts_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import prepare_storage_plot_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import get_pipeline_stats_func
-from igf_airflow.utils.dag21_portal_admin_view_utils import create_merged_json_and_upload_to_portal_func
+from igf_airflow.utils.dag21_portal_admin_view_utils import (
+    get_seqrun_counts_func,
+    prepare_storage_plot_func,
+    prepare_storage_plot_generic,
+    get_pipeline_stats_func,
+    create_merged_json_and_upload_to_portal_func)
 
 args = {
     'owner': 'airflow',
     'start_date': days_ago(2),
-    'retries': 1,
+    'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
     'email_on_failure': False,
@@ -58,13 +59,20 @@ wells_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('wells_server_hostname'))
-
+## SSH HOOK
+igfportal_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfportal_server_hostname'))
+## DAG
 dag = \
     DAG(
         dag_id=DAG_ID,
         schedule_interval="@hourly",
         default_args=args,
         catchup=False,
+        max_active_runs=1,
         tags=['hpc'])
 with dag:
     ## TASK
@@ -77,111 +85,147 @@ with dag:
                 'json_dump_xcom_key': 'seqrun_json_dump'},
             python_callable=get_seqrun_counts_func)
     ## TASK
-    orwell_home_space = \
+    orwell_home = \
         SSHOperator(
-            task_id='orwell_home_space',
+            task_id='orwell_home',
             dag=dag,
             ssh_hook=orwell_ssh_hook,
             queue='hpc_4G',
             pool='orwell_exe_pool',
-            command='df /home|grep -w "/home"|cut -d " " -f 3,4,7')
+            command="""
+                df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
+                """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
     ## TASK
-    wells_home_space = \
+    wells_home = \
         SSHOperator(
-            task_id='wells_home_space',
+            task_id='wells_home',
             dag=dag,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
-            command='df /home|grep -w "/home"|cut -d " " -f 3,4,8')
+            command="""
+                df -Pk /home|grep ol-home|awk '{print $3 " " $4 " " $6 }'
+                """) #cut -d " " -f 3,4,8')
     ## TASK
-    wells_data_space = \
+    nextseq1_root = \
         SSHOperator(
-            task_id='wells_data_space',
+            task_id='nextseq1_root',
             dag=dag,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
-            command='df /data|grep -w "/data"|cut -d " " -f 3,4,8')
+            command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
     ## TASK
-    eliot_root_space = \
+    wells_data = \
         SSHOperator(
-            task_id='eliot_root_space',
+            task_id='wells_data',
+            dag=dag,
+            ssh_hook=wells_ssh_hook,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            command="""
+                df |grep wellsvg-datavol1|awk '{print $3 " " $4 " " $6 }'
+            """
+            )#'df /data|grep -w "/data"|cut -d " " -f 3,4,8')
+    ## TASK
+    eliot_root = \
+        SSHOperator(
+            task_id='eliot_root',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,4,7
+                df -Pk |grep vg_eliot-lv_root|awk '{print $3 " " $4 " " $6 }'
+                #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,4,7
                 """)
     ## TASK
-    eliot_data_space = \
+    eliot_data = \
         SSHOperator(
-            task_id='eliot_data_space',
+            task_id='eliot_data',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df /data|grep -w "/data"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+                df -Pk |grep eliotVG1-dataLV1|awk '{print $3 " " $4 " " $6 }'
+                #df /data|grep -w "/data"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                 """)
     ## TASK
-    eliot_data2_space = \
+    eliot_data2 = \
         SSHOperator(
-            task_id='eliot_data2_space',
+            task_id='eliot_data2',
             dag=dag,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
             command="""
-                df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,7
+                df -Pk |grep eliotVG2-dataLV2|awk '{print $3 " " $4 " " $6 }'
+                #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,7
                 """)
     ## TASK
-    igf_lims_root_space = \
+    igf_lims_root = \
         SSHOperator(
-            task_id='igf_lims_root_space',
+            task_id='igf_lims_root',
             dag=dag,
             ssh_hook=igf_lims_ssh_hook,
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
             command="""
-                df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 3,4,7
+                df |grep vg_igflims-lv_root|awk '{print $3 " " $4 " " $6 }'
+                #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,9
                 """)
     ## TASK
-    woolf_root_space = \
+    woolf_root = \
         SSHOperator(
-            task_id='woolf_root_space',
-            dag=dag,
-            ssh_hook=woolf_ssh_hook,
-            queue='hpc_4G',
-            pool='woolf_ssh_pool',
-            command='df /|grep -w "/"|cut -d " " -f 8,9,12')
-    ## TASK
-    woolf_data1_space = \
-        SSHOperator(
-            task_id='woolf_data1_space',
+            task_id='woolf_root',
             dag=dag,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
             pool='woolf_ssh_pool',
             command="""
-                df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-            """)
+                df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
+                #df /|grep -w "/"|cut -d " " -f 8,9,12
+                """)
     ## TASK
-    woolf_data2_space = \
+    woolf_data1 = \
         SSHOperator(
-            task_id='woolf_data2_space',
+            task_id='woolf_data1',
             dag=dag,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
             pool='woolf_ssh_pool',
             command="""
-                df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-            """)
+                df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
+                #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+                """)
     ## TASK
-    hpc_rds_space = \
+    woolf_data2 = \
+        SSHOperator(
+            task_id='woolf_data2',
+            dag=dag,
+            ssh_hook=woolf_ssh_hook,
+            queue='hpc_4G',
+            pool='woolf_ssh_pool',
+            command="""
+                df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
+                #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+                """)
+    ## TASK
+    igfportal_root = \
+        SSHOperator(
+            task_id='igfportal_root',
+            dag=dag,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="""
+                df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
+                """)
+    ## TASK
+    hpc_rds = \
         BashOperator(
-            task_id="hpc_rds_space",
+            task_id="hpc_rds",
             dag=dag,
             queue='hpc_4G',
             bash_command='cat /rds/general/sys-info/quotas/user/igf|grep -w "genomics-facility-archive-2019" -A1|grep Live|cut -d " " -f13,15')
@@ -191,32 +235,39 @@ with dag:
             task_id="prepare_storage_plot",
             dag=dag,
             queue='hpc_4G',
+            # params={
+            #     'orwell_home': 'orwell_home_space',
+            #     'wells_home': 'wells_home_space',
+            #     'wells_data': 'wells_data_space',
+            #     'nextseq1_data': 'nextseq1_root_space',
+            #     'eliot_root': 'eliot_root_space',
+            #     'eliot_data': 'eliot_data_space',
+            #     'eliot_data2': 'eliot_data2_space',
+            #     'igf_lims_root': 'igf_lims_root_space',
+            #     'woolf_root': 'woolf_root_space',
+            #     'woolf_data1': 'woolf_data1_space',
+            #     'woolf_data2': 'woolf_data2_space',
+            #     'igfportal_data': 'igfportal_root_space',
+            #     'hpc_rds': 'hpc_rds_space',
+            #     'xcom_key': 'storage_stat_json'},
             params={
-                'orwell_home': 'orwell_home_space',
-                'wells_home': 'wells_home_space',
-                'wells_data': 'wells_data_space',
-                'eliot_root': 'eliot_root_space',
-                'eliot_data': 'eliot_data_space',
-                'eliot_data2': 'eliot_data2_space',
-                'igf_lims_root': 'igf_lims_root_space',
-                'woolf_root': 'woolf_root_space',
-                'woolf_data1': 'woolf_data1_space',
-                'woolf_data2': 'woolf_data2_space',
-                'hpc_rds': 'hpc_rds_space',
+                'hpc_rds': 'hpc_rds',
                 'xcom_key': 'storage_stat_json'},
-            python_callable=prepare_storage_plot_func)
+            python_callable=prepare_storage_plot_generic)  #prepare_storage_plot_func)
     ## PIPELINE
-    orwell_home_space >> prepare_storage_plot
-    wells_home_space >> prepare_storage_plot
-    wells_data_space >> prepare_storage_plot
-    eliot_root_space >> prepare_storage_plot
-    eliot_data_space >> prepare_storage_plot
-    eliot_data2_space >> prepare_storage_plot
-    igf_lims_root_space >> prepare_storage_plot
-    woolf_root_space >> prepare_storage_plot
-    woolf_data1_space >> prepare_storage_plot
-    woolf_data2_space >> prepare_storage_plot
-    hpc_rds_space >> prepare_storage_plot
+    orwell_home >> prepare_storage_plot
+    wells_home >> prepare_storage_plot
+    wells_data >> prepare_storage_plot
+    nextseq1_root >> prepare_storage_plot
+    eliot_root >> prepare_storage_plot
+    eliot_data >> prepare_storage_plot
+    eliot_data2 >> prepare_storage_plot
+    igf_lims_root >> prepare_storage_plot
+    woolf_root >> prepare_storage_plot
+    woolf_data1 >> prepare_storage_plot
+    woolf_data2 >> prepare_storage_plot
+    igfportal_root >> prepare_storage_plot
+    hpc_rds >> prepare_storage_plot
     ## TASK
     get_pipeline_stats = \
         PythonOperator(

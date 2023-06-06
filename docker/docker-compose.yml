@@ -15,6 +15,23 @@ services:
         container_name: airflow_db_v2
         networks:
                - airflow_network_v2
+    airflow_pgbouncer_v2:
+        image: pgbouncer:v1.7.0
+        volumes:
+            - /home/igf/airflow_v2/pgbouncer:/opt/pgbouncer
+        restart: always
+        links:
+            - airflow_db_v2
+        depends_on:
+            airflow_db_v2:
+                condition: service_started
+        command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
+        container_name: airflow_pgbouncer_v2
+        ports:
+            - "5435:5432"
+        networks:
+               - airflow_network_v2
+
     airflow_results_db_v2:
         image: postgres:14
         env_file:
@@ -27,6 +44,7 @@ services:
         container_name: airflow_results_db_v2
         networks:
                - airflow_network_v2
+
     redis-server_v2:
         image: redis:6.2
         ports:
@@ -39,6 +57,7 @@ services:
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
                - airflow_network_v2
+
     airflow_webserver_v2:
         image: apache/airflow:2.2.2
         env_file:
@@ -47,6 +66,7 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         ports:
                 - "8083:8080"
         user: "${AIRFLOW_UID:-50000}:0"
@@ -60,14 +80,20 @@ services:
                 - /home/igf/airflow_v2/ssl_cert/airflow.key:/SSL/airflow.key:ro
                 - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - redis-server_v2
+            airflow_db_v2:
+                condition: service_started
+            airflow_pgbouncer_v2:
+                condition: service_started
+            airflow_results_db_v2:
+                condition: service_started
+            redis-server_v2:
+                condition: service_started
         restart: always
         command: webserver
         container_name: airflow_webserver_v2
         networks:
                - airflow_network_v2
+
     airflow_scheduler_v2:
         image: apache/airflow:2.2.2
         env_file:
@@ -76,11 +102,18 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         depends_on:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - airflow_webserver_v2
-                - redis-server_v2
+            airflow_db_v2:
+                condition: service_started
+            airflow_pgbouncer_v2:
+                condition: service_started
+            airflow_results_db_v2:
+                condition: service_started
+            redis-server_v2:
+                condition: service_started
+            airflow_webserver_v2:
+                condition: service_started
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
@@ -95,6 +128,7 @@ services:
         container_name: airflow_scheduler_v2
         networks:
                - airflow_network_v2
+
     airflow_worker_v2:
         image: apache/airflow:2.2.2
         env_file:
@@ -106,13 +140,22 @@ services:
                 - redis-server_v2
                 - airflow_scheduler_v2
                 - airflow_flower_v2
+                - airflow_pgbouncer_v2
         depends_on:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - airflow_webserver_v2
-                - redis-server_v2
-                - airflow_scheduler_v2
-                - airflow_flower_v2
+            airflow_db_v2:
+                condition: service_started
+            airflow_pgbouncer_v2:
+                condition: service_started
+            airflow_results_db_v2:
+                condition: service_started
+            redis-server_v2:
+                condition: service_started
+            airflow_webserver_v2:
+                condition: service_started
+            airflow_scheduler_v2:
+                condition: service_started
+            airflow_flower_v2:
+                condition: service_started
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
@@ -128,6 +171,7 @@ services:
         container_name: airflow_worker_v2
         networks:
                - airflow_network_v2
+
     airflow_flower_v2:
         image: apache/airflow:2.2.2
         env_file:
@@ -136,14 +180,22 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         ports:
                 - "5555:5555"
         depends_on:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - airflow_webserver_v2
-                - redis-server_v2
-                - airflow_scheduler_v2
+            airflow_db_v2:
+                condition: service_started
+            airflow_pgbouncer_v2:
+                condition: service_started
+            airflow_results_db_v2:
+                condition: service_started
+            redis-server_v2:
+                condition: service_started
+            airflow_webserver_v2:
+                condition: service_started
+            airflow_scheduler_v2:
+                condition: service_started
         user: "${AIRFLOW_UID:-50000}:0"
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
@@ -156,6 +208,7 @@ services:
         container_name: airflow_flower_v2
         networks:
                - airflow_network_v2
+
     airflow-init:
         image: apache/airflow:2.2.2
         env_file:
@@ -168,10 +221,16 @@ services:
                 - airflow_db_v2
                 - airflow_results_db_v2
                 - redis-server_v2
+                - airflow_pgbouncer_v2
         depends_on:
-                - airflow_db_v2
-                - airflow_results_db_v2
-                - redis-server_v2
+            airflow_db_v2:
+                condition: service_started
+            airflow_pgbouncer_v2:
+                condition: service_started
+            airflow_results_db_v2:
+                condition: service_started
+            redis-server_v2:
+                condition: service_started
         volumes:
                 - /home/igf/airflow_v2/logs:/rds/general/user/igf/ephemeral/airflow_v2_logs/logs:rw
                 - /home/igf/airflow_v2/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro

@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master, airflow_v2.2.2 ]
+    branches: [ master, analysis_pipelines_2022 ]
   pull_request:
     branches: [ master ]
 
@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: master
+        ref: analysis_pipelines_2022
         path: data-management-python
     - name: Test with pytest
       run: |
