@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -32,15 +32,15 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --exclude *template.py --max-complexity=10 --max-line-length=127 --statistics
     - name: Checkout other repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: analysis_pipelines_2022
+        ref: airflow_2.6.1
         path: data-management-python
     - name: Test with pytest
       run: |
         airflow db upgrade
-        pytest --log-cli-level=10 test/
+        pytest --log-level=ERROR test/
       env:
         PYTHONPATH: /home/runner/work/igf-airflow-hpc/igf-airflow-hpc/data-management-python
         AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 20
