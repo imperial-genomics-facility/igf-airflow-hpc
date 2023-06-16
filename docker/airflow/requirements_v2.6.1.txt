@@ -14,3 +14,4 @@ spython==0.3.0
 SQLAlchemy==1.4.48
 SQLAlchemy-JSONField==1.0.1.post0
 SQLAlchemy-Utils==0.41.1
+atlassian-python-api==3.38.0
