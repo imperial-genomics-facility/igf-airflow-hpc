@@ -26,8 +26,11 @@ services:
         restart: unless-stopped
         links:
             - airflow_db_v3
+            - airflow_results_db_v3
         depends_on:
             airflow_db_v3:
+                condition: service_started
+            airflow_results_db_v3:
                 condition: service_started
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
         container_name: airflow_pgbouncer_v3
@@ -55,7 +58,7 @@ services:
         container_name: airflow_results_db_v3
         networks:
             - airflow_network_v3
-    redis-server_v3:
+    redis_server_v3:
         image: redis:7.0
         logging:
             driver: "json-file"
@@ -67,7 +70,7 @@ services:
         volumes:
             - /home/igf/airflow_v3/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
             - /home/igf/airflow_v3/redis_airflow_data:/data:rw
-        container_name: redis-server_v3
+        container_name: redis_server_v3
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
             - airflow_network_v3
@@ -82,13 +85,13 @@ services:
         links:
             - airflow_db_v3
             - airflow_results_db_v3
-            - redis-server_v3
+            - redis_server_v3
             - airflow_pgbouncer_v3
         ports:
             - "8083:8080"
-        user: "${AIRFLOW_UID:-50000}:0"
+        user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/logs:/rds/general/user/igf/ephemeral/airflow_v3_logs/logs:rw
+            - /home/igf/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
             #- /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
             - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
@@ -103,7 +106,7 @@ services:
                 condition: service_started
             airflow_results_db_v3:
                 condition: service_started
-            redis-server_v3:
+            redis_server_v3:
                 condition: service_started
         restart: unless-stopped
         command: webserver
@@ -121,7 +124,7 @@ services:
         links:
             - airflow_db_v3
             - airflow_results_db_v3
-            - redis-server_v3
+            - redis_server_v3
             - airflow_pgbouncer_v3
         depends_on:
             airflow_db_v3:
@@ -130,13 +133,13 @@ services:
                 condition: service_started
             airflow_results_db_v3:
                 condition: service_started
-            redis-server_v3:
+            redis_server_v3:
                 condition: service_started
             airflow_webserver_v3:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:0"
+        user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/logs:/rds/general/user/igf/ephemeral/airflow_v3_logs/logs:rw
+            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
             - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
             - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
@@ -160,7 +163,7 @@ services:
             - airflow_db_v3
             - airflow_results_db_v3
             - airflow_webserver_v3
-            - redis-server_v3
+            - redis_server_v3
             - airflow_scheduler_v3
             - airflow_flower_v3
             - airflow_pgbouncer_v3
@@ -171,7 +174,7 @@ services:
                 condition: service_started
             airflow_results_db_v3:
                 condition: service_started
-            redis-server_v3:
+            redis_server_v3:
                 condition: service_started
             airflow_webserver_v3:
                 condition: service_started
@@ -179,9 +182,9 @@ services:
                 condition: service_started
             airflow_flower_v3:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:0"
+        user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/logs:/rds/general/user/igf/ephemeral/airflow_v3_logs/logs:rw
+            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
             - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
             - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
@@ -189,7 +192,7 @@ services:
             - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: unless-stopped
         ports:
-            - "8794:8794"
+            - "8793:8793"
         command: celery worker -q generic --celery-hostname igf-lims
         container_name: airflow_worker_v3
         networks:
@@ -205,7 +208,7 @@ services:
         links:
             - airflow_db_v3
             - airflow_results_db_v3
-            - redis-server_v3
+            - redis_server_v3
             - airflow_pgbouncer_v3
         ports:
             - "5555:5555"
@@ -216,15 +219,15 @@ services:
                 condition: service_started
             airflow_results_db_v3:
                 condition: service_started
-            redis-server_v3:
+            redis_server_v3:
                 condition: service_started
             airflow_webserver_v3:
                 condition: service_started
             airflow_scheduler_v3:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:0"
+        user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/logs:/rds/general/user/igf/ephemeral/airflow_v3_logs/logs:rw
+            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
             - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
             - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
@@ -234,18 +237,18 @@ services:
         container_name: airflow_flower_v3
         networks:
             - airflow_network_v3
-    airflow-init:
+    airflow_init:
         image: airflow:v2.6.1
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         environment:
             _AIRFLOW_DB_UPGRADE: 'true'
             _AIRFLOW_WWW_USER_CREATE: 'true'
-        user: "${AIRFLOW_UID:-50000}:0"
+        user: "${AIRFLOW_UID:-50000}:${GID}"
         links:
             - airflow_db_v3
             - airflow_results_db_v3
-            - redis-server_v3
+            - redis_server_v3
             - airflow_pgbouncer_v3
         depends_on:
             airflow_db_v3:
@@ -254,10 +257,10 @@ services:
                 condition: service_started
             airflow_results_db_v3:
                 condition: service_started
-            redis-server_v3:
+            redis_server_v3:
                 condition: service_started
         volumes:
-            - /home/igf/airflow_v3/logs:/rds/general/user/igf/ephemeral/airflow_v3_logs/logs:rw
+            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
             - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
             - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro

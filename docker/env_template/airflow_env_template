@@ -10,14 +10,14 @@ AIRFLOW__WEBSERVER__SECRET_KEY=''
 AIRFLOW__WEBSERVER__LOG_FETCH_TIMEOUT_SEC=5
 ## [scheduler]
 AIRFLOW__SCHEDULER__PARSING_PROCESSES=2
-AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY=/rds/general/user/igf/ephemeral/airflow_logs/logs/scheduler
+AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY=/rds/general/user/igf/ephemeral/airflow_v3_logs/logs/scheduler
 AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT=False
 ## [logging]
-AIRFLOW__LOGGING__BASE_LOG_FOLDER=/rds/general/user/igf/ephemeral/airflow_logs/logs
+AIRFLOW__LOGGING__BASE_LOG_FOLDER=/rds/general/user/igf/ephemeral/airflow_v3_logs/logs
 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR
 AIRFLOW__LOGGING__CELERY_LOGGING_LEVEL=ERROR
 AIRFLOW__LOGGING__FAB_LOGGING_LEVEL=ERROR
-AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION=/rds/general/user/igf/ephemeral/airflow_logs/logs/dag_processor_manager/dag_processor_manager.log
+AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION=/rds/general/user/igf/ephemeral/airflow_v3_logs/logs/dag_processor_manager/dag_processor_manager.log
 ## [core]
 AIRFLOW__CORE__DAGS_FOLDER=/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc/dags
 AIRFLOW__CORE__PLUGIN_FOLDER=/rds/general/user/igf/home/data2/airflow_v3/plugin
