@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master, analysis_pipelines_2022 ]
+    branches: [ master, airflow_2.6.1 ]
   pull_request:
     branches: [ master ]
 
