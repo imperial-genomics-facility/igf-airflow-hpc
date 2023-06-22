@@ -5,8 +5,8 @@ from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.contrib.operators.ssh_operator import SSHOperator
-from airflow.contrib.hooks.ssh_hook import SSHHook
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag25_copy_seqruns_to_hpc_utils import get_new_run_id_for_copy

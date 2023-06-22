@@ -3,9 +3,9 @@ from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
-from airflow.contrib.operators.ssh_operator import SSHOperator
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
 from airflow.operators.bash import BashOperator
-from airflow.contrib.hooks.ssh_hook import SSHHook
 from igf_airflow.utils.dag21_portal_admin_view_utils import (
     get_seqrun_counts_func,
     prepare_storage_plot_func,

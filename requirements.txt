@@ -13,6 +13,7 @@ apache-airflow-providers-imap==3.2.1
 apache-airflow-providers-postgres==5.5.0
 apache-airflow-providers-redis==3.2.0
 apache-airflow-providers-sqlite==3.4.1
+apache-airflow-providers-ssh==3.7.0
 apispec==5.2.2
 argcomplete==3.0.8
 asana==3.2.1
@@ -179,3 +180,4 @@ WTForms==3.0.1
 yarl==1.9.2
 zipp==3.15.0
 atlassian-python-api==3.38.0
+tox==4.6.0

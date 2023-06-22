@@ -3,10 +3,10 @@ from datetime import timedelta
 from requests.auth import HTTPBasicAuth
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
-from airflow.contrib.hooks.ssh_hook import SSHHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
-from airflow.contrib.operators.ssh_operator import SSHOperator
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
 from igf_airflow.celery.check_celery_queue import fetch_queue_list_from_redis_server
 from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
