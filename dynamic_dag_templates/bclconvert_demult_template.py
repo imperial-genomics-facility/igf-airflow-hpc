@@ -70,7 +70,7 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval='@once',
+        schedule='@once',
         default_args=args,
         default_view='graph',
         orientation='TB',

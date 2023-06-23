@@ -51,7 +51,7 @@ FEATURE_TYPE_LIST = \
 dag = \
   DAG(
     dag_id='dag9_tenx_single_cell_immune_profiling',
-    schedule_interval=None,
+    schedule=None,
     tags=['hpc', 'analysis', 'tenx', 'sc'],
     default_args=default_args,
     max_active_tasks=100,

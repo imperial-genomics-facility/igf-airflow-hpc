@@ -40,7 +40,7 @@ dag = \
   DAG(
     dag_id=DAG_ID,
     catchup=False,
-    schedule_interval="0 4 * * *",
+    schedule="0 4 * * *",
     dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
     tags=['igf-lims','igfportal', 'docker-host'],

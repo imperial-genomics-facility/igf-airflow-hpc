@@ -70,7 +70,7 @@ igfportal_ssh_hook = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval="@hourly",
+        schedule="@hourly",
         default_args=args,
         catchup=False,
         max_active_runs=1,

@@ -59,7 +59,7 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval='0 */4 * * *', ## every 4hrs
+        schedule='0 */4 * * *', ## every 4hrs
         default_args=args,
         default_view='tree',
         orientation='TB',

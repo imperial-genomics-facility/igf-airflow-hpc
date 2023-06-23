@@ -34,7 +34,7 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
+        schedule=None,
         default_args=args,
         default_view='tree',
         orientation='TB',
