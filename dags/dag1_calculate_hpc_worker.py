@@ -1,3 +1,4 @@
+import pendulum
 import os, json, logging, requests, base64
 from datetime import timedelta
 from requests.auth import HTTPBasicAuth
@@ -17,7 +18,7 @@ HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
 
 args = {
     'owner':'airflow',
-    'start_date':days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=2),
     'provide_context': True,

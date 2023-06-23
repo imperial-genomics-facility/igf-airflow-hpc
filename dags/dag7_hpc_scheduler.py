@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
@@ -10,7 +11,7 @@ from airflow.providers.ssh.hooks.ssh import SSHHook
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,

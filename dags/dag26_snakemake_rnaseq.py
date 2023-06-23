@@ -1,11 +1,12 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import change_analysis_seed_status_func
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import prepare_snakemake_inputs_func
@@ -17,7 +18,7 @@ from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_glob
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(1),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 10,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -58,7 +59,7 @@ with dag:
         )
     ## TASK
     no_task = \
-        DummyOperator(
+        EmptyOperator(
             task_id="no_task",
             dag=dag,
             queue='hpc_4G',

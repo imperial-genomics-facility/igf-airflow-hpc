@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
@@ -41,7 +42,7 @@ wells_ssh_hook = \
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(1),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

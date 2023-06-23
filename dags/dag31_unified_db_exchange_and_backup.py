@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 import queue
 from airflow.models import DAG, Variable
@@ -23,7 +24,7 @@ from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
 
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

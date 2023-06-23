@@ -1,10 +1,9 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import fetch_seqrun_data_from_portal_func
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import format_samplesheet_func
@@ -22,7 +21,7 @@ IGF_LIMS_SERVER_HOSTNAME = Variable.get('igf_lims_server_hostname', default_var=
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

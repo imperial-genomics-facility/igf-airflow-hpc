@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
@@ -9,7 +10,7 @@ from igf_airflow.utils.dag27_cleanup_demultiplexing_output_utils import cleanup_
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(1),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 10,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

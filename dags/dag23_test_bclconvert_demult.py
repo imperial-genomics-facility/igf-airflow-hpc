@@ -1,9 +1,10 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import (
     get_samplesheet_from_portal_func,
@@ -23,7 +24,7 @@ MAX_SAMPLESHEETS = 30
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -73,7 +74,7 @@ with dag:
             python_callable=mark_seqrun_status_func)
     ## TASK
     no_work = \
-        DummyOperator(
+        EmptyOperator(
             task_id='no_work',
             dag=dag,
             queue='hpc_4G')
@@ -88,7 +89,7 @@ with dag:
             python_callable=generate_merged_report_func)
     ## TASK
     upload_merged_report_to_portal = \
-        DummyOperator(
+        EmptyOperator(
             task_id='upload_merged_report_to_portal')
     ## TASK
     mark_seqrun_finished = \

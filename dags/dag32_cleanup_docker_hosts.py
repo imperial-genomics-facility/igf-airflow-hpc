@@ -1,17 +1,17 @@
 import os
+import pendulum
 from datetime import timedelta
 import queue
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.dummy import DummyOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 
 default_args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

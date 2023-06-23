@@ -1,3 +1,4 @@
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -6,7 +7,7 @@ from igf_airflow.utils.dag15_ePMC_search_utils import update_wiki_publication_pa
 
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(60),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

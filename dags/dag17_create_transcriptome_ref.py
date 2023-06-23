@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -16,7 +17,7 @@ from igf_airflow.utils.dag17_create_transcriptome_ref_utils import add_refs_to_d
 
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,

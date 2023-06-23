@@ -1,10 +1,11 @@
+import pendulum
 from datetime import timedelta
 import os,json,logging,subprocess
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import fetch_analysis_info_and_branch_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import configure_cellranger_run_func
 from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_sc_read_trimmming_func
@@ -34,7 +35,7 @@ from igf_airflow.utils.dag9_tenx_single_cell_immune_profiling_utils import run_s
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 4,
@@ -118,7 +119,7 @@ with dag:
       run_trim_list.append(t)
     ## TASK
     collect_trimmed_files = \
-      DummyOperator(
+      EmptyOperator(
         task_id='collect_trimmed_files_{0}'.format(feature_name),
         trigger_rule='none_failed_min_one_success',
         dag=dag)
@@ -129,7 +130,7 @@ with dag:
     collect_trimmed_files >> configure_cellranger_run
   ## TASK
   no_analysis = \
-    DummyOperator(
+    EmptyOperator(
       task_id='no_analysis',
       dag=dag)
   ## PIPELINE

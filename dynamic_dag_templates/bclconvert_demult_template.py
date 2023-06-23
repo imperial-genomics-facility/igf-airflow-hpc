@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from datetime import datetime
 from airflow import DAG
@@ -6,7 +7,7 @@ from airflow.utils.dates import days_ago
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.utils.task_group import TaskGroup
 from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
 from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_func
@@ -52,7 +53,7 @@ formatted_samplesheets = {{ FORMATTED_SAMPLESHEETS|safe }}
 ## ARGS
 args = {
     'owner': 'airflow',
-    'start_date': days_ago(2),
+    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 10,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
@@ -139,7 +140,7 @@ with dag:
 			python_callable=format_and_split_samplesheet_func)
     ## TASK
     no_work = \
-        DummyOperator(
+        EmptyOperator(
             task_id="no_work")
     ## PIPELINE
     find_seqrun >> mark_seqrun_as_running
@@ -289,7 +290,7 @@ with dag:
 					python_callable=trigger_ig_jobs)
             ## TASK - LANE
             build_qc_page_for_project_lane = \
-                DummyOperator(
+                EmptyOperator(
                     task_id=f"build_qc_page_for_project_{project_id}_lane_{lane_id}")
             ## PIPELINE - LANE
             get_lanes_for_project >> get_igs_for_project_lane
@@ -656,7 +657,7 @@ with dag:
 								python_callable=load_fastq_and_qc_to_db_func)
                         ## TASK - SAMPLE
                         copy_fastq_to_irods = \
-                            DummyOperator(
+                            EmptyOperator(
                                 task_id=f"copy_fastq_to_irods_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         copy_fastq_to_globus = \

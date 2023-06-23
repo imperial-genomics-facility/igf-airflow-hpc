@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
@@ -19,7 +20,7 @@ args = {
     'retries': 4,
     'retry_delay': timedelta(minutes=5),
     'provide_context': True,
-    'email_on_failure': False,
+    'email_on_failure': pendulum.today('UTC').add(days=2),
     'email_on_retry': False,
     'catchup': False,
     'max_active_runs': 1}
