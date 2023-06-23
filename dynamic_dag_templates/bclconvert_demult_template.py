@@ -661,7 +661,7 @@ with dag:
                                 task_id=f"copy_fastq_to_irods_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         copy_fastq_to_globus = \
-                            DummyOperator(
+                            EmptyOperator(
                                 task_id=f"copy_fastq_to_globus_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}")
                         ## TASK - SAMPLE
                         fastqc = \
