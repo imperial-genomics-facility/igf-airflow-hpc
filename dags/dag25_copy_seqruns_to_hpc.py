@@ -8,8 +8,7 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
-from airflow.operators.dummy import DummyOperator
-from airflow.utils.dates import days_ago
+from airflow.operators.empty import EmptyOperator
 from igf_airflow.utils.dag25_copy_seqruns_to_hpc_utils import get_new_run_id_for_copy
 from igf_airflow.utils.dag25_copy_seqruns_to_hpc_utils import register_run_to_db_and_portal_func
 
@@ -61,7 +60,7 @@ dag = \
         dag_id=DAG_ID,
         schedule='0 */4 * * *', ## every 4hrs
         default_args=args,
-        default_view='tree',
+        default_view='grid',
         orientation='TB',
         catchup=False,
         max_active_runs=1,
@@ -229,7 +228,7 @@ with dag:
             python_callable=register_run_to_db_and_portal_func)
     ## TASK
     no_work = \
-        DummyOperator(
+        EmptyOperator(
             task_id='no_work',
             dag=dag,
             queue='hpc_4G')
