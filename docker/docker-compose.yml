@@ -75,7 +75,7 @@ services:
         networks:
             - airflow_network_v3
     airflow_webserver_v3:
-        image: airflow:v2.6.1
+        image: airflow:v2.6.2
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         logging:
@@ -114,7 +114,7 @@ services:
         networks:
             - airflow_network_v3
     airflow_scheduler_v3:
-        image: airflow:v2.6.1
+        image: airflow:v2.6.2
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         logging:
@@ -152,7 +152,7 @@ services:
         networks:
             - airflow_network_v3
     airflow_worker_v3:
-        image: airflow:v2.6.1
+        image: airflow:v2.6.2
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         logging:
@@ -198,7 +198,7 @@ services:
         networks:
             - airflow_network_v3
     airflow_flower_v3:
-        image: airflow:v2.6.1
+        image: airflow:v2.6.2
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         logging:
@@ -238,7 +238,7 @@ services:
         networks:
             - airflow_network_v3
     airflow_init:
-        image: airflow:v2.6.1
+        image: airflow:v2.6.2
         env_file:
             - /home/igf/airflow_v3/secrets/airflow_env
         environment:
