@@ -33,8 +33,6 @@ dag = DAG(
         start_date=pendulum.today('UTC').add(days=2),
         schedule="*/3 * * * *",
         dagrun_timeout=timedelta(minutes=10),
-        retry_delay=timedelta(minutes=2),
-        retries=1,
         default_args=args,
         tags=['igf-lims', 'wells']
       )
@@ -206,6 +204,8 @@ with dag:
     PythonOperator(
       task_id='fetch_queue_list_from_redis',
       dag=dag,
+      retry_delay=timedelta(minutes=2),
+      retries=1,
       python_callable=airflow_utils_for_redis,
       op_kwargs={"redis_conf_file":Variable.get('redis_conn_file')},
       pool='generic_pool',
@@ -216,6 +216,8 @@ with dag:
       task_id='check_hpc_queue',
       ssh_hook=hpc_hook,
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
       command='source /etc/bashrc;qstat',
       pool='generic_pool',
       queue='generic')
@@ -225,6 +227,8 @@ with dag:
       task_id='fetch_active_jobs_from_hpc',
       ssh_hook=hpc_hook,
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
       pool='generic_pool',
       command="""
         source /etc/bashrc;\
@@ -237,6 +241,8 @@ with dag:
     PythonOperator(
       task_id='fetch_celery_workers',
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
       pool='generic_pool',
       queue='generic',
       python_callable=fetch_celery_worker_list,
@@ -247,6 +253,8 @@ with dag:
     BranchPythonOperator(
       task_id='calculate_new_worker_size_and_branch',
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
       python_callable=get_new_workers,
       queue='generic',
       pool='generic_pool',
@@ -262,6 +270,8 @@ with dag:
       task_id=q,
       ssh_hook=hpc_hook,
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
       queue='generic',
       pool='generic_pool',
       command="""
@@ -295,6 +305,9 @@ with dag:
     PythonOperator(
       task_id='cleanup_celery_workers',
       dag=dag,
+      retries=1,
+      retry_delay=timedelta(minutes=2),
+      retries=1,
       queue='generic',
       pool='generic_pool',
       params={'empty_celery_worker_key':'empty_celery_worker'},
