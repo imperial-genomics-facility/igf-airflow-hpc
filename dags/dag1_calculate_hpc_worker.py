@@ -18,7 +18,6 @@ HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
 
 args = {
     'owner':'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
     'retries': 1,
     'retry_delay': timedelta(minutes=2),
     'provide_context': True,
@@ -30,7 +29,7 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
-        start_date=pendulum.today('UTC').add(days=2),
+        start_date=pendulum.yesterday(),
         schedule="*/3 * * * *",
         dagrun_timeout=timedelta(minutes=10),
         default_args=args,
