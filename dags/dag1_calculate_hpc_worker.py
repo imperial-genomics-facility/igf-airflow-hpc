@@ -30,8 +30,11 @@ dag = DAG(
         dag_id='dag1_calculate_hpc_worker',
         catchup=False,
         max_active_runs=1,
+        start_date=pendulum.today('UTC').add(days=2),
         schedule="*/3 * * * *",
         dagrun_timeout=timedelta(minutes=10),
+        retry_delay=timedelta(minutes=2),
+        retries=1,
         default_args=args,
         tags=['igf-lims', 'wells']
       )
