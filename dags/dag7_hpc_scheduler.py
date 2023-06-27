@@ -26,7 +26,6 @@ dag = \
   DAG(
     dag_id=DAG_ID,
     schedule="*/30 * * * *",
-    dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
     catchup=False,
     tags=['igf-lims','hpc'],
