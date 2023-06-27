@@ -307,7 +307,6 @@ with dag:
       dag=dag,
       retries=1,
       retry_delay=timedelta(minutes=2),
-      retries=1,
       queue='generic',
       pool='generic_pool',
       params={'empty_celery_worker_key':'empty_celery_worker'},
