@@ -1,6 +1,7 @@
 asana==3.2.1
 beautifulsoup4==4.12.2
 bs4==0.0.1
+flower==2.0.0
 gviz-api==1.10.0
 html5lib==1.1
 jsonschema==4.17.3
