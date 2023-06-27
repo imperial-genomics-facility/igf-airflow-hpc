@@ -48,7 +48,6 @@ dag = \
         max_active_runs=10,
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=20),
-        provide_context=True,
         owner='airflow',
         tags=['hpc'])
 

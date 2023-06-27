@@ -45,7 +45,6 @@ dag = \
     max_active_runs=1,
     tags=['igf-lims','igfportal', 'docker-host'],
     start_date=pendulum.yesterday(),
-    provide_context=True,
     owner='airflow',)
 
 with dag:

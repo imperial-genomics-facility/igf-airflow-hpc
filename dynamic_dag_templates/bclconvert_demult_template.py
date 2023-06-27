@@ -77,7 +77,6 @@ dag = \
         is_paused_upon_creation=False,
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=15),
-        provide_context=True,
         owner='airflow',
         tags=['hpc', 'dynamic', 'demult'])
 

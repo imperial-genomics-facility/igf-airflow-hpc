@@ -25,7 +25,6 @@ dag = \
     catchup=False,
     start_date=pendulum.yesterday(),
     dagrun_timeout=timedelta(minutes=15),
-    provide_context=True,
     owner='airflow',
     tags=['hpc'])
 
