@@ -57,7 +57,6 @@ dag = \
         schedule="@hourly",
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=30),
-        owner='airflow',
         catchup=False,
         max_active_runs=1,
         default_view='grid',

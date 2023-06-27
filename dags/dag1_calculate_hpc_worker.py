@@ -25,7 +25,6 @@ dag = DAG(
         start_date=pendulum.yesterday(),
         schedule="*/3 * * * *",
         dagrun_timeout=timedelta(minutes=10),
-        owner='airflow',
         tags=['igf-lims', 'wells']
       )
 

@@ -32,7 +32,6 @@ dag = \
     tags=['igf-lims','hpc'],
     start_date=pendulum.yesterday(),
     dagrun_timeout=timedelta(minutes=10),
-    owner='airflow',
     )
 
 ## SSH HOOK

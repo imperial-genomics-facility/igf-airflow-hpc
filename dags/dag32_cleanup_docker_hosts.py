@@ -44,8 +44,8 @@ dag = \
     dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
     tags=['igf-lims','igfportal', 'docker-host'],
-    start_date=pendulum.yesterday(),
-    owner='airflow',)
+    start_date=pendulum.yesterday()
+  )
 
 with dag:
   ## TASK

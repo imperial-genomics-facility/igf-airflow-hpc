@@ -42,7 +42,6 @@ dag = \
         catchup=False,
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=15),
-        owner='airflow',
         default_view='grid',
         orientation='TB',
         tags=['hpc'])

@@ -61,7 +61,6 @@ dag = \
         schedule='0 */4 * * *', ## every 4hrs
         catchup=False,
         start_date=pendulum.yesterday(),
-        owner='airflow',
         default_view='grid',
         orientation='TB',
         max_active_runs=1,

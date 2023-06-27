@@ -36,7 +36,6 @@ dag = \
         max_active_runs=1,
         catchup=False,
         start_date=pendulum.yesterday(),
-        owner='airflow',
         tags=['hpc'])
 with dag:
     ## TASK

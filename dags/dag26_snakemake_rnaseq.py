@@ -36,7 +36,6 @@ dag = \
         dag_id=DAG_ID,
         schedule=None,
         start_date=pendulum.yesterday(),
-        owner='airflow',
         default_view='grid',
         orientation='TB',
         max_active_runs=10,

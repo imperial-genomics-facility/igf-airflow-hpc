@@ -72,7 +72,6 @@ dag = \
         dag_id=DAG_ID,
         schedule="@hourly",
         start_date=pendulum.yesterday(),
-        owner='airflow',
         catchup=False,
         max_active_runs=1,
         tags=['hpc'])
