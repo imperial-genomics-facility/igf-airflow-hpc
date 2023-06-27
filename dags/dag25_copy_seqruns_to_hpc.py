@@ -39,16 +39,16 @@ wells_ssh_hook = \
     remote_host=WELLS_SERVER_HOSTNAME)
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 1}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False,
+#     'max_active_runs': 1}
 
 ## DAG
 DAG_ID = \
@@ -59,10 +59,12 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule='0 */4 * * *', ## every 4hrs
-        default_args=args,
+        catchup=False,
+        start_date=pendulum.yesterday(),
+        provide_context=True,
+        owner='airflow',
         default_view='grid',
         orientation='TB',
-        catchup=False,
         max_active_runs=1,
         tags=['hpc',])
 
@@ -72,6 +74,8 @@ with dag:
         BranchPythonOperator(
             task_id='decide_server',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             python_callable=lambda : 'get_all_runs_from_wells' if SERVER_IN_USE=='wells' else 'get_all_runs_from_orwell')
     ## TASK
@@ -79,6 +83,8 @@ with dag:
         SSHOperator(
             task_id='get_all_runs_from_wells',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
@@ -90,6 +96,8 @@ with dag:
         BranchPythonOperator(
             task_id='get_new_seqrun_id_from_wells',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'xcom_task': 'get_all_runs_from_wells',
@@ -103,6 +111,8 @@ with dag:
         SSHOperator(
             task_id='copy_run_to_wells',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
@@ -114,6 +124,8 @@ with dag:
        BashOperator(
             task_id='copy_run_from_wells_to_hpc',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'server_hostname': WELLS_SERVER_HOSTNAME,
@@ -148,6 +160,8 @@ with dag:
         SSHOperator(
             task_id='get_all_runs_from_orwell',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='orwell_ssh_pool',
             ssh_hook=orwell_ssh_hook,
@@ -159,6 +173,8 @@ with dag:
         BranchPythonOperator(
             task_id='get_new_seqrun_id_from_orwell',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'xcom_task': 'get_all_runs_from_orwell',
@@ -172,6 +188,8 @@ with dag:
         SSHOperator(
             task_id='copy_run_to_orwell',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='orwell_ssh_pool',
             ssh_hook=orwell_ssh_hook,
@@ -183,6 +201,8 @@ with dag:
         BashOperator(
             task_id='copy_run_from_orwell_to_hpc',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'server_hostname': ORWELL_SERVER_HOSTNAME,
@@ -217,6 +237,8 @@ with dag:
         PythonOperator(
             task_id='register_run_to_db_and_portal',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             trigger_rule='none_failed_min_one_success',
             params={
@@ -231,6 +253,8 @@ with dag:
         EmptyOperator(
             task_id='no_work',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G')
     ## PIPELINE
     decide_server >> get_all_runs_from_wells

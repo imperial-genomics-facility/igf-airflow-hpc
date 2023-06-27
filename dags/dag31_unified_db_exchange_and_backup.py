@@ -22,15 +22,15 @@ from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
     process_raw_analysis_queue_func)
 
 
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 4,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 4,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 DAG_ID = \
     os.path.basename(__file__).\
@@ -55,10 +55,13 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule="@hourly",
-        default_args=args,
+        start_date=pendulum.yesterday(),
+        dagrun_timeout=timedelta(minutes=30),
+        provide_context=True,
+        owner='airflow',
         catchup=False,
         max_active_runs=1,
-        default_view='tree',
+        default_view='grid',
         orientation='TB',
         tags=['hpc', 'portal', 'raw_metadata', 'raw_analysis', 'db', 'backup'])
 with dag:
@@ -67,6 +70,8 @@ with dag:
         PythonOperator(
             task_id="copy_quota_xlsx",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'xcom_key': 'quota_xlsx',
@@ -80,6 +85,8 @@ with dag:
         PythonOperator(
             task_id="copy_access_db",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'xcom_key': 'access_db',
@@ -93,6 +100,8 @@ with dag:
         PythonOperator(
             task_id="get_known_projects",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'xcom_key': 'known_projects'},
@@ -102,6 +111,8 @@ with dag:
         PythonOperator(
             task_id="create_raw_metadata_for_new_projects",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_8G8t',
             params={
                 'xcom_key': 'metadata_dir',
@@ -122,6 +133,8 @@ with dag:
         PythonOperator(
             task_id="get_formatted_metadata_files",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'xcom_key': 'formatted_metadata',
@@ -134,6 +147,8 @@ with dag:
         PythonOperator(
             task_id="upload_raw_metadata_to_portal",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={
@@ -146,6 +161,8 @@ with dag:
         PythonOperator(
             task_id="fetch_validated_metadata_from_portal_and_load",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={},
             python_callable=fetch_validated_metadata_from_portal_and_load_func
@@ -155,6 +172,8 @@ with dag:
         PythonOperator(
             task_id="fetch_raw_analysis_queue",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={
@@ -167,6 +186,8 @@ with dag:
         PythonOperator(
             task_id="process_raw_analysis_queue",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={
@@ -180,6 +201,8 @@ with dag:
         BashOperator(
             task_id='backup_prod_db',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             bash_command='bash /rds/general/user/igf/home/secret_keys/get_hourly_prod_db_dump.sh ')
     ## TASK
@@ -187,6 +210,8 @@ with dag:
         SSHOperator(
             task_id='backup_portal_db',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
@@ -196,6 +221,8 @@ with dag:
         BashOperator(
             task_id="load_data_to_legacy_prod_db",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             bash_command='bash /rds/general/user/igf/home/secret_keys/update_legacy_prod_db.sh ')
     ## TASK
@@ -203,6 +230,8 @@ with dag:
         BashOperator(
             task_id="copy_portal_backup_to_hpc",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_dump.sh ")
     ## TASK
@@ -210,6 +239,8 @@ with dag:
         PythonOperator(
             task_id="get_metadata_dump_from_pipeline_db",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'json_dump_xcom_key': 'json_dump'},
@@ -219,6 +250,8 @@ with dag:
         PythonOperator(
             task_id="upload_metadata_to_portal_db",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue="hpc_4G",
             pool='igf_portal_pool',
             params={

@@ -51,15 +51,15 @@ sample_groups = {{ SAMPLE_GROUPS|safe }}
 formatted_samplesheets = {{ FORMATTED_SAMPLESHEETS|safe }}
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 10,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 10,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -71,11 +71,14 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule='@once',
-        default_args=args,
-        default_view='graph',
+        default_view='grid',
         orientation='TB',
         max_active_runs=1,
         is_paused_upon_creation=False,
+        start_date=pendulum.yesterday(),
+        dagrun_timeout=timedelta(minutes=15),
+        provide_context=True,
+        owner='airflow',
         tags=['hpc', 'dynamic', 'demult'])
 
 with dag:
@@ -84,6 +87,8 @@ with dag:
         BranchPythonOperator(
             task_id="find_seqrun",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=10,
             queue="hpc_4G",
             pool="demultiplexing",
             params={
@@ -97,6 +102,8 @@ with dag:
         BranchPythonOperator(
             task_id="mark_seqrun_as_running",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=10,
             queue="hpc_4G",
             pool="demultiplexing",
             params={
@@ -126,6 +133,8 @@ with dag:
         BranchPythonOperator(
 			task_id="format_and_split_samplesheet",
 			dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=10,
 			queue="hpc_4G",
             pool="demultiplexing",
 			params={
@@ -154,6 +163,8 @@ with dag:
         PythonOperator(
             task_id="mark_seqrun_as_finished",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=10,
             queue="hpc_4G",
             pool="demultiplexing",
             trigger_rule="all_done",
@@ -171,6 +182,8 @@ with dag:
             PythonOperator(
                 task_id=f"setup_qc_page_for_project_{project_id}",
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=10,
                 queue="hpc_4G",
                 pool="demultiplexing",
                 params={
@@ -189,6 +202,8 @@ with dag:
             PythonOperator(
                 task_id=f"setup_globus_transfer_for_project_{project_id}",
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=10,
                 queue="hpc_4G",
                 pool="demultiplexing",
                 params={
@@ -208,6 +223,8 @@ with dag:
             BranchPythonOperator(
                 task_id=f"get_lanes_for_project_{project_id}",
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=10,
 				queue="hpc_4G",
                 pool="demultiplexing",
                 params={
@@ -227,6 +244,8 @@ with dag:
             PythonOperator(
                 task_id=f"build_qc_page_for_project_{project_id}",
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=10,
 				queue="hpc_4G",
                 pool="demultiplexing",
                 params={
@@ -251,6 +270,8 @@ with dag:
             PythonOperator(
                 task_id=f"send_email_to_user_for_project_{project_id}",
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=10,
 				queue="hpc_4G",
                 pool="demultiplexing",
                 params={
@@ -272,6 +293,8 @@ with dag:
                 BranchPythonOperator(
                     task_id=f"get_igs_for_project_{project_id}_lane_{lane_id}",
                     dag=dag,
+                    retry_delay=timedelta(minutes=5),
+                    retries=10,
 					queue="hpc_4G",
                     pool="demultiplexing",
 				    params={
@@ -302,6 +325,8 @@ with dag:
                     PythonOperator(
                         task_id=f"bclconvert_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_64G16t",
                         pool="demultiplexing",
                         params={
@@ -332,6 +357,8 @@ with dag:
                     PythonOperator(
                         task_id=f"generate_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -347,6 +374,8 @@ with dag:
                     PythonOperator(
                         task_id=f"load_demult_report_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
                         queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -367,6 +396,8 @@ with dag:
                     PythonOperator(
                         task_id=f"check_output_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -381,6 +412,8 @@ with dag:
                     PythonOperator(
                         task_id=f"merge_single_cell_fastq_files_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -401,6 +434,8 @@ with dag:
                     PythonOperator(
                         task_id=f"collect_qc_reports_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -417,7 +452,9 @@ with dag:
                     PythonOperator(
                         task_id=f"multiqc_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
-						queue="hpc_4G",
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
+                        queue="hpc_8G",
                         pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
@@ -444,6 +481,8 @@ with dag:
                     PythonOperator(
                         task_id=f"copy_known_multiqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
 						params={
@@ -457,6 +496,8 @@ with dag:
                     PythonOperator(
                         task_id=f"fastqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
                         queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -470,6 +511,8 @@ with dag:
                     PythonOperator(
                         task_id=f"fastq_screen_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
                         queue="hpc_8G",
                         pool="demultiplexing",
                         params={
@@ -484,7 +527,9 @@ with dag:
                     PythonOperator(
                         task_id=f"multiqc_for_undetermined_reads_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
-                        queue="hpc_4G",
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
+                        queue="hpc_8G",
                         pool="demultiplexing",
                         params={
                             'seqrun_igf_id': seqrun_igf_id,
@@ -509,6 +554,8 @@ with dag:
                     PythonOperator(
                         task_id=f"build_qc_page_data_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                         dag=dag,
+                        retry_delay=timedelta(minutes=5),
+                        retries=10,
 						queue="hpc_4G",
                         pool="demultiplexing",
                         params={
@@ -553,6 +600,8 @@ with dag:
                         PythonOperator(
                             task_id=f"get_samples_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
+                            retry_delay=timedelta(minutes=5),
+                            retries=10,
 							queue="hpc_4G",
                             pool="demultiplexing",
                             params={
@@ -574,6 +623,8 @@ with dag:
                         PythonOperator(
                             task_id=f"prepare_globus_copy_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
+                            retry_delay=timedelta(minutes=5),
+                            retries=10,
                             queue="hpc_4G",
                             pool="demultiplexing",
                             params={
@@ -592,6 +643,8 @@ with dag:
                         PythonOperator(
                             task_id=f"get_fastqs_and_copy_to_globus_for_project_{project_id}_lane_{lane_id}_ig_{index_id}",
                             dag=dag,
+                            retry_delay=timedelta(minutes=5),
+                            retries=10,
                             queue="hpc_4G",
                             pool="demultiplexing",
                             params={
@@ -616,6 +669,8 @@ with dag:
                             PythonOperator(
 								task_id=f"calculate_md5_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
 								dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 								queue="hpc_4G",
                                 pool="demultiplexing",
 								params={
@@ -638,6 +693,8 @@ with dag:
                             PythonOperator(
                                 task_id=f"load_fastq_to_db_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 								queue="hpc_4G",
                                 pool="demultiplexing",
 								params={
@@ -668,6 +725,8 @@ with dag:
                             PythonOperator(
                                 task_id=f"fastqc_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 								queue="hpc_4G",
                                 pool="demultiplexing",
 								params={
@@ -686,6 +745,8 @@ with dag:
                             PythonOperator(
                                 task_id=f"copy_fastqc_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 							    queue="hpc_4G",
                                 pool="demultiplexing",
 								params={
@@ -699,6 +760,8 @@ with dag:
                             PythonOperator(
                                 task_id=f"fastq_screen_project_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 							    queue="hpc_8G",
                                 pool="demultiplexing",
 								params={
@@ -717,6 +780,8 @@ with dag:
                             PythonOperator(
                                 task_id=f"copy_fastq_screen_to_ftp_{project_id}_lane_{lane_id}_ig_{index_id}_sample_{sample_id}",
                                 dag=dag,
+                                retry_delay=timedelta(minutes=5),
+                                retries=10,
 							    queue="hpc_4G",
                                 pool="demultiplexing",
 								params={

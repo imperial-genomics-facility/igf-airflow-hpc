@@ -9,15 +9,15 @@ from airflow.operators.bash import BashOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 
-default_args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 4,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# default_args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 4,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 igfportal_ssh_hook = \
   SSHHook(
@@ -44,7 +44,9 @@ dag = \
     dagrun_timeout=timedelta(minutes=10),
     max_active_runs=1,
     tags=['igf-lims','igfportal', 'docker-host'],
-    default_args=default_args)
+    start_date=pendulum.yesterday(),
+    provide_context=True,
+    owner='airflow',)
 
 with dag:
   ## TASK
@@ -52,6 +54,8 @@ with dag:
     SSHOperator(
       task_id='cleanup_igf_lims',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=4,
       ssh_hook=igf_lims_ssh_hook,
       pool='igf_lims_ssh_pool',
       queue='hpc_4G',
@@ -62,6 +66,8 @@ with dag:
     SSHOperator(
       task_id='cleanup_igf_portal',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=4,
       ssh_hook=igfportal_ssh_hook,
       pool='igfportal_ssh_pool',
       queue='hpc_4G',

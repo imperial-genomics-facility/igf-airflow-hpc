@@ -16,13 +16,6 @@ CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
 HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
 
-args = {
-    'owner':'airflow',
-    'retries': 1,
-    'retry_delay': timedelta(minutes=2),
-    'provide_context': True,
-}
-
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
 dag = DAG(
@@ -32,7 +25,8 @@ dag = DAG(
         start_date=pendulum.yesterday(),
         schedule="*/3 * * * *",
         dagrun_timeout=timedelta(minutes=10),
-        default_args=args,
+        provide_context=True,
+        owner='airflow',
         tags=['igf-lims', 'wells']
       )
 

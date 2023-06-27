@@ -22,16 +22,16 @@ from igf_airflow.utils.dag23_test_bclconvert_demult_utils import (
 MAX_SAMPLESHEETS = 30
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 10}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False,
+#     'max_active_runs': 10}
 
 ## DAG
 DAG_ID = \
@@ -42,9 +42,14 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule=None,
-        default_args=args,
-        default_view='tree',
+        default_view='grid',
         orientation='TB',
+        catchup=False,
+        max_active_runs=10,
+        start_date=pendulum.yesterday(),
+        dagrun_timeout=timedelta(minutes=20),
+        provide_context=True,
+        owner='airflow',
         tags=['hpc'])
 
 with dag:
@@ -53,6 +58,8 @@ with dag:
         PythonOperator(
             task_id='get_samplesheet_from_portal',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={
@@ -64,6 +71,8 @@ with dag:
         PythonOperator(
             task_id='mark_seqrun_running',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'next_task': 'get_formatted_samplesheets',
@@ -83,6 +92,8 @@ with dag:
         PythonOperator(
             task_id='generate_merged_report',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             trigger_rule='none_failed',
             params={},
@@ -96,6 +107,8 @@ with dag:
         PythonOperator(
             task_id='mark_seqrun_finished',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             trigger_rule='all_done',
             params={
@@ -110,6 +123,8 @@ with dag:
         BranchPythonOperator(
             task_id='get_formatted_samplesheets',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'samplesheet_xcom_key': 'samplesheet_data',
@@ -131,6 +146,8 @@ with dag:
             PythonOperator(
                 task_id=f'calculate_override_bases_mask_{samplesheet_id}',
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=1,
                 queue='hpc_4G',
                 params={
                     'samplesheet_index': samplesheet_id,
@@ -145,6 +162,8 @@ with dag:
             PythonOperator(
                 task_id=f'bcl_convert_run_{samplesheet_id}',
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=1,
                 queue='hpc_8G',
                 params={
                     'samplesheet_index': samplesheet_id,
@@ -160,6 +179,8 @@ with dag:
             PythonOperator(
                 task_id=f'generate_report_{samplesheet_id}',
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=1,
                 queue='hpc_4G',
                 params={
                     'samplesheet_index': samplesheet_id,
@@ -176,6 +197,8 @@ with dag:
             PythonOperator(
                 task_id=f'copy_report_to_rds_{samplesheet_id}',
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=1,
                 queue='hpc_4G',
                 params={
                     'index_column': 'index',
@@ -211,6 +234,8 @@ with dag:
             PythonOperator(
                 task_id=f'upload_report_to_portal{samplesheet_id}',
                 dag=dag,
+                retry_delay=timedelta(minutes=5),
+                retries=1,
                 queue='hpc_4G',
                 pool='igf_portal_pool',
                 params={

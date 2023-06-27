@@ -8,15 +8,15 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 
 ## ARG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': pendulum.today('UTC').add(days=2),
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
+# default_args = {
+#     'owner': 'airflow',
+#     'depends_on_past': False,
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+# }
 ## DAG
 DAG_ID = \
     os.path.basename(__file__).\
@@ -30,7 +30,11 @@ dag = \
     max_active_runs=1,
     catchup=False,
     tags=['igf-lims','hpc'],
-    default_args=default_args)
+    start_date=pendulum.yesterday(),
+    dagrun_timeout=timedelta(minutes=10),
+    provide_context=True,
+    owner='airflow',
+    )
 
 ## SSH HOOK
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
@@ -59,6 +63,8 @@ with dag:
     SSHOperator(
       task_id='run_hpc_scheduler',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=hpc_hook,
       pool='generic_pool',
       queue='generic',
@@ -71,6 +77,8 @@ with dag:
     SSHOperator(
       task_id='restart_flower_server',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=igf_lims_ssh_hook,
       pool='generic_pool',
       queue='hpc_4G',
@@ -89,6 +97,8 @@ with dag:
     SSHOperator(
       task_id='restart_portal_flower_server',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=igfportal_ssh_hook,
       pool='igfportal_ssh_pool',
       queue='hpc_4G',

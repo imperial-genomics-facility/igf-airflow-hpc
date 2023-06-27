@@ -8,15 +8,15 @@ from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag27_cleanup_demultiplexing_output_utils import cleanup_fastq_for_seqrun_func
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 10,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 10,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -27,8 +27,12 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule=None,
-        default_args=args,
-        default_view='tree',
+        catchup=False,
+        start_date=pendulum.yesterday(),
+        dagrun_timeout=timedelta(minutes=15),
+        provide_context=True,
+        owner='airflow',
+        default_view='grid',
         orientation='TB',
         max_active_runs=1,
         tags=['hpc', 'de-multiplexing', 'cleanup'])
@@ -39,6 +43,8 @@ with dag:
         PythonOperator(
             task_id="mark_analysis_seed_as_running",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={

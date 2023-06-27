@@ -14,16 +14,16 @@ from igf_airflow.utils.dag21_portal_admin_view_utils import (
     get_pipeline_stats_func,
     create_merged_json_and_upload_to_portal_func)
 
-args = {
-    'owner': 'airflow',
-    'start_date': days_ago(2),
-    'retries': 4,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': pendulum.today('UTC').add(days=2),
-    'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 1}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': days_ago(2),
+#     'retries': 4,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': pendulum.today('UTC').add(days=2),
+#     'email_on_retry': False,
+#     'catchup': False,
+#     'max_active_runs': 1}
 
 DAG_ID = \
     os.path.basename(__file__).\
@@ -71,7 +71,9 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule="@hourly",
-        default_args=args,
+        start_date=pendulum.yesterday(),
+        provide_context=True,
+        owner='airflow',
         catchup=False,
         max_active_runs=1,
         tags=['hpc'])
@@ -81,6 +83,8 @@ with dag:
         PythonOperator(
             task_id='get_seqrun_counts',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'json_dump_xcom_key': 'seqrun_json_dump'},
@@ -90,6 +94,8 @@ with dag:
         SSHOperator(
             task_id='orwell_home',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=orwell_ssh_hook,
             queue='hpc_4G',
             pool='orwell_exe_pool',
@@ -101,6 +107,8 @@ with dag:
         SSHOperator(
             task_id='wells_home',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
@@ -112,6 +120,8 @@ with dag:
         SSHOperator(
             task_id='nextseq1_root',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
@@ -121,6 +131,8 @@ with dag:
         SSHOperator(
             task_id='wells_data',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
@@ -133,6 +145,8 @@ with dag:
         SSHOperator(
             task_id='eliot_root',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
@@ -145,6 +159,8 @@ with dag:
         SSHOperator(
             task_id='eliot_data',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
@@ -157,6 +173,8 @@ with dag:
         SSHOperator(
             task_id='eliot_data2',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=eliot_ssh_hook,
             queue='hpc_4G',
             pool='eliot_ssh_pool',
@@ -169,6 +187,8 @@ with dag:
         SSHOperator(
             task_id='igf_lims_root',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=igf_lims_ssh_hook,
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
@@ -181,6 +201,8 @@ with dag:
         SSHOperator(
             task_id='woolf_root',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
             pool='woolf_ssh_pool',
@@ -193,6 +215,8 @@ with dag:
         SSHOperator(
             task_id='woolf_data1',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
             pool='woolf_ssh_pool',
@@ -205,6 +229,8 @@ with dag:
         SSHOperator(
             task_id='woolf_data2',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=woolf_ssh_hook,
             queue='hpc_4G',
             pool='woolf_ssh_pool',
@@ -217,6 +243,8 @@ with dag:
         SSHOperator(
             task_id='igfportal_root',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
@@ -228,6 +256,8 @@ with dag:
         BashOperator(
             task_id="hpc_rds",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             bash_command='cat /rds/general/sys-info/quotas/user/igf|grep -w "genomics-facility-archive-2019" -A1|grep Live|cut -d " " -f13,15')
     ## TASK
@@ -235,6 +265,8 @@ with dag:
         PythonOperator(
             task_id="prepare_storage_plot",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             # params={
             #     'orwell_home': 'orwell_home_space',
@@ -274,6 +306,8 @@ with dag:
         PythonOperator(
             task_id='get_pipeline_stats',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'xcom_key': 'pipeline_stats'
@@ -284,6 +318,8 @@ with dag:
         PythonOperator(
             task_id="create_merged_json_and_upload_to_portal",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={

@@ -14,15 +14,15 @@ from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_glob
 from igf_airflow.utils.dag28_nfcore_pipelines_wrapper_utils import prepare_nfcore_pipeline_inputs
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=2),
-    'retries': 10,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 10,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -34,8 +34,11 @@ dag = \
     DAG(
         dag_id=DAG_ID,
         schedule=None,
-        default_args=args,
-        default_view='tree',
+        start_date=pendulum.yesterday(),
+        provide_context=True,
+        owner='airflow',
+        catchup=False,
+        default_view='grid',
         orientation='TB',
         max_active_runs=10,
         tags=['hpc', 'nextflow', 'nfcore'])
@@ -46,6 +49,8 @@ with dag:
         BranchPythonOperator(
             task_id="mark_analysis_seed_as_running",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'new_status': 'RUNNING',
@@ -68,6 +73,8 @@ with dag:
         PythonOperator(
             task_id="mark_analysis_seed_as_finished",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'new_status': 'FINISHED',
@@ -81,6 +88,8 @@ with dag:
         PythonOperator(
             task_id="mark_analysis_seed_as_failed",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'new_status': 'FAILED',
@@ -94,6 +103,8 @@ with dag:
         BranchPythonOperator(
             task_id="prepare_nfcore_pipeline_inputs",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "nextflow_command_key": "nextflow_command",
@@ -108,6 +119,8 @@ with dag:
         BashOperator(
             task_id="run_nfcore_pipeline",
             dag=dag,
+            retry_delay=timedelta(minutes=15),
+            retries=10,
             queue='hpc_4G_long',
             pool='batch_job',
             do_xcom_push=False,
@@ -124,6 +137,8 @@ with dag:
         BashOperator(
             task_id="create_md5sum_for_analysis",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             do_xcom_push=False,
             params={
@@ -142,6 +157,8 @@ with dag:
         PythonOperator(
             task_id="load_analysis_to_disk",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "analysis_dir_key": "nextflow_workdir",
@@ -157,6 +174,8 @@ with dag:
         PythonOperator(
             task_id="copy_analysis_to_globus_dir",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "date_tag_key": "date_tag",
