@@ -43,11 +43,13 @@ woolf_ssh_hook = \
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('woolf_server_hostname'))
 ## SSH HOOK
+# eliot_ssh_hook = \
+#   SSHHook(
+#     key_file=Variable.get('hpc_ssh_key_file'),
+#     username=Variable.get('hpc_user'),
+#     remote_host=Variable.get('eliot_server_hostname'))
 eliot_ssh_hook = \
-  SSHHook(
-    key_file=Variable.get('hpc_ssh_key_file'),
-    username=Variable.get('hpc_user'),
-    remote_host=Variable.get('eliot_server_hostname'))
+  SSHHook(ssh_conn_id='eliot_conn')
 ## SSH HOOK
 igf_lims_ssh_hook = \
   SSHHook(
