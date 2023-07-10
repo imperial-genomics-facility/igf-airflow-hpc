@@ -1,3 +1,5 @@
 {
-  "hpc_conn":"ssh://hpc_conn"
+  "hpc_conn":"ssh://hpc_conn",
+  "eliot_conn":"ssh://hpc_conn"
+  "woolf_conn":"ssh://hpc_conn"
 }
