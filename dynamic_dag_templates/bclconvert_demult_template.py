@@ -76,7 +76,7 @@ dag = \
         max_active_runs=1,
         is_paused_upon_creation=False,
         start_date=pendulum.yesterday(),
-        dagrun_timeout=timedelta(minutes=15),
+        dagrun_timeout=timedelta(hours=24),
         tags=['hpc', 'dynamic', 'demult'])
 
 with dag:
