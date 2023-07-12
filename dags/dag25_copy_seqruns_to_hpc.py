@@ -115,6 +115,8 @@ with dag:
             queue='hpc_4G',
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
+            conn_timeout=1800,
+            cmd_timeout=1800,
             command="""
                 bash /home/igf/airflow_v3/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_wells", key="seqrun_id") }}
             """)
@@ -192,6 +194,8 @@ with dag:
             queue='hpc_4G',
             pool='orwell_ssh_pool',
             ssh_hook=orwell_ssh_hook,
+            conn_timeout=1800,
+            cmd_timeout=1800,
             command="""
                 bash /home/igf/igf_code/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_orwell", key="seqrun_id") }}
             """)
