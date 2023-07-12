@@ -79,7 +79,7 @@ with dag:
       ssh_hook=igf_lims_ssh_hook,
       pool='generic_pool',
       queue='hpc_4G',
-      command="docker restart airflow_flower_v2")
+      command="docker restart airflow_flower_v3")
 
   ## TASK
   # restart_portal_flower_server = \
