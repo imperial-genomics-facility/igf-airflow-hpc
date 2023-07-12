@@ -87,7 +87,7 @@ with dag:
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
             command="""
-                bash /home/igf/airflow_v2/seqrun_copy_scripts/check_new_runs.sh
+                bash /home/igf/airflow_v3/seqrun_copy_scripts/check_new_runs.sh
             """)
     ## TASK
     get_new_seqrun_id_from_wells = \
@@ -115,7 +115,7 @@ with dag:
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,
             command="""
-                bash /home/igf/airflow_v2/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_wells", key="seqrun_id") }}
+                bash /home/igf/airflow_v3/seqrun_copy_scripts/check_and_copy_new_seqrun.sh {{ ti.xcom_pull(task_ids="get_new_seqrun_id_from_wells", key="seqrun_id") }}
             """)
     ## TASK
     copy_run_from_wells_to_hpc = \
