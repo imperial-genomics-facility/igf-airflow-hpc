@@ -1,4 +1,7 @@
 {
+  "geomx_ngs_pipeline_exe": "/project/tgu/software/geomx/GeoMx_NGS_2.3.3.10/geomxngspipeline",
+  "geomx_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/geomx/geomx_ngs_pipeline.sh",
+  "geomx_report_template_file": "",
   "celery_flower_base_url": "http://airflow_flower_v2:5555",
   "celery_flower_config": "/rds/general/user/igf/home/data2/airflow_v2/secrets/celery_flower.conf",
   "redis_conn_file": "/rds/general/user/igf/home/data2/airflow_v2/secrets/redis_conn.json",
