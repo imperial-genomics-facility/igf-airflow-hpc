@@ -73,8 +73,7 @@ def geomx_dag():
 		calculate_md5sum_for_dcc(dcc_count)
 	load_dcc = \
 		load_dcc_count_to_db(
-			dcc_count_path=dcc_count,
-			md5_path=md5_sum)
+			dcc_count_path=dcc_count)
 	copy_globus = \
 		copy_data_to_globus(
 			analysis_dir_dict=load_dcc)
