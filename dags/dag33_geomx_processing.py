@@ -24,8 +24,12 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	mark_analysis_finished)
 
 ## DAG
+DAG_ID = \
+    os.path.basename(__file__).\
+        replace(".pyc", "").\
+        replace(".py", "")
 @dag(
-	dag_id="dag33_geomx_processing",
+	dag_id=DAG_ID,
 	schedule=None,
 	start_date=pendulum.yesterday(),
 	dagrun_timeout=timedelta(minutes=180),
@@ -46,21 +50,24 @@ def geomx_dag():
 	analysis_running >> no_work()
 	config_file = \
 		check_and_process_config_file(
-			design=analysis_design)
+			design_file=analysis_design)
 	fastq_list = \
-		fetch_fastq_file_path_from_db(analysis_design)
+		fetch_fastq_file_path_from_db(
+			design_file=analysis_design)
 	temp_fastq_dir = \
-		create_temp_fastq_input_dir(fastq_list)
+		create_temp_fastq_input_dir(
+			fastq_list_json=fastq_list)
 	dcc_run_script = \
 		prepare_geomx_dcc_run_script(
-			design=analysis_design,
+			design_file=analysis_design,
 			symlink_dir=temp_fastq_dir,
-			config_dict=config_file)
+			config_file_dict=config_file)
 	dcc_count = \
-		generate_geomx_dcc_count(dcc_run_script)
+		generate_geomx_dcc_count(
+			dcc_script_dict=dcc_run_script)
 	qc_report = \
 		generate_geomx_qc_report(
-			design=analysis_design,
+			design_file=analysis_design,
 			dcc_count_path=dcc_count)
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
@@ -70,7 +77,7 @@ def geomx_dag():
 			md5_path=md5_sum)
 	copy_globus = \
 		copy_data_to_globus(
-			dcc_load_path=load_dcc)
+			analysis_dir_dict=load_dcc)
 	copy_globus >> send_email_to_user() >> mark_analysis_finished()
 
 
