@@ -56,14 +56,14 @@ def geomx_dag():
 		create_temp_fastq_input_dir(fastq_list)
 	dcc_run_script = \
 		prepare_geomx_dcc_run_script(
-			design_file=analysis_design,
+			design_dict=analysis_design,
 			symlink_dir=temp_fastq_dir,
 			config_file_dict=config_file)
 	dcc_count = \
 		generate_geomx_dcc_count(dcc_run_script)
 	qc_report = \
 		generate_geomx_qc_report(
-			design_file=analysis_design,
+			design_dict=analysis_design,
 			dcc_count_path=dcc_count)
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
