@@ -50,16 +50,15 @@ def geomx_dag():
 	analysis_running >> no_work()
 	config_file = \
 		check_and_process_config_file(
-			design_file=analysis_design)
+			design_file=analysis_design.design_file)
 	fastq_list = \
 		fetch_fastq_file_path_from_db(
-			design_file=analysis_design)
+			design_file=analysis_design.design_file)
 	temp_fastq_dir = \
-		create_temp_fastq_input_dir(
-			fastq_list_json=fastq_list)
+		create_temp_fastq_input_dir(fastq_list)
 	dcc_run_script = \
 		prepare_geomx_dcc_run_script(
-			design_file=analysis_design,
+			design_file=analysis_design.design_file,
 			symlink_dir=temp_fastq_dir,
 			config_file_dict=config_file)
 	dcc_count = \
@@ -67,7 +66,7 @@ def geomx_dag():
 			dcc_script_dict=dcc_run_script)
 	qc_report = \
 		generate_geomx_qc_report(
-			design_file=analysis_design,
+			design_file=analysis_design.design_file,
 			dcc_count_path=dcc_count)
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
