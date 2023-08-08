@@ -60,7 +60,9 @@ def geomx_dag():
 			symlink_dir=temp_fastq_dir,
 			config_file_dict=config_file)
 	dcc_count = \
-		generate_geomx_dcc_count(dcc_run_script)
+		generate_geomx_dcc_count(
+			design_dict=analysis_design,
+			dcc_script_dict=dcc_run_script)
 	qc_report = \
 		generate_geomx_qc_report(
 			design_dict=analysis_design,
@@ -68,7 +70,10 @@ def geomx_dag():
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
 	load_dcc = \
-		load_dcc_count_to_db(dcc_count)
+		load_dcc_count_to_db(
+			dcc_count_path=dcc_count,
+			md5_file=md5_sum,
+			report_file=qc_report)
 	copy_globus = \
 		copy_data_to_globus(load_dcc)
 	copy_globus >> send_email_to_user() >> mark_analysis_finished()
