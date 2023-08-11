@@ -77,8 +77,7 @@ def geomx_dag():
 			report_file=qc_report)
 	copy_globus = \
 		copy_data_to_globus(load_dcc)
-	copy_globus >> send_email_to_user() >> mark_analysis_finished()
-	send_email_to_user() >> mark_analysis_failed()
+	copy_globus >> send_email_to_user() >> mark_analysis_finished() >> mark_analysis_failed()
 
 
 ## PIPELINE
