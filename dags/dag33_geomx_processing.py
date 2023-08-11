@@ -21,7 +21,8 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	load_dcc_count_to_db,
 	send_email_to_user,
 	copy_data_to_globus,
-	mark_analysis_finished)
+	mark_analysis_finished,
+	mark_analysis_failed)
 
 ## DAG
 DAG_ID = \
@@ -77,6 +78,7 @@ def geomx_dag():
 	copy_globus = \
 		copy_data_to_globus(load_dcc)
 	copy_globus >> send_email_to_user() >> mark_analysis_finished()
+	send_email_to_user() >> mark_analysis_failed()
 
 
 ## PIPELINE
