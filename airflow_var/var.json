@@ -148,6 +148,9 @@
     "hpc_8G4t": {
       "pbs_resource": "-lselect=1:ncpus=4:mem=8gb -lwalltime=12:00:00",
       "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_8G,hpc_8G4t"},
+    "hpc_8G4t72hr": {
+      "pbs_resource": "-lselect=1:ncpus=4:mem=8gb -lwalltime=72:00:00",
+      "airflow_queue": "hpc_1G,hpc_1G4t,hpc_4G,hpc_4G4t,hpc_8G,hpc_8G4t,hpc_8G4t72hr"},
     "hpc_8G24hr": {
         "pbs_resource": "-lselect=1:ncpus=1:mem=8gb -lwalltime=24:00:00",
         "airflow_queue": "hpc_1G,hpc_4G,hpc_4G12hr,hpc_8G,hpc_8G24hr"},

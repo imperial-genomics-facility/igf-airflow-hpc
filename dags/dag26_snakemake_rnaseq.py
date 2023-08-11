@@ -103,7 +103,7 @@ with dag:
             dag=dag,
             retry_delay=timedelta(minutes=15),
             retries=10,
-            queue='hpc_4G_long',
+            queue='hpc_8G4t72hr',
             pool='batch_job',
             do_xcom_push=False,
             params={
