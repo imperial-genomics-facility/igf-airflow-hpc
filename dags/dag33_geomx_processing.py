@@ -18,6 +18,7 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	generate_geomx_dcc_count,
 	generate_geomx_qc_report,
 	calculate_md5sum_for_dcc,
+	copy_geomx_config_file_to_output,
 	load_dcc_count_to_db,
 	send_email_to_user,
 	copy_data_to_globus,
@@ -70,10 +71,15 @@ def geomx_dag():
 			dcc_count_path=dcc_count)
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
+	geomx_config_file = \
+		copy_geomx_config_file_to_output(
+			design_dict=analysis_design,
+			dcc_count_path=dcc_count)
 	load_dcc = \
 		load_dcc_count_to_db(
 			dcc_count_path=dcc_count,
 			md5_file=md5_sum,
+			geomx_config=geomx_config_file,
 			report_file=qc_report)
 	copy_globus = \
 		copy_data_to_globus(load_dcc)
