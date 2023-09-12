@@ -211,6 +211,8 @@ with dag:
       retry_delay=timedelta(minutes=2),
       command='source /etc/bashrc;qstat',
       pool='generic_pool',
+      conn_timeout=30,
+      cmd_timeout=30,
       queue='generic')
   ## TASK
   fetch_active_jobs_from_hpc = \
@@ -226,6 +228,8 @@ with dag:
         source /project/tgu/data2/airflow_v3/secrets/hpc_env.sh;\
         python /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
+      conn_timeout=60,
+      cmd_timeout=60,
       queue='generic')
   ## TASK
   fetch_celery_workers = \
@@ -265,6 +269,8 @@ with dag:
       retry_delay=timedelta(minutes=2),
       queue='generic',
       pool='generic_pool',
+      conn_timeout=30,
+      cmd_timeout=30,
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
         source /etc/bashrc; \
