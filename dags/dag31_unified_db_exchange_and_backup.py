@@ -50,6 +50,11 @@ igfportal_ssh_hook = \
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('igfportal_server_hostname'))
 
+igfdata_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfdata_server_hostname'))
 
 dag = \
     DAG(
@@ -224,6 +229,26 @@ with dag:
             queue='hpc_4G',
             bash_command='bash /rds/general/user/igf/home/secret_keys/update_legacy_prod_db.sh ')
     ## TASK
+    copy_prod_db_to_igfdata = \
+        BashOperator(
+            task_id="copy_prod_db_to_igfdata",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command='bash /project/tgu/data2/airflow_v3/secrets/copy_prod_db_to_igfdata.sh ')
+    ## TASK
+    update_db_on_igfdata = \
+        SSHOperator(
+            task_id='update_db_on_igfdata',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfdata_ssh_hook,
+            queue='hpc_4G',
+            pool='igfdata_ssh_pool',
+            command="bash /home/igf/superset/test1/db/db_update_script.sh ")
+    ## TASK
     copy_portal_backup_to_hpc = \
         BashOperator(
             task_id="copy_portal_backup_to_hpc",
@@ -272,6 +297,6 @@ with dag:
     process_raw_analysis_queue >> backup_prod_db
     get_metadata_dump_from_pipeline_db >> upload_metadata_to_portal_db
     backup_prod_db >> backup_portal_db
-    backup_prod_db >> load_data_to_legacy_prod_db
+    backup_prod_db >> load_data_to_legacy_prod_db >> copy_prod_db_to_igfdata >> update_db_on_igfdata
     backup_portal_db >> copy_portal_backup_to_hpc
     backup_portal_db >> upload_metadata_to_portal_db
