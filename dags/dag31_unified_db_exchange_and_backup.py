@@ -247,6 +247,8 @@ with dag:
             ssh_hook=igfdata_ssh_hook,
             queue='hpc_4G',
             pool='igfdata_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
             command="bash /home/igf/superset/test1/db/db_update_script.sh ")
     ## TASK
     copy_portal_backup_to_hpc = \
