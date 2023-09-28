@@ -199,47 +199,47 @@ with dag:
                 #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,9
                 """)
     ## TASK
-    woolf_root = \
-        SSHOperator(
-            task_id='woolf_root',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=woolf_ssh_hook,
-            queue='hpc_4G',
-            pool='woolf_ssh_pool',
-            command="""
-                df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
-                #df /|grep -w "/"|cut -d " " -f 8,9,12
-                """)
+    #woolf_root = \
+    #    SSHOperator(
+    #        task_id='woolf_root',
+    #        dag=dag,
+    #        retry_delay=timedelta(minutes=5),
+    #        retries=1,
+    #        ssh_hook=woolf_ssh_hook,
+    #        queue='hpc_4G',
+    #        pool='woolf_ssh_pool',
+    #        command="""
+    #            df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
+    #            #df /|grep -w "/"|cut -d " " -f 8,9,12
+    #            """)
     ## TASK
-    woolf_data1 = \
-        SSHOperator(
-            task_id='woolf_data1',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=woolf_ssh_hook,
-            queue='hpc_4G',
-            pool='woolf_ssh_pool',
-            command="""
-                df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
-                #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-                """)
+    #woolf_data1 = \
+    #    SSHOperator(
+    #        task_id='woolf_data1',
+    #        dag=dag,
+    #        retry_delay=timedelta(minutes=5),
+    #        retries=1,
+    #        ssh_hook=woolf_ssh_hook,
+    #        queue='hpc_4G',
+    #        pool='woolf_ssh_pool',
+    #        command="""
+    #            df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
+    #            #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+    #            """)
     ## TASK
-    woolf_data2 = \
-        SSHOperator(
-            task_id='woolf_data2',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=woolf_ssh_hook,
-            queue='hpc_4G',
-            pool='woolf_ssh_pool',
-            command="""
-                df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
-                #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-                """)
+    #woolf_data2 = \
+    #    SSHOperator(
+    #        task_id='woolf_data2',
+    #        dag=dag,
+    #        retry_delay=timedelta(minutes=5),
+    #        retries=1,
+    #        ssh_hook=woolf_ssh_hook,
+    #        queue='hpc_4G',
+    #        pool='woolf_ssh_pool',
+    #        command="""
+    #            df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
+    #            #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+    #            """)
     ## TASK
     igfportal_root = \
         SSHOperator(
@@ -298,9 +298,9 @@ with dag:
     eliot_data >> prepare_storage_plot
     eliot_data2 >> prepare_storage_plot
     igf_lims_root >> prepare_storage_plot
-    woolf_root >> prepare_storage_plot
-    woolf_data1 >> prepare_storage_plot
-    woolf_data2 >> prepare_storage_plot
+    #woolf_root >> prepare_storage_plot
+    #woolf_data1 >> prepare_storage_plot
+    #woolf_data2 >> prepare_storage_plot
     igfportal_root >> prepare_storage_plot
     hpc_rds >> prepare_storage_plot
     ## TASK
