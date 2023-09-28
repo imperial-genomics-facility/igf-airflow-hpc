@@ -70,6 +70,12 @@ igfportal_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('igfportal_server_hostname'))
+## SSH HOOK
+igfdata_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfdata_server_hostname'))
 ## DAG
 dag = \
     DAG(
@@ -253,6 +259,18 @@ with dag:
             command="""
                 df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
                 """)
+    igfdata_root = \
+        SSHOperator(
+            task_id='igfdata_root',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=igfdata_ssh_hook,
+            queue='hpc_4G',
+            pool='igfdata_ssh_pool',
+            command="""
+                df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
+                """)
     ## TASK
     hpc_rds = \
         BashOperator(
@@ -302,6 +320,7 @@ with dag:
     #woolf_data1 >> prepare_storage_plot
     #woolf_data2 >> prepare_storage_plot
     igfportal_root >> prepare_storage_plot
+    igfdata_root >> prepare_storage_plot
     hpc_rds >> prepare_storage_plot
     ## TASK
     get_pipeline_stats = \
