@@ -150,6 +150,7 @@ with dag:
                   scp -i $hpc_ssh_key_file \
                       -r $remote_user@$server_hostname:$seqrun_path/$seqrun_id \
                       $hpc_seqrun_path/
+                  chmod -R g+r $hpc_seqrun_path/$seqrun_id
                   if [ ! -e $hpc_seqrun_path/$seqrun_id/RunInfo.xml ];
                   then
                     echo 1>&2 "Failed to copy ${seqrun_id} from ${server_hostname}"; exit1;
