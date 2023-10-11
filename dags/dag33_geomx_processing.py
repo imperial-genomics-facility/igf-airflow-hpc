@@ -68,7 +68,8 @@ def geomx_dag():
 	qc_report = \
 		generate_geomx_qc_report(
 			design_dict=analysis_design,
-			dcc_count_path=dcc_count)
+			dcc_count_path=dcc_count,
+			config_file_dict=config_file)
 	md5_sum = \
 		calculate_md5sum_for_dcc(dcc_count)
 	geomx_config_file = \
