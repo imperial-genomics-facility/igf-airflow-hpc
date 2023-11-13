@@ -65,7 +65,7 @@ igflims_ssh_hook = \
   SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host=Variable.get('igflims_server_hostname'))
+    remote_host=Variable.get('igf_lims_server_hostname'))
 
 
 dag = \
