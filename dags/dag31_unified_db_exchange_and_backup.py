@@ -32,6 +32,11 @@ from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
 #     'email_on_retry': False,
 #     'catchup': False}
 
+## Toggle for switching portal server
+PORTAL_SERVER_MODE = 'PROD'
+## change it to BACKUP when backup db in use
+# PORTAL_SERVER_MODE = 'BACKUP'
+
 DAG_ID = \
     os.path.basename(__file__).\
         replace(".pyc", "").\
@@ -55,6 +60,13 @@ igfdata_ssh_hook = \
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('igfdata_server_hostname'))
+
+igflims_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igflims_server_hostname'))
+
 
 dag = \
     DAG(
@@ -284,6 +296,154 @@ with dag:
                 "json_dump_xcom_task": "get_metadata_dump_from_pipeline_db",
                 "data_load_url": "/api/v1/metadata/load_metadata"},
             python_callable=upload_metadata_to_portal_db_func)
+    ## TASK
+    backup_nf_tower_db = \
+        SSHOperator(
+            task_id='backup_nf_tower_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igflims_ssh_hook,
+            queue='hpc_4G',
+            pool='igflims_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
+            command="bash /home/igf/nextflow_tower/tower_v20220627/db_backup.sh ")
+    ## TASK
+    copy_nf_tower_backup_to_hpc = \
+        BashOperator(
+            task_id="copy_nf_tower_backup_to_hpc",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump.sh ")
+    ## TASK
+    copy_nf_tower_backup_to_igfdata = \
+        BashOperator(
+            task_id="copy_nf_tower_backup_to_igfdata",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump_to_igfdata.sh ")
+    ## TASK
+    update_tower_db_on_igfdata = \
+        SSHOperator(
+            task_id='update_tower_db_on_igfdata',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfdata_ssh_hook,
+            queue='hpc_4G',
+            pool='igfdata_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
+            command="bash /home/igf/superset/test1/db/tower_db_update_script.sh ")
+    ## TASK
+    backup_airflow_db = \
+        SSHOperator(
+            task_id='backup_airflow_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igflims_ssh_hook,
+            queue='hpc_4G',
+            pool='igflims_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
+            command="bash /home/igf/airflow_db_backup/backupdb.sh ")
+    ## TASK
+    copy_airflow_backup_to_hpc = \
+        BashOperator(
+            task_id="copy_airflow_backup_to_hpc",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_airflow_dump.sh ")
+    ## TASK
+    copy_airflow_backup_to_igfdata = \
+        BashOperator(
+            task_id="copy_airflow_backup_to_igfdata",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_airflow_dump_to_igfdata.sh ")
+    ## TASK
+    update_airflow_db_on_igfdata = \
+        SSHOperator(
+            task_id='update_airflow_db_on_igfdata',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfdata_ssh_hook,
+            queue='hpc_4G',
+            pool='igfdata_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
+            command="bash /home/igf/superset/test1/db/airflow_db_update_script.sh ")
+    ## TASK
+    backup_superset_db_on_igfdata = \
+        SSHOperator(
+            task_id='backup_superset_db_on_igfdata',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfdata_ssh_hook,
+            queue='hpc_4G',
+            pool='igfdata_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
+            command="bash /home/igf/superset/test1/db/superset_db_backup.sh ")
+    ## TASK
+    copy_superset_backup_to_hpc = \
+        BashOperator(
+            task_id="copy_superset_backup_to_hpc",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_superset_dump.sh ")
+    ## TASK
+    backup_portal_static_dir = \
+        SSHOperator(
+            task_id='backup_portal_static_dir',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/scripts/create_backup_for_static_dir.sh ")
+    ## TASK
+    copy_portal_static_backup_to_hpc = \
+        BashOperator(
+            task_id="copy_portal_static_backup_to_hpc",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_static_dump.sh ")
+    ## TASK
+    copy_portal_static_backup_to_igfdata = \
+        BashOperator(
+            task_id="copy_portal_static_backup_to_igfdata",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_static_dump_igfdata.sh ")
+    ## TASK
+    copy_portal_db_backup_to_igfdata = \
+        BashOperator(
+            task_id="copy_portal_db_backup_to_igfdata",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_dump_to_igfdata.sh ")
     ## PIPELINE
     copy_quota_xlsx >> create_raw_metadata_for_new_projects
     copy_access_db >> create_raw_metadata_for_new_projects
@@ -302,3 +462,16 @@ with dag:
     backup_prod_db >> load_data_to_legacy_prod_db >> copy_prod_db_to_igfdata >> update_db_on_igfdata
     backup_portal_db >> copy_portal_backup_to_hpc
     backup_portal_db >> upload_metadata_to_portal_db
+    backup_nf_tower_db >> copy_nf_tower_backup_to_hpc >> copy_nf_tower_backup_to_igfdata
+    copy_nf_tower_backup_to_igfdata >> update_tower_db_on_igfdata
+    backup_airflow_db >> copy_airflow_backup_to_hpc >> copy_airflow_backup_to_igfdata
+    copy_airflow_backup_to_igfdata >> update_airflow_db_on_igfdata
+    backup_superset_db_on_igfdata >> copy_superset_backup_to_hpc
+    backup_portal_db >> backup_portal_static_dir
+    backup_portal_static_dir >> copy_portal_static_backup_to_hpc
+    copy_portal_static_backup_to_hpc >> copy_portal_static_backup_to_igfdata
+    copy_portal_backup_to_hpc >> copy_portal_db_backup_to_igfdata
+    update_tower_db_on_igfdata >> backup_superset_db_on_igfdata
+    update_airflow_db_on_igfdata >> backup_superset_db_on_igfdata
+    update_db_on_igfdata >> backup_superset_db_on_igfdata
+
