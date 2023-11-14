@@ -350,8 +350,8 @@ with dag:
             ssh_hook=igflims_ssh_hook,
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
-            conn_timeout=300,
-            cmd_timeout=300,
+            conn_timeout=600,
+            cmd_timeout=600,
             command="bash /home/igf/airflow_db_backup/backupdb.sh ")
     ## TASK
     copy_airflow_backup_to_hpc = \
@@ -416,6 +416,8 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
+            conn_timeout=300,
+            cmd_timeout=300,
             command="bash /home/igf/scripts/create_backup_for_static_dir.sh ")
     ## TASK
     copy_portal_static_backup_to_hpc = \
