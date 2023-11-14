@@ -305,7 +305,7 @@ with dag:
             retries=4,
             ssh_hook=igflims_ssh_hook,
             queue='hpc_4G',
-            pool='igflims_ssh_pool',
+            pool='igf_lims_ssh_pool',
             conn_timeout=300,
             cmd_timeout=300,
             command="bash /home/igf/nextflow_tower/tower_v20220627/db_backup.sh ")
@@ -349,7 +349,7 @@ with dag:
             retries=4,
             ssh_hook=igflims_ssh_hook,
             queue='hpc_4G',
-            pool='igflims_ssh_pool',
+            pool='igf_lims_ssh_pool',
             conn_timeout=300,
             cmd_timeout=300,
             command="bash /home/igf/airflow_db_backup/backupdb.sh ")
