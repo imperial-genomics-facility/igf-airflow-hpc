@@ -166,8 +166,12 @@ def multiple_sample_task_group(
       sample_group=sample_group,
       cellranger_run_info=cellranger_run_info)
 ## DAG
+DAG_ID = \
+    os.path.basename(__file__).\
+        replace(".pyc", "").\
+        replace(".py", "")
 @dag(
-    dag_id="cellranger_dag_combined",
+    dag_id=DAG_ID,
     schedule=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
