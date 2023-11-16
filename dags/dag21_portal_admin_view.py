@@ -124,16 +124,16 @@ with dag:
     #             df -Pk /home|grep ol-home|awk '{print $3 " " $4 " " $6 }'
     #             """) #cut -d " " -f 3,4,8')
     ## TASK
-    nextseq1_root = \
-        SSHOperator(
-            task_id='nextseq1_root',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=wells_ssh_hook,
-            queue='hpc_4G',
-            pool='wells_ssh_pool',
-            command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
+    # nextseq1_root = \
+    #     SSHOperator(
+    #         task_id='nextseq1_root',
+    #         dag=dag,
+    #         retry_delay=timedelta(minutes=5),
+    #         retries=1,
+    #         ssh_hook=wells_ssh_hook,
+    #         queue='hpc_4G',
+    #         pool='wells_ssh_pool',
+    #         command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
     ## TASK
     # wells_data = \
     #     SSHOperator(
@@ -311,7 +311,7 @@ with dag:
     # orwell_home >> prepare_storage_plot
     # wells_home >> prepare_storage_plot
     # wells_data >> prepare_storage_plot
-    nextseq1_root >> prepare_storage_plot
+    # nextseq1_root >> prepare_storage_plot
     eliot_root >> prepare_storage_plot
     eliot_data >> prepare_storage_plot
     eliot_data2 >> prepare_storage_plot
