@@ -37,19 +37,19 @@ orwell_ssh_hook = \
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('orwell_server_hostname'))
 ## SSH HOOK
-# woolf_ssh_hook = \
-#   SSHHook(
-#     key_file=Variable.get('hpc_ssh_key_file'),
-#     username=Variable.get('hpc_user'),
-#     remote_host=Variable.get('woolf_server_hostname'))
+woolf_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('woolf_server_hostname'))
 woolf_ssh_hook = \
   SSHHook(ssh_conn_id='woolf_conn')
 ## SSH HOOK
-# eliot_ssh_hook = \
-#   SSHHook(
-#     key_file=Variable.get('hpc_ssh_key_file'),
-#     username=Variable.get('hpc_user'),
-#     remote_host=Variable.get('eliot_server_hostname'))
+eliot_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('eliot_server_hostname'))
 eliot_ssh_hook = \
   SSHHook(ssh_conn_id='eliot_conn')
 ## SSH HOOK
@@ -98,56 +98,56 @@ with dag:
                 'json_dump_xcom_key': 'seqrun_json_dump'},
             python_callable=get_seqrun_counts_func)
     ## TASK
-    # orwell_home = \
-    #     SSHOperator(
-    #         task_id='orwell_home',
-    #         dag=dag,
-    #         retry_delay=timedelta(minutes=5),
-    #         retries=1,
-    #         ssh_hook=orwell_ssh_hook,
-    #         queue='hpc_4G',
-    #         pool='orwell_exe_pool',
-    #         command="""
-    #             df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
-    #             """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
+    orwell_home = \
+        SSHOperator(
+            task_id='orwell_home',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=orwell_ssh_hook,
+            queue='hpc_4G',
+            pool='orwell_exe_pool',
+            command="""
+                df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
+                """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
     ## TASK
-    # wells_home = \
-    #     SSHOperator(
-    #         task_id='wells_home',
-    #         dag=dag,
-    #         retry_delay=timedelta(minutes=5),
-    #         retries=1,
-    #         ssh_hook=wells_ssh_hook,
-    #         queue='hpc_4G',
-    #         pool='wells_ssh_pool',
-    #         command="""
-    #             df -Pk /home|grep ol-home|awk '{print $3 " " $4 " " $6 }'
-    #             """) #cut -d " " -f 3,4,8')
+    wells_home = \
+        SSHOperator(
+            task_id='wells_home',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=wells_ssh_hook,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            command="""
+                df -Pk /home|grep ol-home|awk '{print $3 " " $4 " " $6 }'
+                """) #cut -d " " -f 3,4,8')
     ## TASK
-    # nextseq1_root = \
-    #     SSHOperator(
-    #         task_id='nextseq1_root',
-    #         dag=dag,
-    #         retry_delay=timedelta(minutes=5),
-    #         retries=1,
-    #         ssh_hook=wells_ssh_hook,
-    #         queue='hpc_4G',
-    #         pool='wells_ssh_pool',
-    #         command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
+    nextseq1_root = \
+        SSHOperator(
+            task_id='nextseq1_root',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=wells_ssh_hook,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
     ## TASK
-    # wells_data = \
-    #     SSHOperator(
-    #         task_id='wells_data',
-    #         dag=dag,
-    #         retry_delay=timedelta(minutes=5),
-    #         retries=1,
-    #         ssh_hook=wells_ssh_hook,
-    #         queue='hpc_4G',
-    #         pool='wells_ssh_pool',
-    #         command="""
-    #             df |grep wellsvg-datavol1|awk '{print $3 " " $4 " " $6 }'
-    #         """
-    #         )#'df /data|grep -w "/data"|cut -d " " -f 3,4,8')
+    wells_data = \
+        SSHOperator(
+            task_id='wells_data',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=wells_ssh_hook,
+            queue='hpc_4G',
+            pool='wells_ssh_pool',
+            command="""
+                df |grep wellsvg-datavol1|awk '{print $3 " " $4 " " $6 }'
+            """
+            )#'df /data|grep -w "/data"|cut -d " " -f 3,4,8')
     ## TASK
     eliot_root = \
         SSHOperator(
@@ -205,47 +205,47 @@ with dag:
                 #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,9
                 """)
     ## TASK
-    #woolf_root = \
-    #    SSHOperator(
-    #        task_id='woolf_root',
-    #        dag=dag,
-    #        retry_delay=timedelta(minutes=5),
-    #        retries=1,
-    #        ssh_hook=woolf_ssh_hook,
-    #        queue='hpc_4G',
-    #        pool='woolf_ssh_pool',
-    #        command="""
-    #            df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
-    #            #df /|grep -w "/"|cut -d " " -f 8,9,12
-    #            """)
+    woolf_root = \
+       SSHOperator(
+           task_id='woolf_root',
+           dag=dag,
+           retry_delay=timedelta(minutes=5),
+           retries=1,
+           ssh_hook=woolf_ssh_hook,
+           queue='hpc_4G',
+           pool='woolf_ssh_pool',
+           command="""
+               df -Pk|grep sda2|awk '{print $3 " " $4 " " $6 }'
+               #df /|grep -w "/"|cut -d " " -f 8,9,12
+               """)
     ## TASK
-    #woolf_data1 = \
-    #    SSHOperator(
-    #        task_id='woolf_data1',
-    #        dag=dag,
-    #        retry_delay=timedelta(minutes=5),
-    #        retries=1,
-    #        ssh_hook=woolf_ssh_hook,
-    #        queue='hpc_4G',
-    #        pool='woolf_ssh_pool',
-    #        command="""
-    #            df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
-    #            #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-    #            """)
+    woolf_data1 = \
+       SSHOperator(
+           task_id='woolf_data1',
+           dag=dag,
+           retry_delay=timedelta(minutes=5),
+           retries=1,
+           ssh_hook=woolf_ssh_hook,
+           queue='hpc_4G',
+           pool='woolf_ssh_pool',
+           command="""
+               df -Pk|grep vg_woolf_data1-data1|awk '{print $3 " " $4 " " $6 }'
+               #df /data1|grep -w "/data1"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+               """)
     ## TASK
-    #woolf_data2 = \
-    #    SSHOperator(
-    #        task_id='woolf_data2',
-    #        dag=dag,
-    #        retry_delay=timedelta(minutes=5),
-    #        retries=1,
-    #        ssh_hook=woolf_ssh_hook,
-    #        queue='hpc_4G',
-    #        pool='woolf_ssh_pool',
-    #        command="""
-    #            df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
-    #            #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-    #            """)
+    woolf_data2 = \
+       SSHOperator(
+           task_id='woolf_data2',
+           dag=dag,
+           retry_delay=timedelta(minutes=5),
+           retries=1,
+           ssh_hook=woolf_ssh_hook,
+           queue='hpc_4G',
+           pool='woolf_ssh_pool',
+           command="""
+               df -Pk|grep vg_woolf_data2-data2|awk '{print $3 " " $4 " " $6 }'
+               #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+               """)
     ## TASK
     igfportal_root = \
         SSHOperator(
@@ -308,17 +308,17 @@ with dag:
                 'xcom_key': 'storage_stat_json'},
             python_callable=prepare_storage_plot_generic)  #prepare_storage_plot_func)
     ## PIPELINE
-    # orwell_home >> prepare_storage_plot
-    # wells_home >> prepare_storage_plot
-    # wells_data >> prepare_storage_plot
-    # nextseq1_root >> prepare_storage_plot
+    orwell_home >> prepare_storage_plot
+    wells_home >> prepare_storage_plot
+    wells_data >> prepare_storage_plot
+    nextseq1_root >> prepare_storage_plot
     eliot_root >> prepare_storage_plot
     eliot_data >> prepare_storage_plot
     eliot_data2 >> prepare_storage_plot
     igf_lims_root >> prepare_storage_plot
-    #woolf_root >> prepare_storage_plot
-    #woolf_data1 >> prepare_storage_plot
-    #woolf_data2 >> prepare_storage_plot
+    woolf_root >> prepare_storage_plot
+    woolf_data1 >> prepare_storage_plot
+    woolf_data2 >> prepare_storage_plot
     igfportal_root >> prepare_storage_plot
     igfdata_root >> prepare_storage_plot
     hpc_rds >> prepare_storage_plot
