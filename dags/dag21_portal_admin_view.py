@@ -43,7 +43,10 @@ woolf_ssh_hook = \
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('woolf_server_hostname'))
 woolf_ssh_hook = \
-  SSHHook(ssh_conn_id='woolf_conn')
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('woolf_server_hostname'))
 ## SSH HOOK
 eliot_ssh_hook = \
   SSHHook(
