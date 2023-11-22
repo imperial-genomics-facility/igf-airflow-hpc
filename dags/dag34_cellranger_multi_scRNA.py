@@ -36,7 +36,8 @@ def multiple_sample_task_group(
         run_cellranger_script(run_info)
     scanpy_output_dict = \
         run_single_sample_scanpy(
-            sample_group=sample_group_info,
+            design_dict=sample_group_info,
+            sample_group=sample_group,
             cellranger_output_dir=cellranger_output_dir)
     per_sample_info = \
         move_single_sample_result_to_main_work_dir(
@@ -68,7 +69,8 @@ def cellranger_wrapper_dag():
     analysis_running >> sample_group_info
     analysis_running >> no_work()
     sample_groups = \
-        get_analysis_group_list(sample_group_info)
+        get_analysis_group_list(
+            design_dict=sample_group_info)
     grp = \
         multiple_sample_task_group.\
             partial(
@@ -84,7 +86,7 @@ def cellranger_wrapper_dag():
     scanpy_aggr_output_dict = \
         merged_scanpy_report(
             design_dict=sample_group_info,
-           cellranger_aggr_output_dir=aggr_output_dir)
+            cellranger_aggr_output_dir=aggr_output_dir)
     final_work_dir = \
         move_aggr_result_to_main_work_dir(
             main_work_dir=main_work_dir,
