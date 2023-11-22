@@ -63,14 +63,12 @@ def cellranger_wrapper_dag():
             last_task="no_work")
     sample_group_info = \
         fetch_analysis_design_from_db()
-    analysis_design = \
-        fetch_analysis_design_from_db()
     main_work_dir = \
         create_main_work_dir()
-    analysis_running >> analysis_design
+    analysis_running >> sample_group_info
     analysis_running >> no_work()
-    mark_analysis_running() >> sample_group_info
-    sample_groups = get_analysis_group_list(sample_group_info)
+    sample_groups = \
+        get_analysis_group_list(sample_group_info)
     grp = \
         multiple_sample_task_group.\
             partial(
