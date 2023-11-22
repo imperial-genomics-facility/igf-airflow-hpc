@@ -83,7 +83,8 @@ def cellranger_wrapper_dag():
            script_dict=aggr_script_dict)
     scanpy_aggr_output_dict = \
         merged_scanpy_report(
-           aggr_output_dir)
+            design_dict=sample_group_info,
+           cellranger_aggr_output_dir=aggr_output_dir)
     final_work_dir = \
         move_aggr_result_to_main_work_dir(
             main_work_dir=main_work_dir,
