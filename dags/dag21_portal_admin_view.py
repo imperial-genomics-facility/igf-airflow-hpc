@@ -68,11 +68,11 @@ wells_ssh_hook = \
     username=Variable.get('hpc_user'),
     remote_host=Variable.get('wells_server_hostname'))
 ## SSH HOOK
-# igfportal_ssh_hook = \
-#   SSHHook(
-#     key_file=Variable.get('hpc_ssh_key_file'),
-#     username=Variable.get('hpc_user'),
-#     remote_host=Variable.get('igfportal_server_hostname'))
+igfportal_ssh_hook = \
+  SSHHook(
+    key_file=Variable.get('hpc_ssh_key_file'),
+    username=Variable.get('hpc_user'),
+    remote_host=Variable.get('igfportal_server_hostname'))
 ## SSH HOOK
 igfdata_ssh_hook = \
   SSHHook(
@@ -250,18 +250,18 @@ with dag:
                #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
                """)
     ## TASK
-    # igfportal_root = \
-    #     SSHOperator(
-    #         task_id='igfportal_root',
-    #         dag=dag,
-    #         retry_delay=timedelta(minutes=5),
-    #         retries=1,
-    #         ssh_hook=igfportal_ssh_hook,
-    #         queue='hpc_4G',
-    #         pool='igfportal_ssh_pool',
-    #         command="""
-    #             df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
-    #             """)
+    igfportal_root = \
+        SSHOperator(
+            task_id='igfportal_root',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="""
+                df -Pk|grep root|awk '{print $3 " " $4 " " $6 }'
+                """)
     igfdata_root = \
         SSHOperator(
             task_id='igfdata_root',
@@ -322,7 +322,7 @@ with dag:
     woolf_root >> prepare_storage_plot
     woolf_data1 >> prepare_storage_plot
     woolf_data2 >> prepare_storage_plot
-    # igfportal_root >> prepare_storage_plot
+    igfportal_root >> prepare_storage_plot
     igfdata_root >> prepare_storage_plot
     hpc_rds >> prepare_storage_plot
     ## TASK
