@@ -1,5 +1,6 @@
 import os, pendulum
 from airflow.decorators import dag, task_group
+from airflow.utils.edgemodifier import Label
 from igf_airflow.utils.dag33_geomx_processing_util import (
 	mark_analysis_running,
 	no_work,
@@ -14,6 +15,7 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     prepare_cellranger_script,
     run_cellranger_script,
     run_single_sample_scanpy,
+    collect_and_branch,
     configure_cellranger_aggr_run,
     run_cellranger_aggr_script,
     merged_scanpy_report,
@@ -79,7 +81,10 @@ def cellranger_wrapper_dag():
             expand(sample_group=sample_groups)
     aggr_script_dict = \
         configure_cellranger_aggr_run()
-    grp >> aggr_script_dict
+    aggr_branch = \
+        collect_and_branch()
+    grp >> aggr_branch
+    aggr_branch >> Label('Multiple_samples') >> aggr_script_dict
     aggr_output_dir = \
         run_cellranger_aggr_script(
            script_dict=aggr_script_dict)
@@ -94,6 +99,7 @@ def cellranger_wrapper_dag():
     md5_file = \
         calculate_md5sum_for_main_work_dir(
             main_work_dir=final_work_dir)
+    aggr_branch >> Label('Single_sample') >> md5_file
     loaded_files_info = \
         load_cellranger_results_to_db(
             main_work_dir=final_work_dir,
