@@ -85,13 +85,13 @@ def cellranger_wrapper_dag():
         collect_and_branch()
     grp >> aggr_branch
     aggr_branch >> Label('Multiple_samples') >> aggr_script_dict
-    aggr_output_dir = \
+    aggr_output_dict = \
         run_cellranger_aggr_script(
            script_dict=aggr_script_dict)
     scanpy_aggr_output_dict = \
         merged_scanpy_report(
             design_dict=sample_group_info,
-            cellranger_aggr_output_dir=aggr_output_dir)
+            cellranger_aggr_output_dict=aggr_output_dict)
     final_work_dir = \
         move_aggr_result_to_main_work_dir(
             main_work_dir=main_work_dir,
