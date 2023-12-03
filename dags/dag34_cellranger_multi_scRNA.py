@@ -68,8 +68,9 @@ def cellranger_wrapper_dag():
         fetch_analysis_design_from_db()
     main_work_dir = \
         create_main_work_dir()
-    analysis_running >> sample_group_info
-    analysis_running >> no_work()
+    analysis_running >> Label('Analysis Design found') >> sample_group_info
+    analysis_running >> Label('Analysis Design not found') >> no_work()
+    sample_group_info >> main_work_dir
     sample_groups = \
         get_analysis_group_list(
             design_dict=sample_group_info)
@@ -84,14 +85,14 @@ def cellranger_wrapper_dag():
     aggr_branch = \
         collect_and_branch()
     grp >> aggr_branch
-    aggr_branch >> Label('Multiple_samples') >> aggr_script_dict
-    aggr_output_dict = \
+    aggr_branch >> Label('Multiple samples') >> aggr_script_dict
+    aggr_output_dir = \
         run_cellranger_aggr_script(
            script_dict=aggr_script_dict)
     scanpy_aggr_output_dict = \
         merged_scanpy_report(
             design_dict=sample_group_info,
-            cellranger_aggr_output_dict=aggr_output_dict)
+            cellranger_aggr_output_dir=aggr_output_dir)
     final_work_dir = \
         move_aggr_result_to_main_work_dir(
             main_work_dir=main_work_dir,
@@ -99,7 +100,7 @@ def cellranger_wrapper_dag():
     md5_file = \
         calculate_md5sum_for_main_work_dir(
             main_work_dir=final_work_dir)
-    aggr_branch >> Label('Single_sample') >> md5_file
+    aggr_branch >> Label('Single sample') >> md5_file
     loaded_files_info = \
         load_cellranger_results_to_db(
             main_work_dir=final_work_dir,
