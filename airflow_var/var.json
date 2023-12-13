@@ -43,6 +43,8 @@
   "interop_report_base_path": "/rds/general/project/genomics-facility-archive-2019/live/SEQRUN",
   "interop_report_image": "/project/tgu/resources/pipeline_resource/singularity_images/interop/interop_v1.2.4.sif",
   "interop_report_template": "/project/tgu/software/igf-dockerfiles/illumina-interop/templates/interop_report_template_v3.ipynb",
+  "interop_prediction_template": "/project/tgu/software/igf-dockerfiles/illumina-interop/templates/interop_prediction_template_v1.ipynb",
+  "nextseq2000_prediction_model": "/project/tgu/resources/pipeline_resource/ml/interop_model/xgb_reg_20231213.pkl",
   "seqrun_ml_notebook_template": "/project/tgu/software/interop-notebook-image/templates/seqrun_ml_v0.0.1.ipynb",
   "seqrun_training_data_csv": "/project/tgu/resources/pipeline_resource/seqrun_ml/seqrun_training_data.csv",
   "box_dir_prefix_for_seqrun_report": "De-multiplexing_reports",
