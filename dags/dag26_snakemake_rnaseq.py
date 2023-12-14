@@ -8,10 +8,12 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.utils.dates import days_ago
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import change_analysis_seed_status_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import prepare_snakemake_inputs_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import load_analysis_to_disk_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_globus_dir_func
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import (
+    change_analysis_seed_status_func,
+    prepare_snakemake_inputs_func,
+    load_analysis_to_disk_func,
+    copy_analysis_to_globus_dir_func,
+    send_email_to_user_func)
 
 
 
@@ -184,6 +186,19 @@ with dag:
             },
             python_callable=copy_analysis_to_globus_dir_func
         )
+    ## TASK
+    send_email = \
+        PythonOperator(
+            task_id="send_email_to_user",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            params={
+                "send_email_to_user": True
+            },
+            python_callable=send_email_to_user_func
+        )
     ## PIPELINE
     mark_analysis_seed_as_running >> no_task
     mark_analysis_seed_as_running >> prepare_snakemake_inputs
@@ -192,4 +207,4 @@ with dag:
     create_snakemake_report >> create_md5sum_for_analysis
     create_md5sum_for_analysis >> load_analysis_to_disk
     load_analysis_to_disk >> copy_analysis_to_globus_dir
-    copy_analysis_to_globus_dir >> mark_analysis_seed_as_finished
+    copy_analysis_to_globus_dir >> send_email >> mark_analysis_seed_as_finished
