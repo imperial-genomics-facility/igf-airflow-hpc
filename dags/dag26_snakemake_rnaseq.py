@@ -15,8 +15,6 @@ from igf_airflow.utils.dag26_snakemake_rnaseq_utils import (
     copy_analysis_to_globus_dir_func,
     send_email_to_user_func)
 
-
-
 ## ARGS
 # args = {
 #     'owner': 'airflow',
