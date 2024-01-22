@@ -1,21 +1,22 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG, Variable
 from airflow.utils.dates import days_ago
 from airflow.operators.bash import BashOperator
-from airflow.contrib.operators.ssh_operator import SSHOperator
-from airflow.contrib.hooks.ssh_hook import SSHHook
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
 
 ## ARG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': days_ago(2),
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
+# default_args = {
+#     'owner': 'airflow',
+#     'depends_on_past': False,
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+# }
 ## DAG
 DAG_ID = \
     os.path.basename(__file__).\
@@ -24,12 +25,13 @@ DAG_ID = \
 dag = \
   DAG(
     dag_id=DAG_ID,
-    schedule_interval="*/30 * * * *",
-    dagrun_timeout=timedelta(minutes=10),
+    schedule="*/30 * * * *",
     max_active_runs=1,
     catchup=False,
     tags=['igf-lims','hpc'],
-    default_args=default_args)
+    start_date=pendulum.yesterday(),
+    dagrun_timeout=timedelta(minutes=10),
+    )
 
 ## SSH HOOK
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
@@ -58,22 +60,26 @@ with dag:
     SSHOperator(
       task_id='run_hpc_scheduler',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=hpc_hook,
       pool='generic_pool',
       queue='generic',
       command="""
         source /etc/bashrc; \
-        qsub /project/tgu/data2/airflow_v2/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
+        qsub /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
 
   ## TASK
   restart_flower_server = \
     SSHOperator(
       task_id='restart_flower_server',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=igf_lims_ssh_hook,
       pool='generic_pool',
       queue='hpc_4G',
-      command="docker restart airflow_flower_v2")
+      command="docker restart airflow_flower_v3")
 
   ## TASK
   # restart_portal_flower_server = \
@@ -88,6 +94,8 @@ with dag:
     SSHOperator(
       task_id='restart_portal_flower_server',
       dag=dag,
+      retry_delay=timedelta(minutes=5),
+      retries=1,
       ssh_hook=igfportal_ssh_hook,
       pool='igfportal_ssh_pool',
       queue='hpc_4G',

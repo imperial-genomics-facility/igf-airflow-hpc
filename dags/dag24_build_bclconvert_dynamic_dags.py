@@ -1,10 +1,9 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import fetch_seqrun_data_from_portal_func
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import format_samplesheet_func
@@ -20,16 +19,16 @@ IGF_LIMS_SERVER_HOSTNAME = Variable.get('igf_lims_server_hostname', default_var=
 
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': days_ago(2),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 10}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False,
+#     'max_active_runs': 10}
 
 ## DAG
 DAG_ID = \
@@ -39,9 +38,11 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
-        default_args=args,
-        default_view='tree',
+        schedule=None,
+        catchup=False,
+        start_date=pendulum.yesterday(),
+        dagrun_timeout=timedelta(minutes=15),
+        default_view='grid',
         orientation='TB',
         tags=['hpc'])
 
@@ -51,6 +52,8 @@ with dag:
         PythonOperator(
             task_id='fetch_seqrun_data_from_portal',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             pool='igf_portal_pool',
             params={
@@ -62,6 +65,8 @@ with dag:
         PythonOperator(
             task_id='format_samplesheet',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'samplesheet_info_key': 'samplesheet_info',
@@ -78,6 +83,8 @@ with dag:
         PythonOperator(
             task_id='generate_dynamic_dag',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'formatted_samplesheets_key': 'formatted_samplesheets',
@@ -96,6 +103,8 @@ with dag:
         PythonOperator(
             task_id='copy_dag_to_hpc',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'temp_dag_file_key': 'temp_dag_file',
@@ -107,6 +116,8 @@ with dag:
         PythonOperator(
             task_id='copy_dag_to_igf_lims',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'temp_dag_file_key': 'temp_dag_file',
@@ -120,6 +131,8 @@ with dag:
         PythonOperator(
             task_id='copy_dag_to_wells',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'temp_dag_file_key': 'temp_dag_file',
@@ -133,6 +146,8 @@ with dag:
         PythonOperator(
             task_id='register_pipeline',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'dag_id_key': 'dag_id',

@@ -1,4 +1,5 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -14,16 +15,16 @@ from igf_airflow.utils.dag17_create_transcriptome_ref_utils import create_cellra
 from igf_airflow.utils.dag17_create_transcriptome_ref_utils import add_refs_to_db_collection_func
 
 
-args = {
-    'owner': 'airflow',
-    'start_date': days_ago(2),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False,
-    'max_active_runs': 1}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 1,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False,
+#     'max_active_runs': 1}
 DAG_ID = \
     os.path.basename(__file__).\
         replace(".pyc", "").\
@@ -31,8 +32,10 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
-        default_args=args,
+        schedule=None,
+        max_active_runs=1,
+        catchup=False,
+        start_date=pendulum.yesterday(),
         tags=['hpc'])
 with dag:
     ## TASK
@@ -40,6 +43,8 @@ with dag:
         PythonOperator(
             task_id="download_gtf_file",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'gtf_xcom_key': 'gtf_file'
@@ -50,6 +55,8 @@ with dag:
         PythonOperator(
             task_id="create_star_index",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_42G16t',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
@@ -65,6 +72,8 @@ with dag:
         PythonOperator(
             task_id="create_rsem_index",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
@@ -78,6 +87,8 @@ with dag:
         PythonOperator(
             task_id='create_reflat_index',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
@@ -90,6 +101,8 @@ with dag:
         PythonOperator(
             task_id='create_ribosomal_interval',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
@@ -103,6 +116,8 @@ with dag:
         PythonOperator(
             task_id='create_cellranger_ref',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_32G8t',
             params={
                 'gtf_xcom_task': 'download_gtf_file',
@@ -118,6 +133,8 @@ with dag:
         PythonOperator(
             task_id='add_refs_to_db_collection',
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=1,
             queue='hpc_4G',
             params={
                 'task_list': [

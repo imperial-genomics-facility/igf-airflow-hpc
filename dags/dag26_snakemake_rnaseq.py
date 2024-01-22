@@ -1,29 +1,30 @@
 import os
+import pendulum
 from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.utils.dates import days_ago
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import change_analysis_seed_status_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import prepare_snakemake_inputs_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import load_analysis_to_disk_func
-from igf_airflow.utils.dag26_snakemake_rnaseq_utils import copy_analysis_to_globus_dir_func
-
-
+from igf_airflow.utils.dag26_snakemake_rnaseq_utils import (
+    change_analysis_seed_status_func,
+    prepare_snakemake_inputs_func,
+    load_analysis_to_disk_func,
+    copy_analysis_to_globus_dir_func,
+    send_email_to_user_func)
 
 ## ARGS
-args = {
-    'owner': 'airflow',
-    'start_date': days_ago(1),
-    'retries': 10,
-    'retry_delay': timedelta(minutes=5),
-    'provide_context': True,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'catchup': False}
+# args = {
+#     'owner': 'airflow',
+#     'start_date': pendulum.today('UTC').add(days=2),
+#     'retries': 10,
+#     'retry_delay': timedelta(minutes=5),
+#     'provide_context': True,
+#     'email_on_failure': False,
+#     'email_on_retry': False,
+#     'catchup': False}
 
 ## DAG
 DAG_ID = \
@@ -33,9 +34,9 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule_interval=None,
-        default_args=args,
-        default_view='tree',
+        schedule=None,
+        start_date=pendulum.yesterday(),
+        default_view='grid',
         orientation='TB',
         max_active_runs=10,
         tags=['hpc', 'snakemake', 'rnaseq'])
@@ -46,6 +47,8 @@ with dag:
         BranchPythonOperator(
             task_id="mark_analysis_seed_as_running",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'new_status': 'RUNNING',
@@ -58,7 +61,7 @@ with dag:
         )
     ## TASK
     no_task = \
-        DummyOperator(
+        EmptyOperator(
             task_id="no_task",
             dag=dag,
             queue='hpc_4G',
@@ -68,6 +71,8 @@ with dag:
         PythonOperator(
             task_id="mark_analysis_seed_as_finished",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 'new_status': 'FINISHED',
@@ -81,6 +86,8 @@ with dag:
         PythonOperator(
             task_id="prepare_snakemake_inputs",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "snakemake_command_key": "snakemake_command",
@@ -94,7 +101,9 @@ with dag:
         BashOperator(
             task_id="run_snakemake_pipeline",
             dag=dag,
-            queue='hpc_4G_long',
+            retry_delay=timedelta(minutes=15),
+            retries=10,
+            queue='hpc_8G4t72hr',
             pool='batch_job',
             do_xcom_push=False,
             params={
@@ -110,6 +119,8 @@ with dag:
         BashOperator(
             task_id="create_snakemake_report",
             dag=dag,
+            retry_delay=timedelta(minutes=15),
+            retries=4,
             queue='hpc_4G',
             do_xcom_push=False,
              params={
@@ -125,6 +136,8 @@ with dag:
         BashOperator(
             task_id="create_md5sum_for_analysis",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             do_xcom_push=False,
             params={
@@ -143,6 +156,8 @@ with dag:
         PythonOperator(
             task_id="load_analysis_to_disk",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "analysis_dir_key": "snakemake_workdir",
@@ -158,6 +173,8 @@ with dag:
         PythonOperator(
             task_id="copy_analysis_to_globus_dir",
             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
             queue='hpc_4G',
             params={
                 "date_tag_key": "date_tag",
@@ -167,6 +184,19 @@ with dag:
             },
             python_callable=copy_analysis_to_globus_dir_func
         )
+    ## TASK
+    send_email = \
+        PythonOperator(
+            task_id="send_email_to_user",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            params={
+                "send_email_to_user": True
+            },
+            python_callable=send_email_to_user_func
+        )
     ## PIPELINE
     mark_analysis_seed_as_running >> no_task
     mark_analysis_seed_as_running >> prepare_snakemake_inputs
@@ -175,4 +205,4 @@ with dag:
     create_snakemake_report >> create_md5sum_for_analysis
     create_md5sum_for_analysis >> load_analysis_to_disk
     load_analysis_to_disk >> copy_analysis_to_globus_dir
-    copy_analysis_to_globus_dir >> mark_analysis_seed_as_finished
+    copy_analysis_to_globus_dir >> send_email >> mark_analysis_seed_as_finished
