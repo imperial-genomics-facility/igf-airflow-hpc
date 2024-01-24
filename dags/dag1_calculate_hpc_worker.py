@@ -273,7 +273,7 @@ with dag:
       cmd_timeout=30,
       command="""
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
-        #source /etc/bashrc; \
+        source /etc/bashrc; \
         #qsub \
         #  -o /dev/null \
         #  -e /dev/null \
