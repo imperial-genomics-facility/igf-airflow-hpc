@@ -98,6 +98,8 @@
   "cellranger_job_timeout": 259200,
   "cellranger_multi_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/cellranger_template/cellranger_multi_run_script_v1.sh",
   "cellranger_aggr_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/cellranger_template/cellranger_aggr_run_script_v1.sh",
+  "cellranger_arc_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/cellranger_template/cellranger_arc_run_script_v1.sh",
+  "cellranger_arc_aggr_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/cellranger_template/cellranger_arc_aggr_run_script_v1.sh",
   "cutadapt_singularity_image": "/project/tgu/resources/pipeline_resource/singularity_images/cutadapt/cutadapt_v3.1.sif",
   "multiqc_singularity_image": "/project/tgu/resources/pipeline_resource/singularity_images/cutadapt/multiqc_v1.12.sif",
   "multiqc_template_file": "/project/tgu/data2/airflow_v3/github/data-management-python/template/multiqc_report/multiqc_config.yaml",
