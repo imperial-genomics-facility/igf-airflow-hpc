@@ -105,14 +105,28 @@ def cellranger_arc_wrapper_dag():
     md5_file = \
         calculate_md5sum_for_main_work_dir(
             main_work_dir=final_work_dir)
-    aggr_branch >> Label('Single sample') >> md5_file
     loaded_files_info = \
         load_cellranger_results_to_db(
             main_work_dir=final_work_dir,
             md5_file=md5_file)
     copy_globus = \
 		copy_data_to_globus(loaded_files_info)
-    copy_globus >> send_email_to_user() >> mark_analysis_finished() >> mark_analysis_failed()
+    ## single sample branch
+    md5_file_single = \
+        calculate_md5sum_for_main_work_dir(
+            main_work_dir=main_work_dir)
+    aggr_branch >> Label('Single sample') >> md5_file_single
+    loaded_files_info_single = \
+        load_cellranger_results_to_db(
+            main_work_dir=main_work_dir,
+            md5_file=md5_file_single)
+    copy_globus_single = \
+		copy_data_to_globus(loaded_files_info_single)
+    ## merge branch
+    send_mail = send_email_to_user()
+    copy_globus >> send_mail
+    copy_globus_single >> send_mail
+    send_mail >> mark_analysis_finished() >> mark_analysis_failed()
 
 ##  DAG
 cellranger_arc_wrapper_dag()
