@@ -13,7 +13,6 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     get_analysis_group_list,
     create_main_work_dir,
     run_cellranger_script,
-    run_single_sample_scanpy,
     collect_and_branch,
     run_cellranger_aggr_script,
     merged_scanpy_report,
@@ -23,7 +22,8 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     load_cellranger_results_to_db)
 from igf_airflow.utils.dag36_cellranger_arc_scRNA_multiome_utils import (
     prepare_cellranger_arc_script,
-    configure_cellranger_arc_aggr_run)
+    configure_cellranger_arc_aggr_run,
+    run_single_sample_scanpy_for_arc)
 
 # ## TASK GROUP
 @task_group
@@ -38,7 +38,7 @@ def multiple_sample_task_group(
     cellranger_output_dir = \
         run_cellranger_script(run_info)
     scanpy_output_dict = \
-        run_single_sample_scanpy(
+        run_single_sample_scanpy_for_arc(
             design_dict=sample_group_info,
             sample_group=sample_group,
             cellranger_output_dir=cellranger_output_dir)
