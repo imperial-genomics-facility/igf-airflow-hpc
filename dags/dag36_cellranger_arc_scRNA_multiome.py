@@ -6,7 +6,6 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	no_work,
     fetch_analysis_design_from_db,
     copy_data_to_globus,
-    copy_data_to_globus as copy_data_to_globus_single,
     send_email_to_user,
     mark_analysis_finished,
 	mark_analysis_failed)
@@ -20,13 +19,12 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     move_single_sample_result_to_main_work_dir,
     move_aggr_result_to_main_work_dir,
     calculate_md5sum_for_main_work_dir,
-    calculate_md5sum_for_main_work_dir as calculate_md5sum_for_main_work_dir_single,
-    load_cellranger_results_to_db,
-    load_cellranger_results_to_db as load_cellranger_results_to_db_single)
+    load_cellranger_results_to_db)
 from igf_airflow.utils.dag36_cellranger_arc_scRNA_multiome_utils import (
     prepare_cellranger_arc_script,
     configure_cellranger_arc_aggr_run,
-    run_single_sample_scanpy_for_arc)
+    run_single_sample_scanpy_for_arc,
+    dummy_task_for_single_sample)
 
 # ## TASK GROUP
 @task_group
@@ -107,7 +105,9 @@ def cellranger_arc_wrapper_dag():
                 sample_group_info=sample_group_info).\
             expand(sample_group=sample_groups)
     aggr_branch = \
-        collect_and_branch()
+        collect_and_branch(
+            merge_step='configure_cellranger_arc_aggr_run',
+            skip_step='dummy_task_for_single_sample')
     grp >> aggr_branch
     ## MULTI SAMPLE BRANCH
     aggr_script_dict = \
@@ -129,10 +129,13 @@ def cellranger_arc_wrapper_dag():
         load_results_task_group(
             work_dir=final_work_dir)
     ## SINGLE SAMPLE BRANCH
+    work_dir = \
+        dummy_task_for_single_sample(
+            main_work_dir=main_work_dir)
     single = \
         load_results_task_group(
-            work_dir=main_work_dir)
-    aggr_branch >> Label('Single sample') >> single
+            work_dir=work_dir)
+    aggr_branch >> Label('Single sample') >> work_dir
     # md5_file = \
     #     calculate_md5sum_for_main_work_dir(
     #         main_work_dir=final_work_dir)
