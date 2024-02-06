@@ -6,6 +6,7 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	no_work,
     fetch_analysis_design_from_db,
     copy_data_to_globus,
+    copy_data_to_globus as copy_data_to_globus_single,
     send_email_to_user,
     mark_analysis_finished,
 	mark_analysis_failed)
@@ -19,7 +20,9 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     move_single_sample_result_to_main_work_dir,
     move_aggr_result_to_main_work_dir,
     calculate_md5sum_for_main_work_dir,
-    load_cellranger_results_to_db)
+    calculate_md5sum_for_main_work_dir as calculate_md5sum_for_main_work_dir_single,
+    load_cellranger_results_to_db,
+    load_cellranger_results_to_db as load_cellranger_results_to_db_single)
 from igf_airflow.utils.dag36_cellranger_arc_scRNA_multiome_utils import (
     prepare_cellranger_arc_script,
     configure_cellranger_arc_aggr_run,
@@ -113,15 +116,15 @@ def cellranger_arc_wrapper_dag():
 		copy_data_to_globus(loaded_files_info)
     ## single sample branch
     md5_file_single = \
-        calculate_md5sum_for_main_work_dir(
+        calculate_md5sum_for_main_work_dir_single(
             main_work_dir=main_work_dir)
     aggr_branch >> Label('Single sample') >> md5_file_single
     loaded_files_info_single = \
-        load_cellranger_results_to_db(
+        load_cellranger_results_to_db_single(
             main_work_dir=main_work_dir,
             md5_file=md5_file_single)
     copy_globus_single = \
-		copy_data_to_globus(loaded_files_info_single)
+		copy_data_to_globus_single(loaded_files_info_single)
     ## merge branch
     send_mail = send_email_to_user()
     copy_globus >> send_mail
