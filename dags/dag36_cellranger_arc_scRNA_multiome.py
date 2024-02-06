@@ -50,6 +50,25 @@ def multiple_sample_task_group(
             main_work_dir=main_work_dir,
             scanpy_output_dict=scanpy_output_dict)
 
+## TASK GROUP
+@task_group
+def load_results_task_group(
+    work_dir: str) -> None:
+    ## TASK
+    md5_file = \
+        calculate_md5sum_for_main_work_dir(
+            main_work_dir=work_dir)
+    ## TASK
+    loaded_files_info = \
+        load_cellranger_results_to_db(
+            main_work_dir=work_dir,
+            md5_file=md5_file)
+    ## TASK
+    copy_globus = \
+		copy_data_to_globus(loaded_files_info)
+    ## PIPELINE
+    copy_globus >> send_email_to_user() >> mark_analysis_finished() >> mark_analysis_failed()
+
 
 ## DAG
 DAG_ID = \
@@ -87,12 +106,13 @@ def cellranger_arc_wrapper_dag():
                 main_work_dir=main_work_dir,
                 sample_group_info=sample_group_info).\
             expand(sample_group=sample_groups)
-    aggr_script_dict = \
-        configure_cellranger_arc_aggr_run(
-            design_dict=sample_group_info)
     aggr_branch = \
         collect_and_branch()
     grp >> aggr_branch
+    ## MULTI SAMPLE BRANCH
+    aggr_script_dict = \
+        configure_cellranger_arc_aggr_run(
+            design_dict=sample_group_info)
     aggr_branch >> Label('Multiple samples') >> aggr_script_dict
     aggr_output_dir = \
         run_cellranger_aggr_script(
@@ -105,31 +125,39 @@ def cellranger_arc_wrapper_dag():
         move_aggr_result_to_main_work_dir(
             main_work_dir=main_work_dir,
             scanpy_aggr_output_dict=scanpy_aggr_output_dict)
-    md5_file = \
-        calculate_md5sum_for_main_work_dir(
-            main_work_dir=final_work_dir)
-    loaded_files_info = \
-        load_cellranger_results_to_db(
-            main_work_dir=final_work_dir,
-            md5_file=md5_file)
-    copy_globus = \
-		copy_data_to_globus(loaded_files_info)
+    multi = \
+        load_results_task_group(
+            work_dir=final_work_dir)
+    ## SINGLE SAMPLE BRANCH
+    single = \
+        load_results_task_group(
+            work_dir=main_work_dir)
+    aggr_branch >> Label('Single sample') >> single
+    # md5_file = \
+    #     calculate_md5sum_for_main_work_dir(
+    #         main_work_dir=final_work_dir)
+    # loaded_files_info = \
+    #     load_cellranger_results_to_db(
+    #         main_work_dir=final_work_dir,
+    #         md5_file=md5_file)
+    # copy_globus = \
+	# 	copy_data_to_globus(loaded_files_info)
     ## single sample branch
-    md5_file_single = \
-        calculate_md5sum_for_main_work_dir_single(
-            main_work_dir=main_work_dir)
-    aggr_branch >> Label('Single sample') >> md5_file_single
-    loaded_files_info_single = \
-        load_cellranger_results_to_db_single(
-            main_work_dir=main_work_dir,
-            md5_file=md5_file_single)
-    copy_globus_single = \
-		copy_data_to_globus_single(loaded_files_info_single)
+    # md5_file_single = \
+    #     calculate_md5sum_for_main_work_dir_single(
+    #         main_work_dir=main_work_dir)
+    # aggr_branch >> Label('Single sample') >> md5_file_single
+    # loaded_files_info_single = \
+    #     load_cellranger_results_to_db_single(
+    #         main_work_dir=main_work_dir,
+    #         md5_file=md5_file_single)
+    # copy_globus_single = \
+	# 	copy_data_to_globus_single(loaded_files_info_single)
     ## merge branch
-    send_mail = send_email_to_user()
-    copy_globus >> send_mail
-    copy_globus_single >> send_mail
-    send_mail >> mark_analysis_finished() >> mark_analysis_failed()
+    # send_mail = send_email_to_user()
+    # copy_globus >> send_mail
+    # copy_globus_single >> send_mail
+    # send_mail >> mark_analysis_finished() >> mark_analysis_failed()
 
 ##  DAG
 cellranger_arc_wrapper_dag()
