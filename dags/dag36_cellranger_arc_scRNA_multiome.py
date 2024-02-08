@@ -15,7 +15,6 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     run_cellranger_script,
     collect_and_branch,
     run_cellranger_aggr_script,
-    merged_scanpy_report,
     move_single_sample_result_to_main_work_dir,
     move_aggr_result_to_main_work_dir,
     calculate_md5sum_for_main_work_dir,
@@ -24,7 +23,8 @@ from igf_airflow.utils.dag36_cellranger_arc_scRNA_multiome_utils import (
     prepare_cellranger_arc_script,
     configure_cellranger_arc_aggr_run,
     run_single_sample_scanpy_for_arc,
-    dummy_task_for_single_sample)
+    dummy_task_for_single_sample,
+    merged_scanpy_report_for_arc)
 
 # ## TASK GROUP
 @task_group
@@ -118,7 +118,7 @@ def cellranger_arc_wrapper_dag():
         run_cellranger_aggr_script(
            script_dict=aggr_script_dict)
     scanpy_aggr_output_dict = \
-        merged_scanpy_report(
+        merged_scanpy_report_for_arc(
             design_dict=sample_group_info,
             cellranger_aggr_output_dir=aggr_output_dir)
     final_work_dir = \
