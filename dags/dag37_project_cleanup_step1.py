@@ -2,7 +2,7 @@ import os, pendulum
 from airflow.decorators import dag
 from airflow.utils.edgemodifier import Label
 from airflow.operators.empty import EmptyOperator
-from igf_airflow.utils.dag37_project_cleanup_step1_utils.py import (
+from igf_airflow.utils.dag37_project_cleanup_step1_utils import (
     find_projects_for_cleanup,
     upload_project_cleanup_data_to_portal)
 

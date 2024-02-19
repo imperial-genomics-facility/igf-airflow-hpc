@@ -1,7 +1,7 @@
 import os, pendulum
 from airflow.decorators import dag
 from igf_airflow.utils.dag38_project_cleanup_step2_utils import fetch_project_cleanup_data
-from igf_airflow.utils.dag39_project_cleanup_step3_utils.py import (
+from igf_airflow.utils.dag39_project_cleanup_step3_utils import (
     cleanup_old_project_in_db,
     mark_project_deleted_on_portal,
     notify_user_about_project_cleanup_finished)
