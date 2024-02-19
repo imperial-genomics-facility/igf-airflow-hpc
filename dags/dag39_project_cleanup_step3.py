@@ -30,4 +30,5 @@ def dag39_project_cleanup_step3():
     notify_task_context = \
         notify_user_about_project_cleanup_finished(
             project_cleanup_data_file=json_file)
+    cleanup_task_context >> notify_task_context
 dag39_project_cleanup_step3()
