@@ -33,7 +33,7 @@ def project_cleanup_step1():
     upload_project_cleanup_instance = \
         upload_project_cleanup_data_to_portal(
             xcom_key='json_file',
-            xcom_task='find_projects_for_cleanup')
+            xcom_task='find_project_data_for_cleanup')
     ## upload file branch
     find_project_instance >> Label('Data found') >> upload_project_cleanup_instance
 
