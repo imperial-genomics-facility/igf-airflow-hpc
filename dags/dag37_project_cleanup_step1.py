@@ -3,7 +3,7 @@ from airflow.decorators import dag
 from airflow.utils.edgemodifier import Label
 from airflow.operators.empty import EmptyOperator
 from igf_airflow.utils.dag37_project_cleanup_step1_utils import (
-    find_projects_for_cleanup,
+    find_project_data_for_cleanup,
     upload_project_cleanup_data_to_portal)
 
 ## DAG
@@ -24,7 +24,7 @@ DAG_ID = \
 def project_cleanup_step1():
     no_task = EmptyOperator(task_id="no_task")
     find_project_instance = \
-        find_projects_for_cleanup(
+        find_project_data_for_cleanup(
             next_task='upload_project_cleanup_data_to_portal',
             no_task='no_task',
             xcom_key='json_file')
