@@ -292,7 +292,7 @@ with dag:
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
             /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }};
           sleep 1;
-        #done
+        done
       {% else %}
         source /etc/bashrc;\
         qsub \
