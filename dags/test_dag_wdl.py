@@ -246,3 +246,5 @@ def run_wdl(wdls_entry: dict) -> dict:
             ms_teams_conf=MS_TEAMS_CONF,
             message_prefix=e)
         raise ValueError(e)
+
+test_dag_wdl()
