@@ -127,7 +127,7 @@ def collect_ubams() -> dict:
   task_id="fastq_to_ubam",
   retry_delay=timedelta(minutes=5),
   retries=4,
-  queue='hpc_4G',
+  queue='hpc_16G4t',
   multiple_outputs=False)
 def fastq_to_ubam(fastq_entry: dict) -> dict:
     try:
@@ -146,7 +146,7 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
         unmapped_bam = os.path.join(temp_dir, f"{readgroup_name}.unmapped.bam")
         command_template = f"""module load anaconda3/personal;
             source activate java;
-            taskset -a -c 0 {gatk_path} \
+            taskset -a -c 0,1 {gatk_path} \
             --java-options "-XX:ParallelGCThreads=1 -Djava.io.tmpdir=$EPHEMERAL -DGATK_STACKTRACE_ON_USER_EXCEPTION=true -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=1 -Xmx{mem}g" \
             FastqToSam \
             --FASTQ {fastq_1} \
