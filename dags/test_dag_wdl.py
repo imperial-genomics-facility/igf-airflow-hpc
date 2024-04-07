@@ -17,6 +17,7 @@ from igf_data.utils.fileutils import (
   check_file_path,
   copy_local_file,
   get_temp_dir,
+  
   get_date_stamp)
 from igf_airflow.utils.dag22_bclconvert_demult_utils import (
   _create_output_from_jinja_template)
@@ -51,9 +52,9 @@ DAG_ID = \
 def test_dag_wdl():
     rg_groups = read_rg_list()
     ubam_list = collect_ubams()
-    ubams = fastq_to_ubam.expand(rg_groups)
+    ubams = fastq_to_ubam.expand(fastq_entry=rg_groups)
     ubams >> ubam_list
-    grp = wdl_tg.expand(ubam_list)
+    grp = wdl_tg.expand(ubam_entry=ubam_list)
 
 
 
@@ -70,7 +71,7 @@ def wdl_tg(ubam_entry: dict) -> None:
   retries=4,
   queue='hpc_4G',
   multiple_outputs=False)
-def read_rg_list() -> dict:
+def read_rg_list() -> list:
     try:
         with open(JSON_INPUT, 'r') as fp:
             json_data = json.load(fp)
