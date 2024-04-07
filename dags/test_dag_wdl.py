@@ -51,9 +51,9 @@ DAG_ID = \
 def test_dag_wdl():
     rg_groups = read_rg_list()
     ubam_list = collect_ubams()
-    ubams = fastq_to_ubam.extend(rg_groups)
+    ubams = fastq_to_ubam.expand(rg_groups)
     ubams >> ubam_list
-    grp = wdl_tg.extend(collect_ubams)
+    grp = wdl_tg.expand(collect_ubams)
 
 
 
