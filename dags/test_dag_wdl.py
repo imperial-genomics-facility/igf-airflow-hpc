@@ -145,8 +145,8 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
         mem = 3
         unmapped_bam = os.path.join(temp_dir, f"{readgroup_name}.unmapped.bam")
         command_template = f"""module load anaconda3/personal;
-            source activate taskset -a -c 0 java;
-            {gatk_path} \
+            source activate java;
+            taskset -a -c 0 {gatk_path} \
             --java-options "-XX:ParallelGCThreads=1 -Djava.io.tmpdir=$EPHEMERAL -DGATK_STACKTRACE_ON_USER_EXCEPTION=true -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=1 -Xmx~{mem}g" \
             FastqToSam \
             --FASTQ {fastq_1} \
