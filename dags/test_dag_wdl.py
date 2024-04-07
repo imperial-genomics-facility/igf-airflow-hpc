@@ -42,7 +42,6 @@ DAG_ID = \
 	dag_id=DAG_ID,
 	schedule=None,
 	start_date=pendulum.yesterday(),
-	dagrun_timeout=timedelta(minutes=180),
 	catchup=False,
 	max_active_runs=1,
     default_view='grid',
@@ -51,9 +50,9 @@ DAG_ID = \
 )
 def test_dag_wdl():
     rg_groups = read_rg_list()
-    collect_ubams = collect_ubams()
+    ubam_list = collect_ubams()
     ubams = fastq_to_ubam.extend(rg_groups)
-    ubams >> collect_ubams
+    ubams >> ubam_list
     grp = wdl_tg.extend(collect_ubams)
 
 
