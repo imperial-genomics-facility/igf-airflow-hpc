@@ -142,7 +142,7 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
         run_date = fastq_entry.get("ConvertPairedFastQsToUnmappedBamWf.run_date")
         platform_name = fastq_entry.get("ConvertPairedFastQsToUnmappedBamWf.platform_name")
         sequencing_center = fastq_entry.get("ConvertPairedFastQsToUnmappedBamWf.sequencing_center")
-        mem = 3
+        mem = 4
         unmapped_bam = os.path.join(temp_dir, f"{readgroup_name}.unmapped.bam")
         command_template = f"""module load anaconda3/personal;
             source activate java;
