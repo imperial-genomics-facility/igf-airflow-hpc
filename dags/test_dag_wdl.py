@@ -144,8 +144,10 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
         sequencing_center = fastq_entry.get("ConvertPairedFastQsToUnmappedBamWf.sequencing_center")
         mem = 3
         unmapped_bam = os.path.join(temp_dir, f"{readgroup_name}.unmapped.bam")
-        command_template = f"""{gatk_path} \
-            --java-options "-Djava.io.tmpdir=$EPHEMERAL -DGATK_STACKTRACE_ON_USER_EXCEPTION=true -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=1 -Xmx~{mem}g" \
+        command_template = f"""module load anaconda3/personal;
+            source activate taskset -a -c 0 java;
+            {gatk_path} \
+            --java-options "-XX:ParallelGCThreads=1 -Djava.io.tmpdir=$EPHEMERAL -DGATK_STACKTRACE_ON_USER_EXCEPTION=true -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=1 -Xmx~{mem}g" \
             FastqToSam \
             --FASTQ {fastq_1} \
             --FASTQ2 {fastq_2} \
@@ -160,6 +162,8 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
         run_script = os.path.join(temp_dir, "cmd.sh")
         with open(run_script, 'w') as fp:
             fp.write(command_template)
+        stdout_file = None
+        stderr_file = None
         try:
             stdout_file, stderr_file = \
                 bash_script_wrapper(
@@ -232,6 +236,8 @@ def run_wdl(wdls_entry: dict) -> dict:
     try:
         work_dir = wdls_entry.get("work_dir")
         script_file = wdls_entry.get("script_file")
+        stdout_file = None
+        stderr_file = None
         try:
             stdout_file, stderr_file = \
                 bash_script_wrapper(
