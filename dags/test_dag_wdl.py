@@ -59,8 +59,7 @@ def test_dag_wdl():
 
 
 @task_group
-def wdl_tg(
-    ubam_entry: dict) -> None:
+def wdl_tg(ubam_entry: dict) -> None:
     wdl_prep = fromat_wdl_run(ubam_entry)
     wdl_out = run_wdl(wdl_prep)
 
@@ -80,10 +79,10 @@ def read_rg_list() -> dict:
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
-        slack_conf=SLACK_CONF,
-        ms_teams_conf=MS_TEAMS_CONF,
-        message_prefix=e)
-    raise ValueError(e)
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
 
 ## TASK
 @task(
@@ -118,10 +117,10 @@ def collect_ubams() -> dict:
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
-        slack_conf=SLACK_CONF,
-        ms_teams_conf=MS_TEAMS_CONF,
-        message_prefix=e)
-    raise ValueError(e)
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
 
 ## TASK
 @task(
@@ -172,10 +171,10 @@ def fastq_to_ubam(fastq_entry: dict) -> dict:
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
-        slack_conf=SLACK_CONF,
-        ms_teams_conf=MS_TEAMS_CONF,
-        message_prefix=e)
-    raise ValueError(e)
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
 
 ## TASK
 @task(
@@ -216,10 +215,10 @@ def fromat_wdl_run(ubam_entry: dict) -> dict:
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
-        slack_conf=SLACK_CONF,
-        ms_teams_conf=MS_TEAMS_CONF,
-        message_prefix=e)
-    raise ValueError(e)
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
 
 ## TASK
 @task(
@@ -244,7 +243,7 @@ def run_wdl(wdls_entry: dict) -> dict:
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
-        slack_conf=SLACK_CONF,
-        ms_teams_conf=MS_TEAMS_CONF,
-        message_prefix=e)
-    raise ValueError(e)
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
