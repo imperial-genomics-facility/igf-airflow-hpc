@@ -12,7 +12,9 @@ from igf_data.utils.bashutils import bash_script_wrapper
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
-from igf_airflow.utils.generic_airflow_utils import send_airflow_failed_logs_to_channels
+from igf_airflow.utils.generic_airflow_utils import (
+    send_airflow_failed_logs_to_channels,
+    send_airflow_pipeline_logs_to_channels)
 from igf_data.utils.fileutils import (
   check_file_path,
   copy_local_file,
@@ -239,9 +241,17 @@ def run_wdl(wdls_entry: dict) -> dict:
         stdout_file = None
         stderr_file = None
         try:
+            send_airflow_pipeline_logs_to_channels(
+                slack_conf=SLACK_CONF,
+                ms_teams_conf=MS_TEAMS_CONF,
+                message_prefix=f"Started WDL run. Script: {script_file}, Work dir: {work_dir}")
             stdout_file, stderr_file = \
                 bash_script_wrapper(
                     script_path=script_file)
+            send_airflow_pipeline_logs_to_channels(
+                slack_conf=SLACK_CONF,
+                ms_teams_conf=MS_TEAMS_CONF,
+                message_prefix=f"Finished WDL run. Work dir: {work_dir}")
         except Exception as e:
             raise ValueError(
                 f"Failed to run script, Script: {script_file}, error file: {stderr_file}")
