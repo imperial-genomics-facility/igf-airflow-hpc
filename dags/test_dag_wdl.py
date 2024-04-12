@@ -213,7 +213,7 @@ def fromat_wdl_run(ubam_entry: dict) -> dict:
             autoescape_list=['xml',],
             data=dict(
                 SAMPLE_NAME=sample_name,
-                SAMPLE_INPUT_JSON=input_json_file,
+                SAMPLE_INPUT_JSON=json.dumps(input_json_file),
                 WORK_DIR=work_dir))
         return {"work_dir": work_dir, "script_file": wdl_cmd_file}
     except Exception as e:
