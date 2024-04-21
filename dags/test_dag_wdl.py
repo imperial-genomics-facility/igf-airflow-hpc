@@ -5,7 +5,7 @@ import logging
 import shutil
 import pandas as pd
 from airflow import XComArg
-from datetime import timedelta
+from datetime import datetime, timedelta
 from airflow.models import Variable
 from airflow.decorators import dag, task, task_group
 from airflow.operators.python import get_current_context
@@ -44,7 +44,7 @@ DAG_ID = \
 @dag(
 	dag_id=DAG_ID,
 	schedule=None,
-	start_date=pendulum.yesterday(),
+	start_date=datetime(2024, 4, 1),#pendulum.yesterday(),
 	catchup=True,
 	max_active_runs=1,
     default_view='grid',
