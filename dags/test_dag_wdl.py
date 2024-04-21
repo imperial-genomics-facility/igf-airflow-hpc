@@ -2,6 +2,7 @@ import os
 import json
 import pendulum
 import logging
+import shutil
 import pandas as pd
 from airflow import XComArg
 from datetime import timedelta
@@ -19,7 +20,6 @@ from igf_data.utils.fileutils import (
   check_file_path,
   copy_local_file,
   get_temp_dir,
-  
   get_date_stamp)
 from igf_airflow.utils.dag22_bclconvert_demult_utils import (
   _create_output_from_jinja_template)
@@ -45,7 +45,7 @@ DAG_ID = \
 	dag_id=DAG_ID,
 	schedule=None,
 	start_date=pendulum.yesterday(),
-	catchup=False,
+	catchup=True,
 	max_active_runs=1,
     default_view='grid',
     orientation='TB',
@@ -64,6 +64,7 @@ def test_dag_wdl():
 def wdl_tg(ubam_entry: dict) -> None:
     wdl_prep = fromat_wdl_run(ubam_entry=ubam_entry)
     wdl_out = run_wdl(wdls_entry=wdl_prep)
+    output_entry = get_vcf_and_cleanup_input(work_dir=wdl_out)
 
 
 ## TASK
@@ -256,6 +257,87 @@ def run_wdl(wdls_entry: dict) -> dict:
             raise ValueError(
                 f"Failed to run script, Script: {script_file}, error file: {stderr_file}")
         return work_dir
+    except Exception as e:
+        log.error(e)
+        send_airflow_failed_logs_to_channels(
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
+
+## TASK
+@task(
+  task_id="get_vcf_and_cleanup_input",
+  retry_delay=timedelta(minutes=5),
+  retries=20,
+  queue='hpc_4G',
+  multiple_outputs=False)
+def get_vcf_and_cleanup_input(work_dir: str) -> dict:
+    try:
+        ## failsafe for re-run
+        check_file_path(work_dir)
+        ## read metadata json
+        metadata_json = os.path.join(work_dir, "metadata_output.json")
+        with open(metadata_json, "r") as fp:
+            json_data = json.load(fp)
+        ## set output dict
+        output_files = \
+            dict(
+                sample_name=json_data["inputs"]["sample_and_unmapped_bams"]["sample_name"])
+        ## get a new temp dir
+        new_work_dir = get_temp_dir(use_ephemeral_space=True)
+        ## copy metadata json
+        src_path = os.path.join(work_dir, "metadata_output.json")
+        dest_path = os.path.join(new_work_dir, "metadata_output.json")
+        copy_local_file(src_path, dest_path)
+        ## set required files
+        required_files = [
+            'ExomeGermlineSingleSample.output_bqsr_reports',
+            'ExomeGermlineSingleSample.gvcf_summary_metrics',
+            'ExomeGermlineSingleSample.output_cram_md5',
+            'ExomeGermlineSingleSample.gvcf_detail_metrics',
+            'ExomeGermlineSingleSample.hybrid_selection_metrics',
+            'ExomeGermlineSingleSample.output_cram_index',
+            'ExomeGermlineSingleSample.unsorted_read_group_quality_distribution_metrics',
+            'ExomeGermlineSingleSample.unsorted_read_group_insert_size_metrics',
+            'ExomeGermlineSingleSample.read_group_alignment_summary_metrics',
+            'ExomeGermlineSingleSample.agg_quality_distribution_metrics',
+            'ExomeGermlineSingleSample.agg_pre_adapter_detail_metrics',
+            'ExomeGermlineSingleSample.unsorted_read_group_quality_distribution_pdf',
+            'ExomeGermlineSingleSample.output_cram',
+            'ExomeGermlineSingleSample.unsorted_read_group_quality_by_cycle_pdf',
+            'ExomeGermlineSingleSample.agg_insert_size_metrics',
+            'ExomeGermlineSingleSample.agg_alignment_summary_metrics',
+            'ExomeGermlineSingleSample.unsorted_read_group_insert_size_histogram_pdf',
+            'ExomeGermlineSingleSample.unsorted_read_group_base_distribution_by_cycle_metrics',
+            'ExomeGermlineSingleSample.output_vcf_index',
+            'ExomeGermlineSingleSample.duplicate_metrics',
+            'ExomeGermlineSingleSample.fingerprint_detail_metrics',
+            'ExomeGermlineSingleSample.unsorted_read_group_base_distribution_by_cycle_pdf',
+            'ExomeGermlineSingleSample.agg_bait_bias_summary_metrics',
+            'ExomeGermlineSingleSample.agg_bait_bias_detail_metrics',
+            'ExomeGermlineSingleSample.quality_yield_metrics',
+            'ExomeGermlineSingleSample.agg_insert_size_histogram_pdf',
+            'ExomeGermlineSingleSample.unsorted_read_group_quality_by_cycle_metrics',
+            'ExomeGermlineSingleSample.output_vcf',
+            'ExomeGermlineSingleSample.agg_error_summary_metrics',
+            'ExomeGermlineSingleSample.fingerprint_summary_metrics',
+            'ExomeGermlineSingleSample.agg_pre_adapter_summary_metrics',
+            'ExomeGermlineSingleSample.validate_cram_file_report',
+            'ExomeGermlineSingleSample.calculate_read_group_checksum_md5',
+            'ExomeGermlineSingleSample.agg_quality_distribution_pdf']
+        ## go through list of output files and copy required files to the new dir
+        for file_key, file_path in json_data['outputs'].items():
+            if file_key in required_files:
+                dest_path = \
+                    os.path.join(
+                        new_work_dir,
+                        os.path.basename(file_path))
+                copy_local_file(file_path, dest_path)
+                output_files.update({file_key: dest_path})
+        ## cleanup
+        shutil.rmtree(work_dir, ignore_errors=True)
+        return output_files
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
