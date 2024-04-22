@@ -298,27 +298,18 @@ def get_vcf_and_cleanup_input(work_dir: str) -> dict:
             'ExomeGermlineSingleSample.gvcf_detail_metrics',
             'ExomeGermlineSingleSample.hybrid_selection_metrics',
             'ExomeGermlineSingleSample.output_cram_index',
-            'ExomeGermlineSingleSample.unsorted_read_group_quality_distribution_metrics',
-            'ExomeGermlineSingleSample.unsorted_read_group_insert_size_metrics',
             'ExomeGermlineSingleSample.read_group_alignment_summary_metrics',
             'ExomeGermlineSingleSample.agg_quality_distribution_metrics',
             'ExomeGermlineSingleSample.agg_pre_adapter_detail_metrics',
-            'ExomeGermlineSingleSample.unsorted_read_group_quality_distribution_pdf',
             'ExomeGermlineSingleSample.output_cram',
-            'ExomeGermlineSingleSample.unsorted_read_group_quality_by_cycle_pdf',
             'ExomeGermlineSingleSample.agg_insert_size_metrics',
             'ExomeGermlineSingleSample.agg_alignment_summary_metrics',
-            'ExomeGermlineSingleSample.unsorted_read_group_insert_size_histogram_pdf',
-            'ExomeGermlineSingleSample.unsorted_read_group_base_distribution_by_cycle_metrics',
             'ExomeGermlineSingleSample.output_vcf_index',
             'ExomeGermlineSingleSample.duplicate_metrics',
             'ExomeGermlineSingleSample.fingerprint_detail_metrics',
-            'ExomeGermlineSingleSample.unsorted_read_group_base_distribution_by_cycle_pdf',
             'ExomeGermlineSingleSample.agg_bait_bias_summary_metrics',
             'ExomeGermlineSingleSample.agg_bait_bias_detail_metrics',
-            'ExomeGermlineSingleSample.quality_yield_metrics',
             'ExomeGermlineSingleSample.agg_insert_size_histogram_pdf',
-            'ExomeGermlineSingleSample.unsorted_read_group_quality_by_cycle_metrics',
             'ExomeGermlineSingleSample.output_vcf',
             'ExomeGermlineSingleSample.agg_error_summary_metrics',
             'ExomeGermlineSingleSample.fingerprint_summary_metrics',
@@ -328,16 +319,27 @@ def get_vcf_and_cleanup_input(work_dir: str) -> dict:
             'ExomeGermlineSingleSample.agg_quality_distribution_pdf']
         ## go through list of output files and copy required files to the new dir
         for file_key, file_path in json_data['outputs'].items():
-            if file_key in required_files:
+            ## get reuired files and skip lists
+            if file_key in required_files and \
+               isinstance(file_path, str):
                 dest_path = \
                     os.path.join(
                         new_work_dir,
                         os.path.basename(file_path))
                 copy_local_file(file_path, dest_path)
                 output_files.update({file_key: dest_path})
+        ## dump json file
+        output_json_file = \
+            os.path.join(
+                new_work_dir,
+                "new_metadata_output.json")
+        with open(output_json_file, 'w') as fp:
+            json.dump(output_files)
         ## cleanup
-        #shutil.rmtree(work_dir, ignore_errors=True)
-        return output_files
+        if len(output_files) == 1:
+            raise ValueError(f"No required file found in path {work_dir}")
+        shutil.rmtree(work_dir, ignore_errors=True)
+        return {"metadata_file": output_json_file, "output_dir": new_work_dir}
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
