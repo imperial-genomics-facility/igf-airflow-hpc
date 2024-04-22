@@ -334,7 +334,7 @@ def get_vcf_and_cleanup_input(work_dir: str) -> dict:
                 new_work_dir,
                 "new_metadata_output.json")
         with open(output_json_file, 'w') as fp:
-            json.dump(output_files)
+            json.dump(output_files, fp)
         ## cleanup
         if len(output_files) == 1:
             raise ValueError(f"No required file found in path {work_dir}")
