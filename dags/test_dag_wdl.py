@@ -336,7 +336,7 @@ def get_vcf_and_cleanup_input(work_dir: str) -> dict:
                 copy_local_file(file_path, dest_path)
                 output_files.update({file_key: dest_path})
         ## cleanup
-        shutil.rmtree(work_dir, ignore_errors=True)
+        #shutil.rmtree(work_dir, ignore_errors=True)
         return output_files
     except Exception as e:
         log.error(e)
