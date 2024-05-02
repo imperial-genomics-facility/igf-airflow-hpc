@@ -34,6 +34,7 @@ JSON_INPUT = "/rds/general/project/genomics-facility-archive-2019/live/adatta17/
 SAMPLE_INPUT_TEMPLATE = "/rds/general/project/genomics-facility-archive-2019/ephemeral/cromwell_test/wdl_templates/sample_input.json"
 WDL_CMD_TEMPLATE = "/rds/general/project/genomics-facility-archive-2019/ephemeral/cromwell_test/wdl_templates/exome_cmd.sh"
 
+FINAL_WORK_DIR = "/rds/general/project/genomics-facility-archive-2019/ephemeral/cromwell_test/merged_dir"
 
 ## DAG
 DAG_ID = \
@@ -56,7 +57,9 @@ def test_dag_wdl():
     ubam_list = collect_ubams()
     ubams = fastq_to_ubam.expand(fastq_entry=rg_groups)
     ubams >> ubam_list
-    grp = wdl_tg.expand(ubam_entry=ubam_list)
+    grp_gvcf_list = wdl_tg.expand(ubam_entry=ubam_list)
+    gvcf_entry = \
+        collect_gvcf_and_prepare_joinGenotype_input(grp_gvcf_list)
 
 
 
@@ -65,6 +68,7 @@ def wdl_tg(ubam_entry: dict) -> None:
     wdl_prep = fromat_wdl_run(ubam_entry=ubam_entry)
     wdl_out = run_wdl(wdls_entry=wdl_prep)
     output_entry = get_vcf_and_cleanup_input(work_dir=wdl_out)
+    return output_entry
 
 
 ## TASK
@@ -340,6 +344,48 @@ def get_vcf_and_cleanup_input(work_dir: str) -> dict:
             raise ValueError(f"No required file found in path {work_dir}")
         shutil.rmtree(work_dir, ignore_errors=True)
         return {"metadata_file": output_json_file, "output_dir": new_work_dir}
+    except Exception as e:
+        log.error(e)
+        send_airflow_failed_logs_to_channels(
+            slack_conf=SLACK_CONF,
+            ms_teams_conf=MS_TEAMS_CONF,
+            message_prefix=e)
+        raise ValueError(e)
+
+## TASK
+@task(
+  task_id="collect_gvcf_and_prepare_joinGenotype_input",
+  retry_delay=timedelta(minutes=5),
+  retries=2,
+  queue='hpc_4G',
+  multiple_outputs=False)
+def collect_gvcf_and_prepare_joinGenotype_input(gvcf_list: list) -> dict:
+    try:
+        new_gvcf_list = list()
+        os.makedirs(FINAL_WORK_DIR, exist_ok=True)
+        for entry in gvcf_list:
+            metadata_file = entry.get("metadata_file")
+            output_dir = entry.get("output_dir")
+            with open(metadata_file, 'r') as fp:
+                json_data = json.load(fp)
+            if isinstance(json_data, list):
+                json_data = json_data[0]
+            sample_name = json_data.get("sample_name")
+            sample_dir = os.path.join(FINAL_WORK_DIR, sample_name)
+            if os.path.exists(sample_dir):
+                raise ValueError(f"Cleanup path {sample_dir} before copy gvcf.")
+            shutil.copytree(output_dir, sample_dir)
+            gvcf_file = json_data.get("ExomeGermlineSingleSample.output_vcf")
+            new_gvcf_path = \
+                os.path.join(sample_dir, os.path.basename(gvcf_file))
+            new_gvcf_list.append({"sample": sample_name, "gvcf": new_gvcf_path})
+        df = pd.DataFrame(new_gvcf_list)
+        df.to_csv(
+            os.path.join(FINAL_WORK_DIR, "gvcf_list"),
+            sep="\t",
+            header=False,
+            index=False)
+        return {"output_dir": FINAL_WORK_DIR, "gvcf_list": os.path.join(FINAL_WORK_DIR, "gvcf_list")}
     except Exception as e:
         log.error(e)
         send_airflow_failed_logs_to_channels(
