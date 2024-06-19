@@ -1,17 +1,17 @@
 import os, pendulum
 from airflow.decorators import dag, task_group
 from airflow.utils.edgemodifier import Label
-from igf_airflow.utils.dag33_geomx_processing_util import (
+from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
-	no_work,
     fetch_analysis_design_from_db,
-    copy_data_to_globus,
-    send_email_to_user,
-    mark_analysis_finished,
+	no_work,
+	send_email_to_user,
+	copy_data_to_globus,
+	mark_analysis_finished,
+    create_main_work_dir,
 	mark_analysis_failed)
 from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     get_analysis_group_list,
-    create_main_work_dir,
     prepare_cellranger_script,
     run_cellranger_script,
     run_single_sample_scanpy,
@@ -67,7 +67,7 @@ def cellranger_wrapper_dag():
     sample_group_info = \
         fetch_analysis_design_from_db()
     main_work_dir = \
-        create_main_work_dir()
+        create_main_work_dir(task_tag='cellranger_multi_output')
     analysis_running >> Label('Analysis Design found') >> sample_group_info
     analysis_running >> Label('Analysis Design not found') >> no_work()
     sample_group_info >> main_work_dir

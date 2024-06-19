@@ -7,10 +7,15 @@ from airflow import XComArg
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
-from igf_airflow.utils.dag33_geomx_processing_util import (
+from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
-	no_work,
 	fetch_analysis_design_from_db,
+	no_work,
+	send_email_to_user,
+	copy_data_to_globus,
+	mark_analysis_finished,
+	mark_analysis_failed)
+from igf_airflow.utils.dag33_geomx_processing_util import (
 	check_and_process_config_file,
 	fetch_fastq_file_path_from_db,
 	create_temp_fastq_input_dir,
@@ -19,11 +24,7 @@ from igf_airflow.utils.dag33_geomx_processing_util import (
 	generate_geomx_qc_report,
 	calculate_md5sum_for_dcc,
 	copy_geomx_config_file_to_output,
-	load_dcc_count_to_db,
-	send_email_to_user,
-	copy_data_to_globus,
-	mark_analysis_finished,
-	mark_analysis_failed)
+	load_dcc_count_to_db)
 
 ## DAG
 DAG_ID = \
