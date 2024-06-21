@@ -9,6 +9,7 @@ from igf_airflow.utils.generic_airflow_tasks import (
 	copy_data_to_globus,
 	mark_analysis_finished,
     create_main_work_dir,
+    calculate_md5sum_for_main_work_dir,
 	mark_analysis_failed)
 from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     get_analysis_group_list,
@@ -21,7 +22,6 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     merged_scanpy_report,
     move_single_sample_result_to_main_work_dir,
     move_aggr_result_to_main_work_dir,
-    calculate_md5sum_for_main_work_dir,
     load_cellranger_results_to_db)
 
 # ## TASK GROUP

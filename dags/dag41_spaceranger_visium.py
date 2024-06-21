@@ -5,30 +5,6 @@ from airflow.decorators import dag, task, task_group
 from airflow.operators.python import get_current_context
 from airflow import XComArg
 from yaml import load, SafeLoader
-from igf_airflow.utils.dag33_geomx_processing_util import (
-	mark_analysis_running,
-	no_work,
-    fetch_analysis_design_from_db,
-    copy_data_to_globus,
-    send_email_to_user,
-    mark_analysis_finished,
-	mark_analysis_failed)
-from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
-    get_analysis_group_list,
-    create_main_work_dir,
-    run_cellranger_script,
-    collect_and_branch,
-    run_cellranger_aggr_script,
-    move_single_sample_result_to_main_work_dir,
-    move_aggr_result_to_main_work_dir,
-    calculate_md5sum_for_main_work_dir,
-    load_cellranger_results_to_db)
-from igf_airflow.utils.dag36_cellranger_arc_scRNA_multiome_utils import (
-    prepare_cellranger_arc_script,
-    configure_cellranger_arc_aggr_run,
-    run_single_sample_scanpy_for_arc,
-    dummy_task_for_single_sample,
-    merged_scanpy_report_for_arc as merged_scanpy_report)
 
 
 ## TASK: mark analysis as running
