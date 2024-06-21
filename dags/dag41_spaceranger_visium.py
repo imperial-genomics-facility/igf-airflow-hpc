@@ -5,22 +5,34 @@ from airflow.decorators import dag, task, task_group
 from airflow.operators.python import get_current_context
 from airflow import XComArg
 from yaml import load, SafeLoader
+from igf_airflow.utils.generic_airflow_tasks import (
+	mark_analysis_running,
+    fetch_analysis_design_from_db,
+	no_work,
+	send_email_to_user,
+	copy_data_to_globus,
+	mark_analysis_finished,
+    create_main_work_dir,
+    calculate_md5sum_for_main_work_dir,
+	mark_analysis_failed)
+from igf_airflow.utils.dag41_spaceranger_visium_utils import (
+    get_spaceranger_analysis_group_list,
 
-
+)
 ## TASK: mark analysis as running
-@task.branch(task_id="mark_analysis_running")
-def mark_analysis_running() -> list:
-    return ["fetch_analysis_design"]
+# @task.branch(task_id="mark_analysis_running")
+# def mark_analysis_running() -> list:
+#     return ["fetch_analysis_design"]
 
 ## TASK: mark analysis as finished
-@task(task_id="mark_analysis_finished")
-def mark_analysis_finished() -> None:
-    pass
+# @task(task_id="mark_analysis_finished")
+# def mark_analysis_finished() -> None:
+#     pass
 
 ## TASK: mark analysis as failed
-@task(task_id="mark_analysis_failed", trigger_rule="all_failed")
-def mark_analysis_failed() -> None:
-    pass
+# @task(task_id="mark_analysis_failed", trigger_rule="all_failed")
+# def mark_analysis_failed() -> None:
+#     pass
 
 # TASK: fetch design from db
 @task(task_id="fetch_analysis_design")
@@ -54,21 +66,6 @@ analysis_metadata:
     """
     return design
 
-# Task: get analysis groups
-@task(task_id="get_analysis_groups")
-def get_analysis_groups(design: str) -> list:
-    json_data = load(design, Loader=SafeLoader)
-    sample_metadata = json_data.get("sample_metadata")
-    analysis_metadata = json_data.get("analysis_metadata")
-    analysis_groups = list()
-    for sample_id, sample_info in sample_metadata.items():
-        analysis_groups.append({
-            "sample_metadata": {
-                sample_id: sample_info
-            },
-            "analysis_metadata": analysis_metadata
-        })
-    return analysis_groups
 
 ## TASK: create work directory
 @task(task_id="create_main_work_dir")
@@ -111,8 +108,10 @@ def move_analysis(analysis_output: dict, work_dir: str) -> dict:
 
 ## TASK GROUP 1: run script per analysis groups
 @task_group
-def prepare_and_run_analysis_for_each_groups(analysis_entry: dict, work_dir: str) -> dict:
-    analysis_info = prepare_analysis_scripts(analysis_entry=analysis_entry)
+def prepare_and_run_analysis_for_each_groups(
+        analysis_entry: dict,
+        work_dir: str) -> dict:
+    analysis_info = prepare_spaceranger_count_script(analysis_entry=analysis_entry)
     analysis_output = run_analysis(analysis_info=analysis_info)
     squidpy_out = run_squidpy_qc(analysis_out=analysis_output)
     final_output = move_analysis(analysis_output=squidpy_out, work_dir=work_dir)
@@ -170,7 +169,7 @@ def load_analysis_to_db(output_dir: str) -> str:
 def copy_data_to_globus(output_dir: str) -> str:
     return "/path/globus"
 
-## TASK: endm email
+## TASK: send email
 @task(task_id="send_email_to_user")
 def send_email_to_user() -> str:
     return None
@@ -191,15 +190,38 @@ DAG_ID = \
     orientation='TB',
     tags=["spatial", "spaceranger", "hpc"])
 def spaceranger_visium_wrapper_dag():
-    running_analysis = mark_analysis_running()
-    finished_analysis = mark_analysis_finished()
-    failed_analysis = mark_analysis_failed()
-    running_analysis >> finished_analysis
-    design = fetch_analysis_design()
-    work_dir = create_main_work_dir()
+    ## TASK
+    running_analysis = \
+        mark_analysis_running(
+            next_task="fetch_analysis_design",
+            last_task="no_work")
+    ## TASK
+    finished_analysis = \
+        mark_analysis_finished()
+    ## TASK
+    failed_analysis = \
+        mark_analysis_failed()
+    ## TASK
+    design = \
+        fetch_analysis_design_from_db()
+    ## PIPELINE
+    running_analysis >> \
+        Label('Analysis Design found') >> \
+            design
+    running_analysis >> \
+        Label('Analysis Design not found') >> \
+            failed_analysis
+    ## TASK
+    work_dir = \
+        create_main_work_dir(
+            task_tag='spaceranger_output')
+    ## PIPELINE
     design >> work_dir
     running_analysis >> design
-    analysis_groups = get_analysis_groups(design=design)
+    ## TASK
+    analysis_groups = \
+        get_spaceranger_analysis_group_list(
+            design=design)
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
         partial(work_dir=work_dir).\
