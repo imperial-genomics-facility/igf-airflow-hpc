@@ -17,6 +17,10 @@ from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_failed)
 from igf_airflow.utils.dag41_spaceranger_visium_utils import (
     get_spaceranger_analysis_group_list,
+    prepare_spaceranger_count_run_dir_and_script_file,
+    run_spaceranger_count_script,
+    run_squidpy_qc,
+    move_single_spaceranger_count_to_main_work_dir
 
 )
 ## TASK: mark analysis as running
@@ -35,86 +39,95 @@ from igf_airflow.utils.dag41_spaceranger_visium_utils import (
 #     pass
 
 # TASK: fetch design from db
-@task(task_id="fetch_analysis_design")
-def fetch_analysis_design() -> str:
-    design = """sample_metadata:
-  IGF1:
-    image: null
-    darkimage: null
-    colorizedimage: null
-    cytaimage: null
-    slide: null
-    area: null
-    dapi-index: null
-  IGF2:
-    image: null
-    darkimage: null
-    colorizedimage: null
-    cytaimage: null
-    slide: null
-    area: null
-    dapi-index: null
-analysis_metadata:
-  spaceranger_config:
-    - "--transcriptome=/path"
-    - "--probe-set=/path"
-    - "--filter-probes=true"
-    - "--reorient-images=true"
-    - "--create-bam=true"
-  spaceranger_aggr_config:
-    - "--normalize=mapped"
-    """
-    return design
+# @task(task_id="fetch_analysis_design")
+# def fetch_analysis_design() -> str:
+#     design = """sample_metadata:
+#   IGF1:
+#     image: null
+#     darkimage: null
+#     colorizedimage: null
+#     cytaimage: null
+#     slide: null
+#     area: null
+#     dapi-index: null
+#   IGF2:
+#     image: null
+#     darkimage: null
+#     colorizedimage: null
+#     cytaimage: null
+#     slide: null
+#     area: null
+#     dapi-index: null
+# analysis_metadata:
+#   spaceranger_config:
+#     - "--transcriptome=/path"
+#     - "--probe-set=/path"
+#     - "--filter-probes=true"
+#     - "--reorient-images=true"
+#     - "--create-bam=true"
+#   spaceranger_aggr_config:
+#     - "--normalize=mapped"
+#     """
+#     return design
 
 
 ## TASK: create work directory
-@task(task_id="create_main_work_dir")
-def create_main_work_dir() -> str:
-    return "/path/work"
+# @task(task_id="create_main_work_dir")
+# def create_main_work_dir() -> str:
+#     return "/path/work"
 
 ## TG1 TASK: prepare spaceranger scripts for each samples
-@task(task_id="prepare_analysis_scripts")
-def prepare_analysis_scripts(analysis_entry: dict) -> dict:
-    sample_metadata = analysis_entry.get("sample_metadata")
-    sample_id = list(sample_metadata.keys())
-    analysis_metadata = analysis_entry.get("analysis_metadata")
-    # if sample_id[0] == "IGF2":
-    #     raise ValueError(f"I don't like {sample_id}")
-    return {"sample_id": sample_id, "output": "/file/path"}
+# @task(task_id="prepare_analysis_scripts")
+# def prepare_analysis_scripts(analysis_entry: dict) -> dict:
+#     sample_metadata = analysis_entry.get("sample_metadata")
+#     sample_id = list(sample_metadata.keys())
+#     analysis_metadata = analysis_entry.get("analysis_metadata")
+#     # if sample_id[0] == "IGF2":
+#     #     raise ValueError(f"I don't like {sample_id}")
+#     return {"sample_id": sample_id, "output": "/file/path"}
 
 ## TG1 TASK: run analysis script
-@task(task_id="run_analysis")
-def run_analysis(analysis_info: dict) -> dict:
-    sample_metadata = analysis_info.get("sample_metadata")
-    sample_id = analysis_info.get("sample_id")
-    output = analysis_info.get("output")
-    return {"sample_id": sample_id, "output": output}
+# @task(task_id="run_analysis")
+# def run_analysis(analysis_info: dict) -> dict:
+#     sample_metadata = analysis_info.get("sample_metadata")
+#     sample_id = analysis_info.get("sample_id")
+#     output = analysis_info.get("output")
+#     return {"sample_id": sample_id, "output": output}
 
 ## TG1 TASK: run squidpy qc step
-@task(task_id="run_squidpy_qc")
-def run_squidpy_qc(analysis_out: dict) -> dict:
-    sample_id = analysis_out.get("sample_id")
-    output = analysis_out.get("output")
-    ## generate report and move it to visium output directory
-    return {"sample_id": sample_id, "output": output}
+# @task(task_id="run_squidpy_qc")
+# def run_squidpy_qc(analysis_out: dict) -> dict:
+#     sample_id = analysis_out.get("sample_id")
+#     output = analysis_out.get("output")
+#     ## generate report and move it to visium output directory
+#     return {"sample_id": sample_id, "output": output}
 
 ## TG1 TASK: move analysis to 
-@task(task_id="move_analysis")
-def move_analysis(analysis_output: dict, work_dir: str) -> dict:
-    sample_id = analysis_output.get("sample_id")
-    output = analysis_output.get("output")
-    final_output = f"{work_dir}/{sample_id}"
-    return {"sample_id": sample_id, "output": final_output}
+# @task(task_id="move_analysis")
+# def move_analysis(analysis_output: dict, work_dir: str) -> dict:
+#     sample_id = analysis_output.get("sample_id")
+#     output = analysis_output.get("output")
+#     final_output = f"{work_dir}/{sample_id}"
+#     return {"sample_id": sample_id, "output": final_output}
 
 ## TASK GROUP 1: run script per analysis groups
 @task_group
 def prepare_and_run_analysis_for_each_groups(
         analysis_entry: dict,
         work_dir: str) -> dict:
-    analysis_info = prepare_spaceranger_count_script(analysis_entry=analysis_entry)
-    analysis_output = run_analysis(analysis_info=analysis_info)
-    squidpy_out = run_squidpy_qc(analysis_out=analysis_output)
-    final_output = move_analysis(analysis_output=squidpy_out, work_dir=work_dir)
+    analysis_script_info = \
+        prepare_spaceranger_count_run_dir_and_script_file(
+            analysis_entry=analysis_entry)
+    analysis_output = \
+        run_spaceranger_count_script(
+            analysis_script_info=analysis_script_info)
+    squidpy_out = \
+        run_squidpy_qc(
+            analysis_output=analysis_output)
+    final_output = \
+        move_single_spaceranger_count_to_main_work_dir(
+            analysis_output=squidpy_out,
+            work_dir=work_dir)
     return final_output
 
 ## TASK: collect all analysis outputs
