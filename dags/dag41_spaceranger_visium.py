@@ -93,7 +93,7 @@ def spaceranger_visium_wrapper_dag():
     ## TASK
     analysis_groups = \
         get_spaceranger_analysis_group_list(
-            design=design)
+            design_dict=design)
     ## TASK GROUP
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
