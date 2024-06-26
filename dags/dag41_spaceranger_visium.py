@@ -14,7 +14,7 @@ from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_failed)
 from igf_airflow.utils.dag41_spaceranger_visium_utils import (
     get_spaceranger_analysis_group_list,
-    prepare_spaceranger_count_run_dir_and_script_file,
+    prepare_spaceranger_count_script,
     run_spaceranger_count_script,
     run_squidpy_qc,
     move_single_spaceranger_count_to_main_work_dir,
@@ -32,7 +32,7 @@ def prepare_and_run_analysis_for_each_groups(
         analysis_entry: dict,
         work_dir: str) -> dict:
     analysis_script_info = \
-        prepare_spaceranger_count_run_dir_and_script_file(
+        prepare_spaceranger_count_script(
             analysis_entry=analysis_entry)
     analysis_output = \
         run_spaceranger_count_script(
