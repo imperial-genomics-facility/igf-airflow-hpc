@@ -121,8 +121,8 @@ def spaceranger_visium_wrapper_dag():
     ## TASK
     aggr_moved = \
         move_spaceranger_aggr_to_main_work_dir(
-            aggr_path=aggr_qc_dir,
-            work_dir=work_dir)
+            work_dir=work_dir,
+            analysis_output_dir=aggr_qc_dir)
     ## TASK
     work_dir_with_md5 = \
         calculate_md5sum_for_main_work_dir(
