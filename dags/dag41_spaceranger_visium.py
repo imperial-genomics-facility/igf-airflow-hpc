@@ -20,7 +20,13 @@ from igf_airflow.utils.dag41_spaceranger_visium_utils import (
     prepare_spaceranger_count_run_dir_and_script_file,
     run_spaceranger_count_script,
     run_squidpy_qc,
-    move_single_spaceranger_count_to_main_work_dir
+    move_single_spaceranger_count_to_main_work_dir,
+    collect_spaceranger_count_analysis,
+    decide_aggr,
+    prepare_spaceranger_aggr_script,
+    run_spaceranger_aggr_script,
+    squidpy_qc_for_aggr,
+    move_spaceranger_aggr_to_main_work_dir
 
 )
 ## TASK: mark analysis as running
@@ -130,42 +136,42 @@ def prepare_and_run_analysis_for_each_groups(
             work_dir=work_dir)
     return final_output
 
-## TASK: collect all analysis outputs
-@task(task_id="collect_analysis")
-def collect_analysis(analysis_output_list: list) -> list:
-    return analysis_output_list
+# ## TASK: collect all analysis outputs
+# @task(task_id="collect_analysis")
+# def collect_analysis(analysis_output_list: list) -> list:
+#     return analysis_output_list
 
-## TASK: switch to aggr if morethan one samples are present
-@task.branch(task_id="decide_aggr")
-def decide_aggr(
-    analysis_output_list: list,
-    aggr_task: str = "prepare_aggr_script",
-    non_aggr_task: str = "calculate_md5_for_work_dir") -> list:
-    if len(analysis_output_list) > 1:
-        return [aggr_task]
-    elif len(analysis_output_list) == 1:
-        return [non_aggr_task]
+# ## TASK: switch to aggr if morethan one samples are present
+# @task.branch(task_id="decide_aggr")
+# def decide_aggr(
+#     analysis_output_list: list,
+#     aggr_task: str = "prepare_aggr_script",
+#     non_aggr_task: str = "calculate_md5_for_work_dir") -> list:
+#     if len(analysis_output_list) > 1:
+#         return [aggr_task]
+#     elif len(analysis_output_list) == 1:
+#         return [non_aggr_task]
 
-## TASK: prep aggr run script
-@task(task_id="prepare_aggr_script")
-def prepare_aggr_script(analysis_output_list: list) -> str:
-    return "/path/ALL"
+# ## TASK: prep aggr run script
+# @task(task_id="prepare_aggr_script")
+# def prepare_aggr_script(analysis_output_list: list) -> str:
+#     return "/path/ALL"
 
 ## TASK: run aggr
-@task(task_id="run_aggr")
-def run_aggr(output_dir: str) -> str:
-    return output_dir
+# @task(task_id="run_aggr")
+# def run_aggr(output_dir: str) -> str:
+#     return output_dir
 
 ## TASK: run aggr QC
-@task(task_id="squidpy_qc_for_aggr")
-def squidpy_qc_for_aggr(output_dir: str) -> str:
-    ## generate squidpy qc and move it to visium directory
-    return output_dir
+# @task(task_id="squidpy_qc_for_aggr")
+# def squidpy_qc_for_aggr(output_dir: str) -> str:
+#     ## generate squidpy qc and move it to visium directory
+#     return output_dir
 
 ## TASK: move aggr to main work dir
-@task(task_id="move_aggr")
-def move_aggr(aggr_path: str, work_dir: str) -> str:
-    return f"{work_dir}/ALL"
+# @task(task_id="move_aggr")
+# def move_aggr(aggr_path: str, work_dir: str) -> str:
+#     return f"{work_dir}/ALL"
 
 ## TASK: calculate md5sum for main work dir
 @task(task_id="calculate_md5_for_work_dir", trigger_rule="none_failed")
@@ -235,24 +241,55 @@ def spaceranger_visium_wrapper_dag():
     analysis_groups = \
         get_spaceranger_analysis_group_list(
             design=design)
+    ## TASK GROUP
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
         partial(work_dir=work_dir).\
         expand(analysis_entry=analysis_groups)
+    ## TASK
     analysis_output_list = \
-      collect_analysis(analysis_outputs)
-    aggr_or_not = decide_aggr(analysis_output_list)
-    prep_aggr = prepare_aggr_script(analysis_output_list)
-    aggr_run_dir = run_aggr(prep_aggr)
-    aggr_qc_dir = squidpy_qc_for_aggr(aggr_run_dir)
-    aggr_moved = move_aggr(aggr_path=aggr_qc_dir, work_dir=work_dir)
-    md5_out = calculate_md5_for_work_dir()
-    aggr_or_not >> prep_aggr
-    aggr_or_not >> md5_out
-    aggr_moved >> md5_out
-    loaded_data = load_analysis_to_db(md5_out)
-    globus_data = copy_data_to_globus(loaded_data)
-    send_email = send_email_to_user()
+      collect_spaceranger_count_analysis(
+          analysis_outputs)
+    ## TASK
+    aggr_or_not = \
+        decide_aggr(analysis_output_list)
+    ## TASK
+    aggr_script_info = \
+        prepare_spaceranger_aggr_script(
+            analysis_output_list)
+    ## TASK
+    aggr_run_dir = \
+        run_spaceranger_aggr_script(
+            aggr_script_info)
+    ## TASK
+    aggr_qc_dir = \
+        squidpy_qc_for_aggr(
+            aggr_run_dir)
+    ## TASK
+    aggr_moved = \
+        move_spaceranger_aggr_to_main_work_dir(
+            aggr_path=aggr_qc_dir,
+            work_dir=work_dir)
+    ## TASK
+    work_dir_with_md5 = \
+        calculate_md5_for_work_dir(
+            work_dir)
+    ## PIPELINE
+    aggr_or_not >> aggr_script_info
+    aggr_or_not >> work_dir_with_md5
+    aggr_moved >> work_dir_with_md5
+    ## TASK
+    loaded_data = \
+        load_analysis_to_db(
+            work_dir_with_md5)
+    ## TASK
+    globus_data = \
+        copy_data_to_globus(
+            loaded_data)
+    ## TASK
+    send_email = \
+        send_email_to_user()
+    ## PIPELINE
     globus_data >> send_email
     send_email >> failed_analysis
     send_email >> finished_analysis
