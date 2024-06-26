@@ -26,7 +26,8 @@ from igf_airflow.utils.dag41_spaceranger_visium_utils import (
     prepare_spaceranger_aggr_script,
     run_spaceranger_aggr_script,
     squidpy_qc_for_aggr,
-    move_spaceranger_aggr_to_main_work_dir
+    move_spaceranger_aggr_to_main_work_dir,
+    load_analysis_results_to_db
 
 )
 ## TASK: mark analysis as running
@@ -174,9 +175,9 @@ def prepare_and_run_analysis_for_each_groups(
 #     return f"{work_dir}/ALL"
 
 ## TASK: calculate md5sum for main work dir
-@task(task_id="calculate_md5_for_work_dir", trigger_rule="none_failed")
-def calculate_md5_for_work_dir() -> str:
-    return "/path/output"
+# @task(task_id="calculate_md5_for_work_dir", trigger_rule="none_failed")
+# def calculate_md5_for_work_dir() -> str:
+#     return "/path/output"
 
 ## TASK: load results to disk and db
 @task(task_id="load_analysis_to_db")
@@ -272,20 +273,20 @@ def spaceranger_visium_wrapper_dag():
             work_dir=work_dir)
     ## TASK
     work_dir_with_md5 = \
-        calculate_md5_for_work_dir(
+        calculate_md5sum_for_main_work_dir(
             work_dir)
     ## PIPELINE
     aggr_or_not >> aggr_script_info
     aggr_or_not >> work_dir_with_md5
     aggr_moved >> work_dir_with_md5
     ## TASK
-    loaded_data = \
-        load_analysis_to_db(
+    loaded_data_info = \
+        load_analysis_results_to_db(
             work_dir_with_md5)
     ## TASK
     globus_data = \
         copy_data_to_globus(
-            loaded_data)
+            loaded_data_info)
     ## TASK
     send_email = \
         send_email_to_user()
