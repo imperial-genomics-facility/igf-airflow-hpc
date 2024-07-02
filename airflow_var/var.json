@@ -1,4 +1,6 @@
 {
+  "spaceranger_count_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/spaceranger_template/spaceranger_count_run_script_v1.sh",
+  "spaceranger_aggr_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/spaceranger_template/spaceranger_aggr_run_script_v1.sh",
   "geomx_ngs_pipeline_exe": "/project/tgu/software/geomx/GeoMx_NGS_2.3.3.10/geomxngspipeline",
   "geomx_script_template": "/project/tgu/data2/airflow_v3/github/data-management-python/template/geomx/geomx_ngs_pipeline.sh",
   "geomx_report_template_file": "/project/tgu/software/igf-dockerfiles/bioconductor-geomxworkflows/templates/GeoMx_workflows_report_v0.0.1.ipynb",
