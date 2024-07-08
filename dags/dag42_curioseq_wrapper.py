@@ -97,7 +97,7 @@ def dag42_curioseq_wrapper():
     ## TASK
     analysis_groups = \
         get_curioseeker_analysis_group_list(
-            design=design)
+            design_dict=design)
     ## TASK GROUP EXPAND
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
