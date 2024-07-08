@@ -79,7 +79,7 @@ def dag42_curioseq_wrapper():
     failed_analysis = \
         mark_analysis_failed()
     ## PIPELINE
-    running_analysis >> finished_analysis
+    #running_analysis >> finished_analysis
     ## TASK
     design = \
         fetch_analysis_design_from_db()
