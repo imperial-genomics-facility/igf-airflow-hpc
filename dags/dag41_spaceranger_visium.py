@@ -89,7 +89,6 @@ def spaceranger_visium_wrapper_dag():
             task_tag='spaceranger_output')
     ## PIPELINE
     design >> work_dir
-    running_analysis >> design
     ## TASK
     analysis_groups = \
         get_spaceranger_analysis_group_list(
