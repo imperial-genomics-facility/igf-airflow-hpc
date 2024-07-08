@@ -1,7 +1,7 @@
-import os
+import json, time, os
 import pendulum
 from airflow.utils.edgemodifier import Label
-from airflow.decorators import dag, task_group
+from airflow.decorators import dag, task, task_group
 from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
     fetch_analysis_design_from_db,
@@ -11,41 +11,46 @@ from igf_airflow.utils.generic_airflow_tasks import (
     create_main_work_dir,
     calculate_md5sum_for_main_work_dir,
     load_analysis_results_to_db,
-	mark_analysis_failed)
-from igf_airflow.utils.dag41_spaceranger_visium_utils import (
-    get_spaceranger_analysis_group_list,
-    prepare_spaceranger_count_script,
-    run_spaceranger_count_script,
-    run_squidpy_qc,
-    move_single_spaceranger_count_to_main_work_dir,
-    collect_spaceranger_count_analysis,
-    decide_aggr,
-    prepare_spaceranger_aggr_script,
-    run_spaceranger_aggr_script,
-    squidpy_qc_for_aggr,
-    move_spaceranger_aggr_to_main_work_dir)
+	mark_analysis_failed,
+    collect_all_analysis,
+    move_per_sample_analysis_to_main_work_dir)
+from igf_airflow.utils.dag42_curioseq_wrapper_utils import (
+    merge_fastqs_for_analysis,
+    prepare_curioseeker_analysis_scripts,
+    run_curioseeker_nf_script,
+    get_curioseeker_analysis_group_list,
+    run_scanpy_qc,
+    run_scanpy_qc_for_all_samples)
 
 
-## TASK GROUP
+## TASK GROUP: run script per analysis groups
 @task_group
 def prepare_and_run_analysis_for_each_groups(
         analysis_entry: dict,
         work_dir: str) -> dict:
+    ## TASK
+    merged_fastqs = \
+        merge_fastqs_for_analysis(
+            analysis_entry)
+    ## TASK
     analysis_script_info = \
-        prepare_spaceranger_count_script(
-            analysis_entry=analysis_entry)
+        prepare_curioseeker_analysis_scripts(
+            analysis_entry=analysis_entry,
+            modified_sample_metadata=merged_fastqs)
+    ## TASK
     analysis_output = \
-        run_spaceranger_count_script(
+        run_curioseeker_nf_script(
             analysis_script_info=analysis_script_info)
-    squidpy_out = \
-        run_squidpy_qc(
+    ## TASK
+    scanpy_out = \
+        run_scanpy_qc(
             analysis_output=analysis_output)
+    ## TASK
     final_output = \
-        move_single_spaceranger_count_to_main_work_dir(
-            analysis_output=squidpy_out,
+        move_per_sample_analysis_to_main_work_dir(
+            analysis_output=scanpy_out,
             work_dir=work_dir)
     return final_output
-
 
 ## DAG
 DAG_ID = \
@@ -60,8 +65,8 @@ DAG_ID = \
 	max_active_runs=10,
     default_view='grid',
     orientation='TB',
-    tags=["spatial", "spaceranger", "hpc"])
-def spaceranger_visium_wrapper_dag():
+    tags=["spatial", "curioseeker", "hpc"])
+def dag42_curioseq_wrapper():
     ## TASK
     running_analysis = \
         mark_analysis_running(
@@ -73,9 +78,15 @@ def spaceranger_visium_wrapper_dag():
     ## TASK
     failed_analysis = \
         mark_analysis_failed()
+    ## PIPELINE
+    running_analysis >> finished_analysis
     ## TASK
     design = \
         fetch_analysis_design_from_db()
+    ## TASK
+    work_dir = \
+        create_main_work_dir(
+            task_tag='curioseeker_output')
     ## PIPELINE
     running_analysis >> \
         Label('Analysis Design found') >> \
@@ -83,67 +94,45 @@ def spaceranger_visium_wrapper_dag():
     running_analysis >> \
         Label('Analysis Design not found') >> \
             failed_analysis
-    ## TASK
-    work_dir = \
-        create_main_work_dir(
-            task_tag='spaceranger_output')
-    ## PIPELINE
     design >> work_dir
     ## TASK
     analysis_groups = \
-        get_spaceranger_analysis_group_list(
+        get_curioseeker_analysis_group_list(
             design_dict=design)
-    ## TASK GROUP
+    ## TASK GROUP EXPAND
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
         partial(work_dir=work_dir).\
         expand(analysis_entry=analysis_groups)
     ## TASK
     analysis_output_list = \
-      collect_spaceranger_count_analysis(
+      collect_all_analysis(
           analysis_outputs)
     ## TASK
-    aggr_or_not = \
-        decide_aggr(analysis_output_list)
-    ## TASK
-    aggr_script_info = \
-        prepare_spaceranger_aggr_script(
+    agg_report = \
+        run_scanpy_qc_for_all_samples(
             analysis_output_list)
-    ## TASK
-    aggr_run_dir = \
-        run_spaceranger_aggr_script(
-            aggr_script_info)
-    ## TASK
-    aggr_qc_dir = \
-        squidpy_qc_for_aggr(
-            aggr_run_dir)
-    ## TASK
-    aggr_moved = \
-        move_spaceranger_aggr_to_main_work_dir(
-            work_dir=work_dir,
-            analysis_output_dir=aggr_qc_dir)
     ## TASK
     work_dir_with_md5 = \
         calculate_md5sum_for_main_work_dir(
             work_dir)
-    ## PIPELINE
-    aggr_or_not >> aggr_script_info
-    aggr_or_not >> work_dir_with_md5
-    aggr_moved >> work_dir_with_md5
     ## TASK
-    loaded_data_info = \
+    loaded_data = \
         load_analysis_results_to_db(
             work_dir_with_md5)
     ## TASK
     globus_data = \
         copy_data_to_globus(
-            loaded_data_info)
+            loaded_data)
     ## TASK
     send_email = \
         send_email_to_user()
     ## PIPELINE
+    analysis_output_list >> work_dir_with_md5
+    agg_report >> work_dir_with_md5
     globus_data >> send_email
     send_email >> failed_analysis
     send_email >> finished_analysis
 
-spaceranger_visium_wrapper_dag()
+## call dag
+dag42_curioseq_wrapper()
