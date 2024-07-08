@@ -33,14 +33,14 @@ def prepare_and_run_analysis_for_each_groups(
         merge_fastqs_for_analysis(
             analysis_entry)
     ## TASK
-    analysis_info = \
+    analysis_script_info = \
         prepare_curioseeker_analysis_scripts(
             analysis_entry=analysis_entry,
             modified_sample_metadata=merged_fastqs)
     ## TASK
     analysis_output = \
         run_curioseeker_nf_script(
-            analysis_info=analysis_info)
+            analysis_script_info=analysis_script_info)
     ## TASK
     scanpy_out = \
         run_scanpy_qc(\
