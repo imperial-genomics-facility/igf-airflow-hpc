@@ -66,7 +66,7 @@ def spaceranger_visium_wrapper_dag():
     running_analysis = \
         mark_analysis_running(
             next_task="fetch_analysis_design",
-            last_task="no_work")
+            last_task="mark_analysis_failed")
     ## TASK
     finished_analysis = \
         mark_analysis_finished()

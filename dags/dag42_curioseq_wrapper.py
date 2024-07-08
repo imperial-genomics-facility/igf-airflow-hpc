@@ -68,7 +68,9 @@ DAG_ID = \
 def dag42_curioseq_wrapper():
     ## TASK
     running_analysis = \
-        mark_analysis_running()
+        mark_analysis_running(
+            next_task="fetch_analysis_design",
+            last_task="mark_analysis_failed")
     ## TASK
     finished_analysis = \
         mark_analysis_finished()
@@ -82,7 +84,8 @@ def dag42_curioseq_wrapper():
         fetch_analysis_design_from_db()
     ## TASK
     work_dir = \
-        create_main_work_dir()
+        create_main_work_dir(
+            task_tag='curioseeker_output')
     ## PIPELINE
     running_analysis >> \
         Label('Analysis Design found') >> \
