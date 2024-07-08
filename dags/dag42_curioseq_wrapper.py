@@ -35,7 +35,8 @@ def prepare_and_run_analysis_for_each_groups(
     ## TASK
     analysis_info = \
         prepare_curioseeker_analysis_scripts(
-            analysis_entry=merged_fastqs)
+            analysis_entry=analysis_entry,
+            modified_sample_metadata=merged_fastqs)
     ## TASK
     analysis_output = \
         run_curioseeker_nf_script(
