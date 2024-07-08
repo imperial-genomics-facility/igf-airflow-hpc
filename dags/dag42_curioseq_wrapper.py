@@ -43,8 +43,8 @@ def prepare_and_run_analysis_for_each_groups(
             analysis_script_info=analysis_script_info)
     ## TASK
     scanpy_out = \
-        run_scanpy_qc(\
-            analysis_out=analysis_output)
+        run_scanpy_qc(
+            analysis_output=analysis_output)
     ## TASK
     final_output = \
         move_per_sample_analysis_to_main_work_dir(
