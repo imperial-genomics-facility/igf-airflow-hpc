@@ -108,8 +108,8 @@ def cellranger_wrapper_dag():
     aggr_or_not = \
         decide_aggr(
             analysis_output_list,
-            aggr_task="",
-            non_aggr_task="")
+            aggr_task="configure_cellranger_aggr_run",
+            non_aggr_task="calculate_md5_for_work_dir")
     ## TASK
     aggr_script_info = \
         configure_cellranger_aggr_run(
@@ -121,7 +121,8 @@ def cellranger_wrapper_dag():
     ## TASK
     aggr_qc_dir = \
         merged_scanpy_report(
-            aggr_run_dir)
+            aggr_run_dir,
+            design)
     ## TASK
     aggr_moved = \
         move_aggr_result_to_main_work_dir(
