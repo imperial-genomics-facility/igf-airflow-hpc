@@ -92,7 +92,9 @@ def cellranger_wrapper_dag():
     ## TASK
     analysis_groups = \
         get_analysis_group_list(
-            design_dict=design)
+            design_dict=design,
+            required_tag_name="feature_types",
+            required_tag_value="Gene Expression")
     ## TASK GROUP
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
