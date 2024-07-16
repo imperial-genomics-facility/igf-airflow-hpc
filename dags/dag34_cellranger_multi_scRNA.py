@@ -2,6 +2,7 @@ import os
 import pendulum
 from airflow.utils.edgemodifier import Label
 from airflow.decorators import dag, task_group
+from airflow.models import Variable
 from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
     fetch_analysis_design_from_db,
@@ -25,21 +26,27 @@ from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     move_single_sample_result_to_main_work_dir,
     move_aggr_result_to_main_work_dir)
 
+SEND_MAIL = \
+    Variable.get('send_analysis_email', default_var=True)
 
 ## TASK GROUP
 @task_group
 def prepare_and_run_analysis_for_each_groups(
-        analysis_entry: dict,
-        work_dir: str) -> dict:
+        sample_group: str,
+        work_dir: str,
+        design_dict: dict) -> dict:
     analysis_script_info = \
         prepare_cellranger_script(
-            analysis_entry=analysis_entry)
-    analysis_output = \
+            design_dict=design_dict,
+            sample_group=sample_group)
+    cellranger_output_dir = \
         run_cellranger_script(
             analysis_script_info=analysis_script_info)
     scanpy_out = \
         run_single_sample_scanpy(
-            analysis_output=analysis_output)
+            sample_group=sample_group,
+            cellranger_output_dir=cellranger_output_dir,
+            design_dict=design_dict)
     final_output = \
         move_single_sample_result_to_main_work_dir(
             analysis_output=scanpy_out,
@@ -98,8 +105,10 @@ def cellranger_wrapper_dag():
     ## TASK GROUP
     analysis_outputs = \
         prepare_and_run_analysis_for_each_groups.\
-        partial(work_dir=work_dir).\
-        expand(analysis_entry=analysis_groups)
+        partial(
+            work_dir=work_dir,
+            design_dict=design).\
+        expand(sample_group=analysis_groups)
     ## TASK
     analysis_output_list = \
       collect_all_analysis(
@@ -121,13 +130,13 @@ def cellranger_wrapper_dag():
     ## TASK
     aggr_qc_dir = \
         merged_scanpy_report(
-            aggr_run_dir,
-            design)
+            cellranger_aggr_output_dir=aggr_run_dir,
+            design_dict=design)
     ## TASK
     aggr_moved = \
         move_aggr_result_to_main_work_dir(
-            work_dir=work_dir,
-            analysis_output_dir=aggr_qc_dir)
+            main_work_dir=work_dir,
+            scanpy_aggr_output_dict=aggr_qc_dir)
     ## TASK
     work_dir_with_md5 = \
         calculate_md5sum_for_main_work_dir(
@@ -146,7 +155,8 @@ def cellranger_wrapper_dag():
             loaded_data_info)
     ## TASK
     send_email = \
-        send_email_to_user()
+        send_email_to_user(
+            send_email=SEND_MAIL)
     ## PIPELINE
     globus_data >> send_email
     send_email >> failed_analysis
