@@ -49,7 +49,7 @@ def prepare_and_run_analysis_for_each_groups(
             design_dict=design_dict)
     final_output = \
         move_single_sample_result_to_main_work_dir(
-            analysis_output=scanpy_out,
+            scanpy_output_dict=scanpy_out,
             main_work_dir=work_dir)
     return final_output
 
