@@ -51,7 +51,7 @@ def prepare_and_run_analysis_for_each_groups(
     final_output = \
         move_single_sample_result_to_main_work_dir(
             analysis_output=scanpy_out,
-            work_dir=work_dir)
+            main_work_dir=work_dir)
     return final_output
 
 
