@@ -42,7 +42,7 @@ def prepare_and_run_analysis_for_each_groups(
             sample_group=sample_group)
     cellranger_arc_output_dir = \
         run_cellranger_script(
-            analysis_script_info=analysis_script_info)
+            script_dict=analysis_script_info)
     scanpy_out = \
         run_single_sample_scanpy_for_arc(
             sample_group=sample_group,
