@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master, curio_seq ]
+    branches: [ master, fix_cellranger_july24 ]
   pull_request:
     branches: [ master ]
 
@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: master
+        ref: fix_cellranger_july24
         path: data-management-python
     - name: Test with pytest
       run: |

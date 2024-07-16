@@ -71,7 +71,7 @@ igflims_ssh_hook = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule="@hourly",
+        schedule="0 10-18 * * 1-5",
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=30),
         catchup=False,
