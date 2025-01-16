@@ -1,3 +1,11 @@
+## Docker image building
+
+* Copy the correct requirement file and keep it in the same directory where the Dockerfile is present
+* Run docker build command (we are building local containers for now).
+
+```bash
+docker build -t airflow:vVERSION -f Dockerfile_vVERSION .
+```
 ## Set up
 
 ### Secret key generation
