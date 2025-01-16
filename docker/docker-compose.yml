@@ -1,12 +1,12 @@
 version: '3.9'
 networks:
-    airflow_network_v3:
+    airflow_network_v4:
         driver: bridge
 services:
-    airflow_db_v3:
-        image: postgres:15
+    airflow_db_v4:
+        image: postgres:16.4
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_db_env
+            - /home/igf/airflow_v4/secrets/airflow_db_env
         logging:
             driver: "json-file"
             options:
@@ -15,25 +15,25 @@ services:
             - "5433:5432"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v3/postgres_airflow_db:/var/lib/postgresql/data:rw
-        container_name: airflow_db_v3
+            - /home/igf/airflow_v4/postgres_airflow_db:/var/lib/postgresql/data:rw
+        container_name: airflow_db_v4
         networks:
-            - airflow_network_v3
-    airflow_pgbouncer_v3:
+            - airflow_network_v4
+    airflow_pgbouncer_v4:
         image: pgbouncer:v1.19.0
         volumes:
-            - /home/igf/airflow_v3/pgbouncer:/opt/pgbouncer
+            - /home/igf/airflow_v4/pgbouncer:/opt/pgbouncer
         restart: unless-stopped
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v4:
                 condition: service_started
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
-        container_name: airflow_pgbouncer_v3
+        container_name: airflow_pgbouncer_v4
         logging:
             driver: "json-file"
             options:
@@ -41,11 +41,11 @@ services:
         ports:
             - "5435:5432"
         networks:
-            - airflow_network_v3
-    airflow_results_db_v3:
-        image: postgres:15
+            - airflow_network_v4
+    airflow_results_db_v4:
+        image: postgres:16.4
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_results_db_env
+            - /home/igf/airflow_v4/secrets/airflow_results_db_env
         logging:
             driver: "json-file"
             options:
@@ -54,12 +54,12 @@ services:
             - "5434:5432"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v3/postgres_airflow_results_db:/var/lib/postgresql/data:rw
-        container_name: airflow_results_db_v3
+            - /home/igf/airflow_v4/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+        container_name: airflow_results_db_v4
         networks:
-            - airflow_network_v3
-    redis_server_v3:
-        image: redis:7.0
+            - airflow_network_v4
+    redis_server_v4:
+        image: redis:7.4
         logging:
             driver: "json-file"
             options:
@@ -68,203 +68,203 @@ services:
             - "6379:6379"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v3/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
-            - /home/igf/airflow_v3/redis_airflow_data:/data:rw
-        container_name: redis_server_v3
+            - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
+            - /home/igf/airflow_v4/redis_airflow_data:/data:rw
+        container_name: redis_server_v4
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
-            - airflow_network_v3
-    airflow_webserver_v3:
-        image: airflow:v2.6.2
+            - airflow_network_v4
+    airflow_webserver_v4:
+        image: apache/airflow:2.10.0-python3.11
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_env
+            - /home/igf/airflow_v4/secrets/airflow_env
         logging:
             driver: "json-file"
             options:
                 max-size: "2048m"
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
-            - redis_server_v3
-            - airflow_pgbouncer_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
+            - redis_server_v4
+            - airflow_pgbouncer_v4
         ports:
             - "8083:8080"
         user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
+            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
             #- /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
-            - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
-            - /home/igf/airflow_v3/plugin:/rds/general/user/igf/home/data2/airflow_v3/plugin:ro
-            - /home/igf/airflow_v3/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-            - /home/igf/airflow_v3/ssl_cert/airflow.key:/SSL/airflow.key:ro
+            - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
+            - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
+            - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
+            - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+            - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
             - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_pgbouncer_v3:
+            airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v4:
                 condition: service_started
-            redis_server_v3:
+            redis_server_v4:
                 condition: service_started
         restart: unless-stopped
         command: webserver
-        container_name: airflow_webserver_v3
+        container_name: airflow_webserver_v4
         networks:
-            - airflow_network_v3
-    airflow_scheduler_v3:
-        image: airflow:v2.6.2
+            - airflow_network_v4
+    airflow_scheduler_v4:
+        image: apache/airflow:2.10.0-python3.11
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_env
+            - /home/igf/airflow_v4/secrets/airflow_env
         logging:
             driver: "json-file"
             options:
                 max-size: "2048m"
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
-            - redis_server_v3
-            - airflow_pgbouncer_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
+            - redis_server_v4
+            - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_pgbouncer_v3:
+            airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v4:
                 condition: service_started
-            redis_server_v3:
+            redis_server_v4:
                 condition: service_started
-            airflow_webserver_v3:
+            airflow_webserver_v4:
                 condition: service_started
         user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
-            - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
-            - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
-            - /home/igf/airflow_v3/plugin:/rds/general/user/igf/home/data2/airflow_v3/plugin:ro
-            - /home/igf/airflow_v3/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-            - /home/igf/airflow_v3/ssl_cert/airflow.key:/SSL/airflow.key:ro
+            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v4/github/igf-airflow-hpc:ro
+            - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
+            - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
+            - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
+            - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+            - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
         restart: unless-stopped
         command: scheduler
-        container_name: airflow_scheduler_v3
+        container_name: airflow_scheduler_v4
         networks:
-            - airflow_network_v3
-    airflow_worker_v3:
-        image: airflow:v2.6.2
+            - airflow_network_v4
+    airflow_worker_v4:
+        image: apache/airflow:2.10.0-python3.11
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_env
+            - /home/igf/airflow_v4/secrets/airflow_env
         logging:
             driver: "json-file"
             options:
                 max-size: "2048m"
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
-            - airflow_webserver_v3
-            - redis_server_v3
-            - airflow_scheduler_v3
-            - airflow_flower_v3
-            - airflow_pgbouncer_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
+            - airflow_webserver_v4
+            - redis_server_v4
+            - airflow_scheduler_v4
+            - airflow_flower_v4
+            - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_pgbouncer_v3:
+            airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v4:
                 condition: service_started
-            redis_server_v3:
+            redis_server_v4:
                 condition: service_started
-            airflow_webserver_v3:
+            airflow_webserver_v4:
                 condition: service_started
-            airflow_scheduler_v3:
+            airflow_scheduler_v4:
                 condition: service_started
-            airflow_flower_v3:
+            airflow_flower_v4:
                 condition: service_started
         user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
-            - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
-            - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
-            - /home/igf/airflow_v3/plugin:/rds/general/user/igf/home/data2/airflow_v3/plugin:ro
+            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v4/github/igf-airflow-hpc:ro
+            - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
+            - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
+            - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
             - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: unless-stopped
         ports:
             - "8793:8793"
         command: celery worker -q generic --celery-hostname igf-lims
-        container_name: airflow_worker_v3
+        container_name: airflow_worker_v4
         networks:
-            - airflow_network_v3
-    airflow_flower_v3:
-        image: airflow:v2.6.2
+            - airflow_network_v4
+    airflow_flower_v4:
+        image: apache/airflow:2.10.0-python3.11
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_env
+            - /home/igf/airflow_v4/secrets/airflow_env
         logging:
             driver: "json-file"
             options:
                 max-size: "2048m"
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
-            - redis_server_v3
-            - airflow_pgbouncer_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
+            - redis_server_v4
+            - airflow_pgbouncer_v4
         ports:
             - "5555:5555"
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_pgbouncer_v3:
+            airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v4:
                 condition: service_started
-            redis_server_v3:
+            redis_server_v4:
                 condition: service_started
-            airflow_webserver_v3:
+            airflow_webserver_v4:
                 condition: service_started
-            airflow_scheduler_v3:
+            airflow_scheduler_v4:
                 condition: service_started
         user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
-            - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
-            - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
-            - /home/igf/airflow_v3/plugin:/rds/general/user/igf/home/data2/airflow_v3/plugin:ro
+            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v4/github/igf-airflow-hpc:ro
+            - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
+            - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
+            - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
         restart: unless-stopped
         command: celery flower
-        container_name: airflow_flower_v3
+        container_name: airflow_flower_v4
         networks:
-            - airflow_network_v3
+            - airflow_network_v4
     airflow_init:
-        image: airflow:v2.6.2
+        image: apache/airflow:2.10.0-python3.11
         env_file:
-            - /home/igf/airflow_v3/secrets/airflow_env
+            - /home/igf/airflow_v4/secrets/airflow_env
         environment:
             _AIRFLOW_DB_UPGRADE: 'true'
             _AIRFLOW_WWW_USER_CREATE: 'true'
         user: "${AIRFLOW_UID:-50000}:${GID}"
         links:
-            - airflow_db_v3
-            - airflow_results_db_v3
-            - redis_server_v3
-            - airflow_pgbouncer_v3
+            - airflow_db_v4
+            - airflow_results_db_v4
+            - redis_server_v4
+            - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v3:
+            airflow_db_v4:
                 condition: service_started
-            airflow_pgbouncer_v3:
+            airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v3:
+            airflow_results_db_v40:
                 condition: service_started
-            redis_server_v3:
+            redis_server_v4:
                 condition: service_started
         volumes:
-            - /home/igf/airflow_v3/airflow_v3_logs:/rds/general/user/igf/ephemeral/airflow_v3_logs:rw
-            - /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v3/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v3/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v3/github/data-management-python:ro
-            - /home/igf/airflow_v3/secrets:/rds/general/user/igf/home/data2/airflow_v3/secrets:ro
-            - /home/igf/airflow_v3/plugin:/rds/general/user/igf/home/data2/airflow_v3/plugin:ro
+            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v4/github/igf-airflow-hpc:ro
+            - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
+            - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
+            - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
         command: version
         networks:
-            - airflow_network_v3
+            - airflow_network_v4
