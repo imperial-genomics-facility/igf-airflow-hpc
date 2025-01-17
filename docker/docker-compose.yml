@@ -255,7 +255,7 @@ services:
                 condition: service_started
             airflow_pgbouncer_v4:
                 condition: service_started
-            airflow_results_db_v40:
+            airflow_results_db_v4:
                 condition: service_started
             redis_server_v4:
                 condition: service_started
