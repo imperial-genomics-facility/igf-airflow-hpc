@@ -75,7 +75,7 @@ services:
         networks:
             - airflow_network_v4
     airflow_webserver_v4:
-        image: apache/airflow:2.10.0-python3.11
+        image: airflow:v2.10.4
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_env
         logging:
@@ -92,7 +92,6 @@ services:
         user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
             - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            #- /home/igf/airflow_v3/github/igf-airflow-hpc:/rds/general/user/igf/home/data2/airflow_v2/github/igf-airflow-hpc:ro
             - /home/igf/airflow_v4/github/data-management-python:/rds/general/user/igf/home/data2/airflow_v4/github/data-management-python:ro
             - /home/igf/airflow_v4/secrets:/rds/general/user/igf/home/data2/airflow_v4/secrets:ro
             - /home/igf/airflow_v4/plugin:/rds/general/user/igf/home/data2/airflow_v4/plugin:ro
@@ -114,7 +113,7 @@ services:
         networks:
             - airflow_network_v4
     airflow_scheduler_v4:
-        image: apache/airflow:2.10.0-python3.11
+        image: airflow:v2.10.4
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_env
         logging:
@@ -152,7 +151,7 @@ services:
         networks:
             - airflow_network_v4
     airflow_worker_v4:
-        image: apache/airflow:2.10.0-python3.11
+        image: airflow:v2.10.4
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_env
         logging:
@@ -198,7 +197,7 @@ services:
         networks:
             - airflow_network_v4
     airflow_flower_v4:
-        image: apache/airflow:2.10.0-python3.11
+        image: airflow:v2.10.4
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_env
         logging:
@@ -238,7 +237,7 @@ services:
         networks:
             - airflow_network_v4
     airflow_init:
-        image: apache/airflow:2.10.0-python3.11
+        image: airflow:v2.10.4
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_env
         environment:
