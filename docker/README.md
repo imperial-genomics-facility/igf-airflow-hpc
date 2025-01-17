@@ -31,12 +31,12 @@ touch /home/igf/airflow_v3/pgbouncer/userlist.txt
 * init
 
 ```bash
-AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v3 up airflow_init
+AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v4 up airflow_init
 ## wait
-AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v3 down
+AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v4 down
 ```
 
 * start airflow
 ```bash
-AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v3 up -d
+AIRFLOW_UID="$(id -u)" GID=0 docker-compose -f docker-compose.yml -p igf_airflow_v4 up -d
 ```
