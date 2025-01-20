@@ -8,47 +8,36 @@ x-common-logging: &common-logging
 x-common-user: &common-user
     "${AIRFLOW_UID:-50000}:${GID}"
 
-x-airflow-common-volumes: &airflow-common-volumes
-    - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-    - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
-
-x-airflow-worker-volumes: &airflow-worker-volumes
-    - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-    - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
-    - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-    - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
-
-x-airflow-web-volumes: &airflow-web-volumes
-    - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-    - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
+x-volumes:
+    airflow-common-volumes: &airflow-common-volumes
+        - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+        - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
+    airflow-worker-volumes: &airflow-worker-volumes
+        - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
+        - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
+        - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
+        - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+    airflow-web-volumes: &airflow-web-volumes
+        - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+        - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
+    airflow-postgres-volumes: &airflow-postgres-volumes
+        - /home/igf/airflow_v4/postgres_airflow_db:/var/lib/postgresql/data:rw
+    airflow-pgbouncer-volumes: &airflow-pgbouncer-volumes
+        - /home/igf/airflow_v4/pgbouncer:/opt/pgbouncer
+    results-postgres-volumes: &results-postgres-volumes
+        - /home/igf/airflow_v4/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+    redis-volumes: &redis-volumes
+        - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
+        - /home/igf/airflow_v4/redis_airflow_data:/data:rw
 
 x-airflow-env-file@: &airflow-env-file
     - /home/igf/airflow_v4/secrets/airflow_env
 
-x-airflow-image: &airflow-image
-    airflow:v2.10.4
-
-x-postgres-image: &postgres-image
-    postgres:16.4
-
-x-pgbouncer-image: &pgbouncer-image
-    pgbouncer:v1.19.0
-
-x-redis-image: &redis-image
-    redis:7.4
-
-x-airflow-postgres-volumes: &airflow-postgres-volumes
-    - /home/igf/airflow_v4/postgres_airflow_db:/var/lib/postgresql/data:rw
-
-x-airflow-pgbouncer-volumes: &airflow-pgbouncer-volumes
-    - /home/igf/airflow_v4/pgbouncer:/opt/pgbouncer
-
-x-results-postgres-volumes: &results-postgres-volumes
-    - /home/igf/airflow_v4/postgres_airflow_results_db:/var/lib/postgresql/data:rw
-
-x-redis-volumes: &redis-volumes
-    - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    - /home/igf/airflow_v4/redis_airflow_data:/data:rw
+x-images:
+    airflow-image: &airflow-image airflow:v2.10.4
+    postgres-image: &postgres-image postgres:16.4
+    pgbouncer-image: &pgbouncer-image pgbouncer:v1.19.0
+    redis-image: &redis-image redis:7.4
 
 x-airflow-common-depends-on: &airflow-common-depends-on
     airflow_db_v4:
