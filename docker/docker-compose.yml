@@ -74,8 +74,7 @@ services:
         ports:
             - "5433:5432"
         restart: unless-stopped
-        volumes:
-            <<: *airflow-postgres-volumes
+        volumes: *airflow-postgres-volumes
         container_name: airflow_db_v4
         networks:
             - airflow_network_v4
@@ -83,8 +82,7 @@ services:
         image: *pgbouncer-image
         logging:
             <<: *common-logging
-        volumes:
-            <<: *airflow-pgbouncer-volumes
+        volumes: *airflow-pgbouncer-volumes
         restart: unless-stopped
         links:
             - airflow_db_v4
@@ -108,8 +106,7 @@ services:
         ports:
             - "5434:5432"
         restart: unless-stopped
-        volumes: 
-            <<: *results-postgres-volumes
+        volumes: *results-postgres-volumes
         container_name: airflow_results_db_v4
         networks:
             - airflow_network_v4
