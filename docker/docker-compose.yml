@@ -30,8 +30,13 @@ x-volumes:
         - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
         - /home/igf/airflow_v4/redis_airflow_data:/data:rw
 
-x-airflow-env-file@: &airflow-env-file
-    - /home/igf/airflow_v4/secrets/airflow_env
+x-env-file:
+    airflow-env-file: &airflow-env-file
+        - /home/igf/airflow_v4/secrets/airflow_env
+    airflow-db-env-file: &airflow-db-env-file
+        - /home/igf/airflow_v4/secrets/airflow_db_env
+    airflow-results-db-env-file: &airflow-results-db-env-file
+        - /home/igf/airflow_v4/secrets/airflow_results_db_env
 
 x-images:
     airflow-image: &airflow-image airflow:v2.10.4
@@ -63,7 +68,7 @@ services:
     airflow_db_v4:
         image: *postgres-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_db_env
+            << *airflow-db-env-file
         logging:
             <<: *common-logging
         ports:
@@ -75,10 +80,9 @@ services:
         networks:
             - airflow_network_v4
     airflow_pgbouncer_v4:
-        image:
-            <<: *pgbouncer-image
+        image: *pgbouncer-image
         volumes:
-            <<: *airflow-pgbouncer-volumes
+            << *airflow-pgbouncer-volumes
         restart: unless-stopped
         links:
             - airflow_db_v4
@@ -98,44 +102,37 @@ services:
             - airflow_network_v4
     airflow_results_db_v4:
         image: *postgres-image
-        env_file:
-            - /home/igf/airflow_v4/secrets/airflow_results_db_env
+        env_file: *airflow-results-db-env-file
         logging:
             <<: *common-logging
         ports:
             - "5434:5432"
         restart: unless-stopped
-        volumes:
-            << *results-postgres-volumes
+        volumes: *results-postgres-volumes
         container_name: airflow_results_db_v4
         networks:
             - airflow_network_v4
     redis_server_v4:
         image: *redis-image
-        logging:
-            <<: *common-logging
+        logging: *common-logging
         ports:
             - "6379:6379"
         restart: unless-stopped
-        volumes:
-            << *redis-volumes
+        volumes: *redis-volumes
         container_name: redis_server_v4
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
             - airflow_network_v4
     airflow_webserver_v4:
         image: *airflow-image
-        env_file:
-            << *airflow-env-file
+        env_file: *airflow-env-file
         logging:
             <<: *common-logging
         user: *common-user
-        links:
-            << *airflow-common-links
+        links: *airflow-common-links
         ports:
             - "8083:8080"
-        volumes:
-            << [*airflow-common-volumes, *airflow-web-volumes]
+        volumes: [*airflow-common-volumes, *airflow-web-volumes]
         depends_on:
             <<: *airflow-common-depends-on
         restart: unless-stopped
@@ -145,15 +142,12 @@ services:
             - airflow_network_v4
     airflow_scheduler_v4:
         image: *airflow-image
-        env_file:
-            << *airflow-env-file
+        env_file: *airflow-env-file
         logging:
             <<: *common-logging
         user: *common-user
-        volumes:
-            << [*airflow-common-volumes, *airflow-worker-volumes]
-        links:
-            << *airflow-common-links
+        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        links: *airflow-common-links
         depends_on:
             <<: *airflow-common-depends-on
             airflow_webserver_v4:
@@ -165,14 +159,12 @@ services:
             - airflow_network_v4
     airflow_worker_v4:
         image: *airflow-image
-        env_file:
-            << *airflow-env-file
+        env_file: *airflow-env-file
         logging:
             <<: *common-logging
         user: *common-user
-        volumes:
-            << [*airflow-common-volumes, *airflow-worker-volumes]
-        links:
+        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        links: 
             << *airflow-common-links
             - airflow_webserver_v4
             - airflow_scheduler_v4
@@ -194,15 +186,12 @@ services:
             - airflow_network_v4
     airflow_flower_v4:
         image: *airflow-image
-        env_file:
-            << *airflow-env-file
+        env_file: *airflow-env-file
         logging:
             <<: *common-logging
         user: *common-user
-        volumes:
-            << [*airflow-common-volumes, *airflow-worker-volumes]
-        links:
-            << *airflow-common-links
+        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        links: *airflow-common-links
         ports:
             - "5555:5555"
         depends_on:
@@ -218,18 +207,15 @@ services:
             - airflow_network_v4
     airflow_init:
         image: *airflow-image
-        env_file:
-            << *airflow-env-file
+        env_file: *airflow-env-file
         environment:
             _AIRFLOW_DB_UPGRADE: 'true'
             _AIRFLOW_WWW_USER_CREATE: 'true'
         logging:
             <<: *common-logging
         user: *common-user
-        volumes:
-            << [*airflow-common-volumes, *airflow-worker-volumes]
-        links:
-            << *airflow-common-links
+        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        links: *airflow-common-links
         depends_on:
             <<: *airflow-common-depends-on
         command: version
