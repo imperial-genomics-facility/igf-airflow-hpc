@@ -75,14 +75,16 @@ services:
             - "5433:5432"
         restart: unless-stopped
         volumes:
-            << *airflow-postgres-volumes
+            <<: *airflow-postgres-volumes
         container_name: airflow_db_v4
         networks:
             - airflow_network_v4
     airflow_pgbouncer_v4:
         image: *pgbouncer-image
+        logging:
+            <<: *common-logging
         volumes:
-            << *airflow-pgbouncer-volumes
+            <<: *airflow-pgbouncer-volumes
         restart: unless-stopped
         links:
             - airflow_db_v4
@@ -94,8 +96,6 @@ services:
                 condition: service_started
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
         container_name: airflow_pgbouncer_v4
-        logging:
-            <<: *common-logging
         ports:
             - "5435:5432"
         networks:
@@ -108,7 +108,8 @@ services:
         ports:
             - "5434:5432"
         restart: unless-stopped
-        volumes: *results-postgres-volumes
+        volumes: 
+            <<: *results-postgres-volumes
         container_name: airflow_results_db_v4
         networks:
             - airflow_network_v4
@@ -118,7 +119,8 @@ services:
         ports:
             - "6379:6379"
         restart: unless-stopped
-        volumes: *redis-volumes
+        volumes:
+            <<: *redis-volumes
         container_name: redis_server_v4
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
@@ -132,7 +134,8 @@ services:
         links: *airflow-common-links
         ports:
             - "8083:8080"
-        volumes: [*airflow-common-volumes, *airflow-web-volumes]
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-web-volumes]
         depends_on:
             <<: *airflow-common-depends-on
         restart: unless-stopped
@@ -146,7 +149,8 @@ services:
         logging:
             <<: *common-logging
         user: *common-user
-        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links: *airflow-common-links
         depends_on:
             <<: *airflow-common-depends-on
@@ -163,8 +167,9 @@ services:
         logging:
             <<: *common-logging
         user: *common-user
-        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
-        links: 
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
+        links:
             << *airflow-common-links
             - airflow_webserver_v4
             - airflow_scheduler_v4
@@ -190,7 +195,8 @@ services:
         logging:
             <<: *common-logging
         user: *common-user
-        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links: *airflow-common-links
         ports:
             - "5555:5555"
@@ -214,7 +220,8 @@ services:
         logging:
             <<: *common-logging
         user: *common-user
-        volumes: [*airflow-common-volumes, *airflow-worker-volumes]
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links: *airflow-common-links
         depends_on:
             <<: *airflow-common-depends-on
