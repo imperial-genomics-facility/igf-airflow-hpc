@@ -1,28 +1,89 @@
 version: '3.9'
+
+x-common-logging: &common-logging
+    driver: "json-file"
+    options:
+        max-size: "2048m"
+
+x-common-user: &common-user
+    "${AIRFLOW_UID:-50000}:${GID}"
+
+x-airflow-common-volumes: &airflow-common-volumes
+    - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+    - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
+
+x-airflow-worker-volumes: &airflow-worker-volumes
+    - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
+    - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
+    - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
+    - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+
+x-airflow-web-volumes: &airflow-web-volumes
+    - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
+    - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
+
+x-airflow-env-file@: &airflow-env-file
+    - /home/igf/airflow_v4/secrets/airflow_env
+
+x-airflow-image: &airflow-image
+    airflow:v2.10.4
+
+x-postgres-image: &postgres-image
+    postgres:16.4
+
+x-pgbouncer-image: &pgbouncer-image
+    pgbouncer:v1.19.0
+
+x-redis-image: &redis-image
+    redis:7.4
+
+x-airflow-postgres-volumes: &airflow-postgres-volumes
+    - /home/igf/airflow_v4/postgres_airflow_db:/var/lib/postgresql/data:rw
+
+x-airflow-pgbouncer-volumes: &airflow-pgbouncer-volumes
+    - /home/igf/airflow_v4/pgbouncer:/opt/pgbouncer
+
+x-results-postgres-volumes: &results-postgres-volumes
+    - /home/igf/airflow_v4/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+
+x-redis-volumes: &redis-volumes
+    - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    - /home/igf/airflow_v4/redis_airflow_data:/data:rw
+
+x-airflow-common-depends-on: &airflow-common-depends-on
+    airflow_db_v4:
+        condition: service_started
+    airflow_pgbouncer_v4:
+        condition: service_started
+    airflow_results_db_v4:
+        condition: service_started
+    redis_server_v4:
+        condition: service_started
+
 networks:
     airflow_network_v4:
         driver: bridge
 services:
     airflow_db_v4:
-        image: postgres:16.4
+        image:
+            <<: *postgres-image
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_db_env
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
         ports:
             - "5433:5432"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v4/postgres_airflow_db:/var/lib/postgresql/data:rw
+            <<: *airflow-postgres-volumes
         container_name: airflow_db_v4
         networks:
             - airflow_network_v4
     airflow_pgbouncer_v4:
-        image: pgbouncer:v1.19.0
+        image:
+            <<: *pgbouncer-image
         volumes:
-            - /home/igf/airflow_v4/pgbouncer:/opt/pgbouncer
+            <<: *airflow-pgbouncer-volumes
         restart: unless-stopped
         links:
             - airflow_db_v4
@@ -35,53 +96,48 @@ services:
         command: ["pgbouncer /opt/pgbouncer/pgbouncer.ini"]
         container_name: airflow_pgbouncer_v4
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
         ports:
             - "5435:5432"
         networks:
             - airflow_network_v4
     airflow_results_db_v4:
-        image: postgres:16.4
+        image:
+            <<: *postgres-image
         env_file:
             - /home/igf/airflow_v4/secrets/airflow_results_db_env
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
         ports:
             - "5434:5432"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v4/postgres_airflow_results_db:/var/lib/postgresql/data:rw
+            <<: *results-postgres-volumes
         container_name: airflow_results_db_v4
         networks:
             - airflow_network_v4
     redis_server_v4:
-        image: redis:7.4
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+        image:
+            <<: *redis-image
+        <<: *common-logging
         ports:
             - "6379:6379"
         restart: unless-stopped
         volumes:
-            - /home/igf/airflow_v4/secrets/redis.conf:/usr/local/etc/redis/redis.conf:ro
-            - /home/igf/airflow_v4/redis_airflow_data:/data:rw
+            <<: *redis-volumes
         container_name: redis_server_v4
         command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
         networks:
             - airflow_network_v4
     airflow_webserver_v4:
-        image: airflow:v2.10.4
+        image:
+            <<: *airflow-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_env
+            <<: *airflow-env-file
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
+        user:
+            <<: *common-user
         links:
             - airflow_db_v4
             - airflow_results_db_v4
@@ -89,75 +145,51 @@ services:
             - airflow_pgbouncer_v4
         ports:
             - "8083:8080"
-        user: "${AIRFLOW_UID:-50000}:${GID}"
         volumes:
-            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-            - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-            - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
-            - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-            - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
-            - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
+            <<: [*airflow-common-volumes, *airflow-web-volumes]
         depends_on:
-            airflow_db_v4:
-                condition: service_started
-            airflow_pgbouncer_v4:
-                condition: service_started
-            airflow_results_db_v4:
-                condition: service_started
-            redis_server_v4:
-                condition: service_started
+            <<: *airflow-common-depends-on
         restart: unless-stopped
         command: webserver
         container_name: airflow_webserver_v4
         networks:
             - airflow_network_v4
     airflow_scheduler_v4:
-        image: airflow:v2.10.4
+        image:
+            <<: *airflow-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_env
+            <<: *airflow-env-file
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
+        user:
+            <<: *common-user
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links:
             - airflow_db_v4
             - airflow_results_db_v4
             - redis_server_v4
             - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v4:
-                condition: service_started
-            airflow_pgbouncer_v4:
-                condition: service_started
-            airflow_results_db_v4:
-                condition: service_started
-            redis_server_v4:
-                condition: service_started
+            <<: *airflow-common-depends-on
             airflow_webserver_v4:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:${GID}"
-        volumes:
-            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-            - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-            - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
-            - /home/igf/airflow_v4/ssl_cert/airflow.cert:/SSL/airflow.cert:ro
-            - /home/igf/airflow_v4/ssl_cert/airflow.key:/SSL/airflow.key:ro
         restart: unless-stopped
         command: scheduler
         container_name: airflow_scheduler_v4
         networks:
             - airflow_network_v4
     airflow_worker_v4:
-        image: airflow:v2.10.4
+        image:
+            <<: *airflow-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_env
+            <<: *airflow-env-file
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
+        user:
+            <<: *common-user
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links:
             - airflow_db_v4
             - airflow_results_db_v4
@@ -167,28 +199,13 @@ services:
             - airflow_flower_v4
             - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v4:
-                condition: service_started
-            airflow_pgbouncer_v4:
-                condition: service_started
-            airflow_results_db_v4:
-                condition: service_started
-            redis_server_v4:
-                condition: service_started
+            <<: *airflow-common-depends-on
             airflow_webserver_v4:
                 condition: service_started
             airflow_scheduler_v4:
                 condition: service_started
             airflow_flower_v4:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:${GID}"
-        volumes:
-            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-            - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-            - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
-            - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
         restart: unless-stopped
         ports:
             - "8793:8793"
@@ -197,13 +214,16 @@ services:
         networks:
             - airflow_network_v4
     airflow_flower_v4:
-        image: airflow:v2.10.4
+        image:
+            <<: *airflow-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_env
+            <<: *airflow-env-file
         logging:
-            driver: "json-file"
-            options:
-                max-size: "2048m"
+            <<: *common-logging
+        user:
+            <<: *common-user
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links:
             - airflow_db_v4
             - airflow_results_db_v4
@@ -212,58 +232,37 @@ services:
         ports:
             - "5555:5555"
         depends_on:
-            airflow_db_v4:
-                condition: service_started
-            airflow_pgbouncer_v4:
-                condition: service_started
-            airflow_results_db_v4:
-                condition: service_started
-            redis_server_v4:
-                condition: service_started
+            <<: *airflow-common-depends-on
             airflow_webserver_v4:
                 condition: service_started
             airflow_scheduler_v4:
                 condition: service_started
-        user: "${AIRFLOW_UID:-50000}:${GID}"
-        volumes:
-            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-            - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-            - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
         restart: unless-stopped
         command: celery flower
         container_name: airflow_flower_v4
         networks:
             - airflow_network_v4
     airflow_init:
-        image: airflow:v2.10.4
+        image:
+            <<: *airflow-image
         env_file:
-            - /home/igf/airflow_v4/secrets/airflow_env
+            <<: *airflow-env-file
         environment:
             _AIRFLOW_DB_UPGRADE: 'true'
             _AIRFLOW_WWW_USER_CREATE: 'true'
-        user: "${AIRFLOW_UID:-50000}:${GID}"
+        logging:
+            <<: *common-logging
+        user:
+            <<: *common-user
+        volumes:
+            <<: [*airflow-common-volumes, *airflow-worker-volumes]
         links:
             - airflow_db_v4
             - airflow_results_db_v4
             - redis_server_v4
             - airflow_pgbouncer_v4
         depends_on:
-            airflow_db_v4:
-                condition: service_started
-            airflow_pgbouncer_v4:
-                condition: service_started
-            airflow_results_db_v4:
-                condition: service_started
-            redis_server_v4:
-                condition: service_started
-        volumes:
-            - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
-            - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
-            - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
-            - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
-            - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
+            <<: *airflow-common-depends-on
         command: version
         networks:
             - airflow_network_v4
