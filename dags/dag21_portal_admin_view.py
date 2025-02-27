@@ -152,47 +152,47 @@ with dag:
             """
             )#'df /data|grep -w "/data"|cut -d " " -f 3,4,8')
     ## TASK
-    eliot_root = \
-        SSHOperator(
-            task_id='eliot_root',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=eliot_ssh_hook,
-            queue='hpc_4G',
-            pool='eliot_ssh_pool',
-            command="""
-                df -Pk |grep vg_eliot-lv_root|awk '{print $3 " " $4 " " $6 }'
-                #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,4,7
-                """)
-    ## TASK
-    eliot_data = \
-        SSHOperator(
-            task_id='eliot_data',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=eliot_ssh_hook,
-            queue='hpc_4G',
-            pool='eliot_ssh_pool',
-            command="""
-                df -Pk |grep eliotVG1-dataLV1|awk '{print $3 " " $4 " " $6 }'
-                #df /data|grep -w "/data"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
-                """)
-    ## TASK
-    eliot_data2 = \
-        SSHOperator(
-            task_id='eliot_data2',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=eliot_ssh_hook,
-            queue='hpc_4G',
-            pool='eliot_ssh_pool',
-            command="""
-                df -Pk |grep eliotVG2-dataLV2|awk '{print $3 " " $4 " " $6 }'
-                #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,7
-                """)
+    # eliot_root = \
+    #     SSHOperator(
+    #         task_id='eliot_root',
+    #         dag=dag,
+    #         retry_delay=timedelta(minutes=5),
+    #         retries=1,
+    #         ssh_hook=eliot_ssh_hook,
+    #         queue='hpc_4G',
+    #         pool='eliot_ssh_pool',
+    #         command="""
+    #             df -Pk |grep vg_eliot-lv_root|awk '{print $3 " " $4 " " $6 }'
+    #             #df /|grep -w "/"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,4,7
+    #             """)
+    # ## TASK
+    # eliot_data = \
+    #     SSHOperator(
+    #         task_id='eliot_data',
+    #         dag=dag,
+    #         retry_delay=timedelta(minutes=5),
+    #         retries=1,
+    #         ssh_hook=eliot_ssh_hook,
+    #         queue='hpc_4G',
+    #         pool='eliot_ssh_pool',
+    #         command="""
+    #             df -Pk |grep eliotVG1-dataLV1|awk '{print $3 " " $4 " " $6 }'
+    #             #df /data|grep -w "/data"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,6
+    #             """)
+    # ## TASK
+    # eliot_data2 = \
+    #     SSHOperator(
+    #         task_id='eliot_data2',
+    #         dag=dag,
+    #         retry_delay=timedelta(minutes=5),
+    #         retries=1,
+    #         ssh_hook=eliot_ssh_hook,
+    #         queue='hpc_4G',
+    #         pool='eliot_ssh_pool',
+    #         command="""
+    #             df -Pk |grep eliotVG2-dataLV2|awk '{print $3 " " $4 " " $6 }'
+    #             #df /data2|grep -w "/data2"|sed 's|^[[:space:]]\+||'|cut -d " " -f 2,3,7
+    #             """)
     ## TASK
     igf_lims_root = \
         SSHOperator(
@@ -315,9 +315,9 @@ with dag:
     wells_home >> prepare_storage_plot
     wells_data >> prepare_storage_plot
     nextseq1_root >> prepare_storage_plot
-    eliot_root >> prepare_storage_plot
-    eliot_data >> prepare_storage_plot
-    eliot_data2 >> prepare_storage_plot
+    # eliot_root >> prepare_storage_plot
+    # eliot_data >> prepare_storage_plot
+    # eliot_data2 >> prepare_storage_plot
     igf_lims_root >> prepare_storage_plot
     # woolf_root >> prepare_storage_plot
     # woolf_data1 >> prepare_storage_plot
