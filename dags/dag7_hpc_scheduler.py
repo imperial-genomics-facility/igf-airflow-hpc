@@ -76,10 +76,10 @@ with dag:
       dag=dag,
       retry_delay=timedelta(minutes=5),
       retries=1,
-      ssh_hook=igf_lims_ssh_hook,
+      ssh_hook=wells_ssh_hook,
       pool='generic_pool',
       queue='hpc_4G',
-      command="docker restart airflow_flower_v3")
+      command="docker restart airflow_flower_v4")
 
   ## TASK
   # restart_portal_flower_server = \
