@@ -136,7 +136,7 @@ with dag:
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
-            command='bash /home/igf/airflow_v2/seqrun_copy_scripts/check_nextseq1_disk.sh ')
+            command='bash /home/igf/airflow_v4/seqrun_copy_scripts/check_nextseq1_disk.sh ')
     ## TASK
     wells_data = \
         SSHOperator(
