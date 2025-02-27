@@ -281,7 +281,7 @@ with dag:
         #  -k n -m n \
         #  -N {{ params.job_name }} \
         #  -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
-        #    /project/tgu/data2/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+        #    /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
         ## NON-ARRAY JOB MODE
         for i in $(seq 1 {{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }});
         do
@@ -290,7 +290,7 @@ with dag:
           -e /dev/null \
           -k n -m n \
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }};
+            /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }};
           sleep 1;
         done
       {% else %}
@@ -300,7 +300,7 @@ with dag:
           -e /dev/null \
           -k n -m n \
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% endif %}
       """,
       params={'pbs_resource':pbs_resource,
