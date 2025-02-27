@@ -101,18 +101,18 @@ with dag:
                 'json_dump_xcom_key': 'seqrun_json_dump'},
             python_callable=get_seqrun_counts_func)
     ## TASK
-    orwell_home = \
-        SSHOperator(
-            task_id='orwell_home',
-            dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
-            ssh_hook=orwell_ssh_hook,
-            queue='hpc_4G',
-            pool='orwell_exe_pool',
-            command="""
-                df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
-                """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
+    # orwell_home = \
+    #     SSHOperator(
+    #         task_id='orwell_home',
+    #         dag=dag,
+    #         retry_delay=timedelta(minutes=5),
+    #         retries=1,
+    #         ssh_hook=orwell_ssh_hook,
+    #         queue='hpc_4G',
+    #         pool='orwell_exe_pool',
+    #         command="""
+    #             df -Pk|grep rhel_wcma--mmuelle1--s1-home|awk '{print $3 " " $4 " " $6 }'
+    #             """)  #'df /home|grep -w "/home"|cut -d " " -f 3,4,7')
     ## TASK
     wells_home = \
         SSHOperator(
@@ -311,7 +311,7 @@ with dag:
                 'xcom_key': 'storage_stat_json'},
             python_callable=prepare_storage_plot_generic)  #prepare_storage_plot_func)
     ## PIPELINE
-    orwell_home >> prepare_storage_plot
+    # orwell_home >> prepare_storage_plot
     wells_home >> prepare_storage_plot
     wells_data >> prepare_storage_plot
     nextseq1_root >> prepare_storage_plot
