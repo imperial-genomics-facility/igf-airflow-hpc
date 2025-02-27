@@ -225,8 +225,8 @@ with dag:
       pool='generic_pool',
       command="""
         source /etc/bashrc;\
-        source /project/tgu/data2/airflow_v3/secrets/hpc_env.sh;\
-        python /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
+        source /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/hpc_env.sh;\
+        python /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       conn_timeout=60,
       cmd_timeout=60,
