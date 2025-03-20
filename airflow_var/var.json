@@ -103,6 +103,7 @@
   "snakemake_rnaseq_report_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/snakemake/rna-seq-star-deseq2/snakemake_report_v0.0.1.sh",
   "hpc_queue_list_yaml": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/hpc_worker.yaml",
   "hpc_job_mode": "NON-ARRAY",
+  "hpc_queue_list": "",
   "airflow_hpc_job_submission_script": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh"
 }
 
