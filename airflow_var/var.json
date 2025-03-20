@@ -41,6 +41,8 @@
   "seqrun_base_path": "/home/igf/seqrun/illumina",
   "wells_seqrun_base_path": "/data/igf/seqrun/illumina",
   "database_config_file":"/rds/general/user/igf/home/secret_keys/new_dbconfig.json",
+  "slack_conf":"/rds/general/user/igf/home/secret_keys/slack_config.json",
+  "analysis_slack_conf":"/rds/general/user/igf/home/secret_keys/slack_config2.json",
   "ms_teams_conf":"/rds/general/user/igf/home/secret_keys/team_de-mult.json",
   "analysis_ms_teams_conf":"/rds/general/user/igf/home/secret_keys/team_analysis.json",
   "hpc_seqrun_path":"/rds/general/project/genomics-facility-archive-2019/ephemeral/",
