@@ -14,7 +14,7 @@ from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
-HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
+HPC_QUEUE_LIST = Variable.get("hpc_queue_list", default_var=[])
 
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
