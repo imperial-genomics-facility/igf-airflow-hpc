@@ -106,7 +106,7 @@ def dag1_calculate_hpc_ph1_workers():
             ssh_hook=hpc_hook,
             retries=0,
             params={"hpc_job_mode": HPC_JOB_MODE,
-                    "airflow_job_subscription_script": AIRFLOW_HPC_JOB_SUBMISSION_SCRIPT},
+                    "airflow_job_submission_script": AIRFLOW_HPC_JOB_SUBMISSION_SCRIPT},
             command="""set -o pipefail; source /etc/bashrc;
             {% for queue_conf in task_instance.xcom_pull(task_ids='prep_scale_out_hpc_workers', key='return_value') %}
                 {% if params.hpc_job_mode == "ARRAY" %}
