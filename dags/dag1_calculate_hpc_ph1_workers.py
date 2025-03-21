@@ -87,18 +87,18 @@ def dag1_calculate_hpc_ph1_workers():
     ## TASK
     decide_scale = \
         decide_scale_out_scale_in_ops(
-            scaled_workers_data=calculated_workers["scaled_workers_data"],
+            scaled_workers_data=calculated_workers["scaled_worker_data"],
             scale_in_task='scale_in_hpc_workers',
             scale_out_task='prep_scale_out_hpc_workers')
     ## TASK
     scale_in_ops = \
         scale_in_hpc_workers(
-            scaled_worker_data=calculated_workers["scaled_workers_data"],
+            scaled_worker_data=calculated_workers["scaled_worker_data"],
             raw_worker_data=calculated_workers["raw_worker_data"])
     ## TASK
     prep_scale_out_ops = \
         prep_scale_out_hpc_workers(
-            scaled_worker_data=calculated_workers["scaled_workers_data"])
+            scaled_worker_data=calculated_workers["scaled_worker_data"])
     ## TASK
     scaled_hpc_workers = \
         SSHOperator(
