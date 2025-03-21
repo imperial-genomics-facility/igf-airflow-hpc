@@ -68,7 +68,7 @@ def dag1_calculate_hpc_ph1_workers():
             task_id='check_hpc_queue',
             ssh_hook=hpc_hook,
             retries=0,
-            command="""set -o pipefail; qstat -u $USER  -fw|grep -e "Job Id" -e Job_Name -e job_state|
+            command="""set -o pipefail; source /etc/bashrc; qstat -u $USER  -fw|grep -e "Job Id" -e Job_Name -e job_state|
             awk '
             /^Job Id/ {job_id=$3} 
             /Job_Name/ {job_name=$3} 
