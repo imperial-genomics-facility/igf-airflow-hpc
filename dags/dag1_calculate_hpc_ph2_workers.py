@@ -15,7 +15,6 @@ from igf_airflow.utils.dag1_calculate_hpc_worker_utils import (
   scale_in_hpc_workers,
   prep_scale_out_hpc_workers)
 
-hpc_hook = SSHHook(ssh_conn_id='hpc_ph2_conn')
 
 HPC_JOB_MODE = \
   Variable.get(
@@ -27,6 +26,8 @@ AIRFLOW_HPC_JOB_SUBMISSION_SCRIPT = \
 TOTAL_HPC_JOBS = \
     Variable.get(
         'hpc_max_total_workers', default_var=50)
+
+hpc_hook = SSHHook(ssh_conn_id='hpc_ph2_conn')
 
 ## DAG
 DAG_ID = \
