@@ -36,6 +36,9 @@ x-redis-volumes: &redis-volumes
 x-airflow-env-file: &airflow-env-file
     - /home/igf/airflow_v4/secrets/airflow_env
 
+x-airflow-env-file2: &airflow-env-file2
+    - /home/igf/airflow_v4/secrets/airflow_env2
+
 x-airflow-db-env-file: &airflow-db-env-file
     - /home/igf/airflow_v4/secrets/airflow_db_env
 
@@ -153,18 +156,10 @@ services:
             - airflow_network_v4
     airflow_worker_v4:
         image: *airflow-image
-        env_file: *airflow-env-file
+        env_file: *airflow-env-file2
         logging: *common-logging
         user: *common-user
         volumes: *airflow-worker-volumes
-        links:
-            - airflow_db_v4
-            - airflow_results_db_v4
-            - redis_server_v4
-            - airflow_pgbouncer_v4
-            - airflow_webserver_v4
-            - airflow_scheduler_v4
-            - airflow_flower_v4
         depends_on:
             <<: [*airflow-db-depends-on, *airflow-common-depends-on]
             airflow_webserver_v4:
@@ -174,12 +169,9 @@ services:
             airflow_flower_v4:
                 condition: service_started
         restart: unless-stopped
-        ports:
-            - "8793:8793"
         command: celery worker -q generic --celery-hostname igf-lims
         container_name: airflow_worker_v4
-        networks:
-            - airflow_network_v4
+        network_mode: host
     airflow_flower_v4:
         image: *airflow-image
         env_file: *airflow-env-file
