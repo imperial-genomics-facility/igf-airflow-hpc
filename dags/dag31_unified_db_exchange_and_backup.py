@@ -248,7 +248,7 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             queue='hpc_4G',
-            bash_command='bash /project/tgu/data2/airflow_v3/secrets/copy_prod_db_to_igfdata.sh ')
+            bash_command='bash /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/copy_prod_db_to_igfdata.sh ')
     ## TASK
     update_db_on_igfdata = \
         SSHOperator(

@@ -14,7 +14,7 @@ from igf_airflow.celery.check_celery_queue import calculate_new_workers
 
 CELERY_FLOWER_BASE_URL = Variable.get('celery_flower_base_url', default_var=None)
 CELERY_FLOWER_CONFIG = Variable.get('celery_flower_config', default_var=None)
-HPC_QUEUE_LIST = Variable.get("hpc_queue_list")
+HPC_QUEUE_LIST = Variable.get("hpc_queue_list", default_var={})
 
 hpc_hook = SSHHook(ssh_conn_id='hpc_conn')
 
@@ -225,8 +225,8 @@ with dag:
       pool='generic_pool',
       command="""
         source /etc/bashrc;\
-        source /project/tgu/data2/airflow_v3/secrets/hpc_env.sh;\
-        python /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
+        source /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/hpc_env.sh;\
+        python /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/count_active_jobs_in_hpc.py """,
       do_xcom_push=True,
       conn_timeout=60,
       cmd_timeout=60,
@@ -275,24 +275,24 @@ with dag:
       {% if ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) > 1 %}
         source /etc/bashrc; \
         ## ARRAY JOB MODE
-        qsub \
-          -o /dev/null \
-          -e /dev/null \
-          -k n -m n \
-          -N {{ params.job_name }} \
-          -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
-        ## NON-ARRAY JOB MODE
-        #for i in $(seq 1 {{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }});
-        #do
-        #  qsub \
+        #qsub \
         #  -o /dev/null \
         #  -e /dev/null \
         #  -k n -m n \
-        #  -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-        #    /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }};
-        #  sleep 1;
-        #done
+        #  -N {{ params.job_name }} \
+        #  -J 1-{{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }}  {{ params.pbs_resource }} -- \
+        #    /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+        ## NON-ARRAY JOB MODE
+        for i in $(seq 1 {{ ti.xcom_pull(key=params.job_name,task_ids="calculate_new_worker_size_and_branch" ) }});
+        do
+          qsub \
+          -o /dev/null \
+          -e /dev/null \
+          -k n -m n \
+          -N {{ params.job_name }} {{ params.pbs_resource }} -- \
+            /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }};
+          sleep 1;
+        done
       {% else %}
         source /etc/bashrc;\
         qsub \
@@ -300,7 +300,7 @@ with dag:
           -e /dev/null \
           -k n -m n \
           -N {{ params.job_name }} {{ params.pbs_resource }} -- \
-            /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
+            /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/airflow_worker.sh {{  params.airflow_queue }} {{ params.job_name }}
       {% endif %}
       """,
       params={'pbs_resource':pbs_resource,

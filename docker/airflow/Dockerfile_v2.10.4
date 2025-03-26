@@ -1,0 +1,6 @@
+FROM apache/airflow:2.10.4
+LABEL maintainer="imperialgenomicsfacility"
+LABEL version="Airflow_v2.10.4"
+LABEL description="Docker image for IGF Airflow"
+ADD requirements_v2.10.4.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt

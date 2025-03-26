@@ -67,7 +67,7 @@ with dag:
       queue='generic',
       command="""
         source /etc/bashrc; \
-        qsub /project/tgu/data2/airflow_v3/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
+        qsub /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/scripts/hpc/run_hpc_scheduler.sh """)
 
   ## TASK
   restart_flower_server = \
@@ -79,7 +79,7 @@ with dag:
       ssh_hook=igf_lims_ssh_hook,
       pool='generic_pool',
       queue='hpc_4G',
-      command="docker restart airflow_flower_v3")
+      command="docker restart airflow_flower_v4")
 
   ## TASK
   # restart_portal_flower_server = \
