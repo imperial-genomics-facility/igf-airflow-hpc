@@ -16,7 +16,8 @@ from igf_airflow.utils.dag20_portal_metadata_utils import (
     create_raw_metadata_for_new_projects_func,
     get_formatted_metadata_files_func,
     upload_raw_metadata_to_portal_func,
-    fetch_validated_metadata_from_portal_and_load_func)
+    fetch_validated_metadata_from_portal_and_load_func,
+    fetch_validated_manual_metadata_from_portal_and_load_func)
 from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
     fetch_raw_analysis_queue_func,
     process_raw_analysis_queue_func)
@@ -171,6 +172,17 @@ with dag:
                 'formatted_metadata_xcom_task': 'get_formatted_metadata_files'
             },
             python_callable=upload_raw_metadata_to_portal_func)
+    ## TASK
+    fetch_validated_manual_metadata_from_portal_and_load = \
+        PythonOperator(
+            task_id="fetch_validated_manual_metadata_from_portal_and_load",
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            queue='hpc_4G',
+            params={},
+            python_callable=fetch_validated_manual_metadata_from_portal_and_load_func
+        )
     ## TASK
     fetch_validated_metadata_from_portal_and_load = \
         PythonOperator(
@@ -452,7 +464,7 @@ with dag:
     get_known_projects >> create_raw_metadata_for_new_projects
     create_raw_metadata_for_new_projects >> get_formatted_metadata_files
     get_formatted_metadata_files >> upload_raw_metadata_to_portal
-    upload_raw_metadata_to_portal >> fetch_validated_metadata_from_portal_and_load
+    upload_raw_metadata_to_portal >> fetch_validated_manual_metadata_from_portal_and_load >> fetch_validated_metadata_from_portal_and_load
     upload_raw_metadata_to_portal >> fetch_raw_analysis_queue
     fetch_raw_analysis_queue >> process_raw_analysis_queue
     fetch_validated_metadata_from_portal_and_load >> get_metadata_dump_from_pipeline_db
