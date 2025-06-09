@@ -36,6 +36,11 @@ def run_ftp_export(run_entry, work_dir):
 	return run_entry
 
 @task(multiple_outputs=False)
+def extract_ftp_export(run_entry):
+    run_entry.update({'extract': '/path'})
+    return run_entry
+
+@task(multiple_outputs=False)
 def validate_export_md5(run_entry):
     run_entry.update({'validation': True})
     return run_entry
@@ -43,8 +48,8 @@ def validate_export_md5(run_entry):
 @task_group
 def run_export_task_group(run_entry, work_dir):
     downloaded_data = run_ftp_export(run_entry, work_dir)
-    validated_data = validate_export_md5(run_entry=downloaded_data)
-    return validated_data
+    extracted_data = extract_ftp_export(run_entry=downloaded_data)
+    return extracted_data
 
 @task(multiple_outputs=False)
 def collect_all_slides(run_entry):
@@ -66,18 +71,22 @@ def generate_fov_qc_report(run_entry):
     return run_entry
 
 @task(multiple_outputs=False)
-def generate_db_data(run_entry):
-    run_entry.update({'db_data': 'DB'})
+def generate_db_data(qc_list):
+    run_entry = dict()
+    for qc in qc_list:
+        run_entry.update(**qc)
+    run_entry.update({'db_data': '/DB'})
     return run_entry
 
 @task(multiple_outputs=False)
-def copy_data_to_globus(run_entry, data_registered):
-    run_entry.update({'Globus': '/path'})
+def copy_data_to_globus(run_entry):
+    run_entry.update({'Globus': '/globus_path'})
     return run_entry
 
 @task(multiple_outputs=False)
 def register_db_data(run_entry):
-    return True
+    run_entry.update({'db': True})
+    return run_entry
 
 @task(multiple_outputs=False)
 def collect_qc_reports_and_upload_to_portal(run_entrys):
@@ -90,11 +99,13 @@ def send_email():
 
 @task_group
 def slide_qc_task_group(run_entry):
-    count_qc = generate_count_qc_report(run_entry)
-    fov_qc = generate_fov_qc_report(count_qc)
-    db_entry = generate_db_data(fov_qc)
-    registered = register_db_data(db_entry)
-    globus_data = copy_data_to_globus(fov_qc, registered)
+    validated_data = validate_export_md5(run_entry)
+    count_qc = generate_count_qc_report(validated_data)
+    fov_qc = generate_fov_qc_report(validated_data)
+    ## add more here
+    db_entry = generate_db_data(qc_list = [count_qc, fov_qc])
+    registered_data = register_db_data(db_entry)
+    globus_data = copy_data_to_globus(registered_data)
     return globus_data
 
 ## DAG
