@@ -1,23 +1,15 @@
 import os, pendulum
 from airflow.utils.edgemodifier import Label
 from airflow.decorators import dag, task, task_group
+from igf_airflow.utils.generic_airflow_tasks import (
+	mark_analysis_running,
+    fetch_analysis_design_from_db,
+	send_email_to_user,
+	copy_data_to_globus,
+	mark_analysis_finished,
+    create_main_work_dir,
+	mark_analysis_failed)
 
-
-@task(multiple_outputs=False)
-def mark_analysis_running():
-	return {'status':'running'}
-
-@task(multiple_outputs=False)
-def mark_analysis_finished():
-	return {'status':'finished'}
-
-@task(multiple_outputs=False, trigger_rule="one_failed")
-def mark_analysis_failed():
-	return {'status':'failed'}
-
-@task(multiple_outputs=False)
-def fetch_analysis_design():
-    return '/design.json'
 
 @task(multiple_outputs=False)
 def create_work_dir():
@@ -93,10 +85,6 @@ def collect_qc_reports_and_upload_to_portal(run_entrys):
     print([r for r in run_entrys])
     return True
 
-@task(multiple_outputs=False)
-def send_email():
-    return True
-
 @task_group
 def slide_qc_task_group(run_entry):
     validated_data = validate_export_md5(run_entry)
@@ -123,32 +111,54 @@ DAG_ID = \
     orientation='TB',
     tags=["spatial", "cosmx", "hpc"])
 def dag43_cosmx_export_and_qc():
+    ## TASK
     running_analysis = \
-        mark_analysis_running()
+        mark_analysis_running(
+            next_task="fetch_analysis_design",
+            last_task="mark_analysis_failed")
+    ## TASK
     finished_analysis = \
         mark_analysis_finished()
+    ## TASK
     failed_analysis = \
         mark_analysis_failed()
-    design_file = fetch_analysis_design()
-    running_analysis >> design_file
+    ## TASK
+    design_file = \
+        fetch_analysis_design_from_db()
+    ## TASK
     work_dir = \
-		create_work_dir()
+        create_main_work_dir(
+            task_tag='cosmx_output')
+    ## PIPELINE
+    running_analysis >> \
+        Label('Analysis Design found') >> \
+            design_file
+    running_analysis >> \
+        Label('Analysis Design not found') >> \
+            failed_analysis
     design_file >> work_dir
+    ## TO DO TASK
     design_data = \
         export_factory(work_dir)
+    ## TO DO TASK GROUP EXPAND
     downloaded_data = \
         run_export_task_group.\
 		    partial(work_dir=work_dir).\
 		    expand(run_entry=design_data)
+    ## TO DO TASK
     all_slides = \
         collect_all_slides(run_entry=downloaded_data)
+    ## TO DO TASK GROUP EXPAND
     slide_qc_reports = \
         slide_qc_task_group.\
             expand(run_entry=all_slides)
+    ## TO DO TASK
     collect_qc = collect_qc_reports_and_upload_to_portal(slide_qc_reports)
-    email_user = send_email()
-    collect_qc >> email_user
-    email_user >> finished_analysis
-    email_user >> failed_analysis
+    ## TASK
+    send_email = \
+        send_email_to_user()
+    collect_qc >> send_email
+    send_email >> failed_analysis
+    send_email >> finished_analysis
 
 dag43_cosmx_export_and_qc()
