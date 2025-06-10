@@ -11,9 +11,13 @@ from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_failed)
 from igf_airflow.utils.dag43_cosmx_export_and_qc_utils import (
     run_ftp_export_factory,
+    prepare_run_ftp_export,
     run_ftp_export,
+    prep_extract_ftp_export,
     extract_ftp_export,
+    collect_extracted_data,
     collect_all_slides,
+    prep_validate_export_md5,
     validate_export_md5,
     generate_count_qc_report,
     generate_fov_qc_report,
@@ -23,85 +27,34 @@ from igf_airflow.utils.dag43_cosmx_export_and_qc_utils import (
     collect_qc_reports_and_upload_to_portal
 )
 
-# @task(multiple_outputs=False)
-# def run_ftp_export_factory(design_file, work_dir):
-# 	design_data = [
-# 		{'cosmx_run_id': 'A', 'export_directory_path': 'A_f'},
-# 		{'cosmx_run_id': 'B', 'export_directory_path': 'B_f'}]
-# 	return design_data
-
-# @task(multiple_outputs=False)
-# def run_ftp_export(run_entry, work_dir):
-# 	run_entry.update({'download_path': work_dir + '/' + run_entry['export_directory_path'] + '/download'})
-# 	return run_entry
-
-# @task(multiple_outputs=False)
-# def extract_ftp_export(run_entry):
-#     run_entry.update({'extract': '/path'})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def collect_all_slides(run_entry):
-#     slide_data = [
-# 		{'run_name': 'A', 'slide_id': 'slide1'},
-# 		{'run_name': 'A', 'slide_id': 'slide2'},
-# 		{'run_name': 'B', 'slide_id': 'slide3'},
-# 		{'run_name': 'B', 'slide_id': 'slide4'}]
-#     return slide_data
-
-# @task(multiple_outputs=False)
-# def validate_export_md5(run_entry):
-#     run_entry.update({'validation': True})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def generate_count_qc_report(run_entry):
-#     run_entry.update({'count_qc_json': 'json', 'count_qc_html': 'html'})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def generate_fov_qc_report(run_entry):
-#     run_entry.update({'fov_qc_json': 'json', 'fov_qc_html': 'html'})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def generate_db_data(qc_list):
-#     run_entry = dict()
-#     for qc in qc_list:
-#         run_entry.update(**qc)
-#     run_entry.update({'db_data': '/DB'})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def copy_slide_data_to_globus(run_entry):
-#     run_entry.update({'Globus': '/globus_path'})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def register_db_data(run_entry):
-#     run_entry.update({'db': True})
-#     return run_entry
-
-# @task(multiple_outputs=False)
-# def collect_qc_reports_and_upload_to_portal(run_entrys):
-#     print([r for r in run_entrys])
-#     return True
 
 @task_group
 def run_export_task_group(run_entry, work_dir):
-    downloaded_data = run_ftp_export(run_entry, work_dir)
-    extracted_data = extract_ftp_export(run_entry=downloaded_data)
-    return extracted_data
+    ## TASK
+    downloaded_data = prepare_run_ftp_export(run_entry, work_dir)
+    ftp_export = run_ftp_export(run_cmd=downloaded_data["run_cmd"])
+    extracted_data = prep_extract_ftp_export(run_entry=downloaded_data["run_entry"])
+    extract_tar = extract_ftp_export(run_cmd=extracted_data["run_cmd"])
+    colleced_run_entry = collect_extracted_data(run_entry=extracted_data["run_entry"])
+    ## PIPELINE
+    ftp_export >> extracted_data
+    extract_tar >> colleced_run_entry
+    return colleced_run_entry
 
 @task_group
 def slide_qc_task_group(run_entry):
-    validated_data = validate_export_md5(run_entry)
-    count_qc = generate_count_qc_report(validated_data)
+    ## TASK
+    validated_data = prep_validate_export_md5(run_entry)
+    md5_validate = validate_export_md5(run_cmd=validated_data["run_cmd"])
+    count_qc = generate_count_qc_report(run_entry=validated_data["run_entry"])
     fov_qc = generate_fov_qc_report(validated_data)
     ## add more here
     db_entry = generate_db_data(qc_list = [count_qc, fov_qc])
     registered_data = register_db_data(db_entry)
     globus_data = copy_slide_data_to_globus(registered_data)
+    ## PIPELINE
+    md5_validate >> count_qc
+    md5_validate >> fov_qc
     return globus_data
 
 ## DAG
