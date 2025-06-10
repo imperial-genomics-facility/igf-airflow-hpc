@@ -32,7 +32,7 @@ from igf_airflow.utils.dag43_cosmx_export_and_qc_utils import (
 def run_export_task_group(run_entry, work_dir):
     ## TASK
     downloaded_data = prepare_run_ftp_export(run_entry, work_dir)
-    ftp_export = run_ftp_export(run_cmd=downloaded_data["run_cmd"])
+    ftp_export = run_ftp_export(cosmx_ftp_export_name=downloaded_data["cosmx_ftp_export_name"])
     extracted_data = prep_extract_ftp_export(run_entry=downloaded_data["run_entry"])
     extract_tar = extract_ftp_export(run_cmd=extracted_data["run_cmd"])
     colleced_run_entry = collect_extracted_data(run_entry=extracted_data["run_entry"])
