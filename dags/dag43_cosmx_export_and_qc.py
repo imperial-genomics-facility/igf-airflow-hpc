@@ -34,7 +34,7 @@ def run_export_task_group(run_entry, work_dir):
     downloaded_data = prepare_run_ftp_export(run_entry, work_dir)
     ftp_export = run_ftp_export(cosmx_ftp_export_name=downloaded_data["cosmx_ftp_export_name"])
     extracted_data = prep_extract_ftp_export(run_entry=downloaded_data["run_entry"])
-    extract_tar = extract_ftp_export(run_cmd=extracted_data["run_cmd"])
+    extract_tar = extract_ftp_export(run_cmd=extracted_data["run_cmd"], work_dir=work_dir)
     colleced_run_entry = collect_extracted_data(run_entry=extracted_data["run_entry"])
     ## PIPELINE
     ftp_export >> extracted_data
