@@ -76,8 +76,8 @@ def dag1_calculate_hpc_ph2_workers():
             /job_state/ {job_state=$3; print job_id "," job_name "," job_state}'|grep hpc||true""",
             pool='generic_pool',
             queue='generic',
-            conn_timeout=30,
-            cmd_timeout=30)
+            conn_timeout=10,
+            cmd_timeout=10)
     ## TASK
     calculated_workers = \
         calculate_workers(
