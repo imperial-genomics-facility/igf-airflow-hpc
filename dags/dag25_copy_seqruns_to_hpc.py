@@ -84,8 +84,7 @@ with dag:
         SSHOperator(
             task_id='get_all_runs_from_wells',
             dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
+            retries=0,
             queue='hpc_4G',
             pool='wells_ssh_pool',
             ssh_hook=wells_ssh_hook,

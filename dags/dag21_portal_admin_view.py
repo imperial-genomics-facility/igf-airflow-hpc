@@ -131,8 +131,7 @@ with dag:
         SSHOperator(
             task_id='nextseq1_root',
             dag=dag,
-            retry_delay=timedelta(minutes=5),
-            retries=1,
+            retries=0,
             ssh_hook=wells_ssh_hook,
             queue='hpc_4G',
             pool='wells_ssh_pool',
