@@ -35,26 +35,24 @@ def run_export_task_group(run_entry, work_dir):
     ftp_export = run_ftp_export(cosmx_ftp_export_name=downloaded_data["cosmx_ftp_export_name"])
     extracted_data = prep_extract_ftp_export(run_entry=downloaded_data["run_entry"])
     extract_tar = extract_ftp_export(run_cmd=extracted_data["run_cmd"], work_dir=work_dir)
-    colleced_run_entry = collect_extracted_data(run_entry=extracted_data["run_entry"])
+    validated_data = prep_validate_export_md5(run_entry=extracted_data["run_entry"])
+    md5_validate = validate_export_md5(export_dir=validated_data["export_dir"])
+    colleced_run_entry = collect_extracted_data(run_entry=validated_data["run_entry"])
     ## PIPELINE
     ftp_export >> extracted_data
-    extract_tar >> colleced_run_entry
+    extract_tar >> validated_data
+    md5_validate >> colleced_run_entry
     return colleced_run_entry
 
 @task_group
 def slide_qc_task_group(run_entry):
     ## TASK
-    validated_data = prep_validate_export_md5(run_entry)
-    md5_validate = validate_export_md5(run_cmd=validated_data["run_cmd"])
-    count_qc = generate_count_qc_report(run_entry=validated_data["run_entry"])
-    fov_qc = generate_fov_qc_report(validated_data)
+    count_qc = generate_count_qc_report(run_entry=run_entry)
+    fov_qc = generate_fov_qc_report(run_entry=run_entry)
     ## add more here
     db_entry = generate_db_data(qc_list = [count_qc, fov_qc])
     registered_data = register_db_data(db_entry)
     globus_data = copy_slide_data_to_globus(registered_data)
-    ## PIPELINE
-    md5_validate >> count_qc
-    md5_validate >> fov_qc
     return globus_data
 
 ## DAG
