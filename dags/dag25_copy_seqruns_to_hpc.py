@@ -60,7 +60,7 @@ DAG_ID = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule='0 */4 * * *', ## every 4hrs
+        schedule='0 */4 * * 1-5', ## every 4hrs, only work days
         catchup=False,
         start_date=pendulum.yesterday(),
         dagrun_timeout=timedelta(minutes=60),

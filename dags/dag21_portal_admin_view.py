@@ -83,7 +83,7 @@ igfdata_ssh_hook = \
 dag = \
     DAG(
         dag_id=DAG_ID,
-        schedule="@hourly",
+        schedule="0 */2 * * 1-5",
         start_date=pendulum.yesterday(),
         catchup=False,
         max_active_runs=1,
