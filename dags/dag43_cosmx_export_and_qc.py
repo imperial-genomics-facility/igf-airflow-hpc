@@ -65,7 +65,10 @@ def run_export_task_group(run_entry, work_dir):
 
 
 @task_group
-def slide_qc_task_group(slide_entry, matched_slide_ids):
+def slide_qc_task_group(
+    slide_entry,
+    matched_slide_ids,
+    design_file):
     ## TASK
     slide_meatadata = \
         collect_slide_metadata(
@@ -85,7 +88,8 @@ def slide_qc_task_group(slide_entry, matched_slide_ids):
             slide_entry=count_qc)
     db_entry = \
         register_db_data(
-            slide_entry=count_qc)
+            slide_entry=count_qc,
+            design_file=design_file)
     fov_qc >> db_entry
     additional_qc_1 >> db_entry
     additional_qc_2 >> db_entry
@@ -158,7 +162,9 @@ def dag43_cosmx_export_and_qc():
     ## TASK GROUP
     all_processed_slides = \
         slide_qc_task_group.\
-            partial(matched_slide_ids=matched_slides).\
+            partial(
+                matched_slide_ids=matched_slides,
+                design_file=design_file).\
             expand(slide_entry=all_slides)
     ## TASK
     all_processed_slides_list = \
