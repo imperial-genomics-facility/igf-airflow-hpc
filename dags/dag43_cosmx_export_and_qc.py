@@ -16,13 +16,14 @@ from igf_airflow.utils.dag43_cosmx_export_and_qc_utils import (
     prep_extract_ftp_export,
     extract_ftp_export,
     collect_extracted_data,
+    copy_export_dir_to_globus,
     collect_all_slides,
     match_slide_ids_with_project_id,
     prep_validate_export_md5,
     validate_export_md5,
     generate_count_qc_report,
     generate_fov_qc_report,
-    copy_slide_data_to_globus,
+    copy_slide_reports_to_globus,
     register_db_data,
     collect_slide_metadata,
     generate_additional_qc_report1,
@@ -57,10 +58,14 @@ def run_export_task_group(run_entry, work_dir):
     md5_validate = \
         validate_export_md5(
             export_dir=validated_data["export_dir"])
+    globus_copy = \
+        copy_export_dir_to_globus(
+            export_dir=validated_data["export_dir"])
     colleced_run_entry = \
         collect_extracted_data(
             run_entry=validated_data["run_entry"],
-            validation_finished=md5_validate)
+            validation_finished=md5_validate,
+            globus_copy_finished=globus_copy)
     return colleced_run_entry
 
 
@@ -93,12 +98,12 @@ def slide_qc_task_group(
     fov_qc >> db_entry
     additional_qc_1 >> db_entry
     additional_qc_2 >> db_entry
-    globus_data = \
-        copy_slide_data_to_globus(
+    globus_report_data = \
+        copy_slide_reports_to_globus(
             slide_entry=db_entry)
     uploaded_reports = \
         upload_reports_to_portal(
-            slide_entry=globus_data)
+            slide_entry=globus_report_data)
     return uploaded_reports
 
 
