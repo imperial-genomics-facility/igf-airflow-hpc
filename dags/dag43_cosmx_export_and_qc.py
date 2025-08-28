@@ -159,7 +159,7 @@ def dag43_cosmx_export_and_qc():
     ## TASK
     all_slides = \
         collect_all_slides(
-            run_entry=downloaded_data)
+            run_entry_list=downloaded_data)
     ## TASK
     matched_slides = \
         match_slide_ids_with_project_id(
