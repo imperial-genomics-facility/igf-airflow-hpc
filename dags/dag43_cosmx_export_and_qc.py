@@ -49,7 +49,7 @@ def run_export_task_group(run_entry, work_dir):
             export_finished=ftp_export)
     extract_tar = \
         extract_ftp_export(
-            run_cmd=extracted_data["run_cmd"],
+            export_dir=extracted_data["export_dir"],
             work_dir=work_dir)
     validated_data = \
         prep_validate_export_md5(
