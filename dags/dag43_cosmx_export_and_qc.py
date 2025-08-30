@@ -150,7 +150,9 @@ def dag43_cosmx_export_and_qc():
     design_file >> work_dir
     ## TO DO TASK
     design_data = \
-        run_ftp_export_factory(design_file, work_dir)
+        run_ftp_export_factory(
+            design_file=design_file["analysis_design"],
+            work_dir=work_dir)
     ## TO DO TASK GROUP EXPAND
     downloaded_data = \
         run_export_task_group.\
