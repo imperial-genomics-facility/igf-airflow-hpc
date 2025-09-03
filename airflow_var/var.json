@@ -1,5 +1,6 @@
 {
   "cosmx_export_base_dir": "/rds/general/project/genomics-facility-archive-2019/ephemeral/cosmx_export/",
+  "cosmx_reports_dir_on_hpc": "/rds/general/project/genomics-facility-archive-2019/live/COSMX_REPORTS/",
   "cosmx_export_conda_env": "rclone",
   "cosmx_export_script_path": "/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/COSMX/CosMxDataDownloader/CosMxDataDownloaderV2.py",
   "cosmx_export_rclone_profile": "igf-remote",
