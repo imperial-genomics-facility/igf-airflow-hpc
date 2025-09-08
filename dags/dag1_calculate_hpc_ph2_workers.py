@@ -1,8 +1,7 @@
 import pendulum
-import os, json, logging, requests, base64
+import os
 from datetime import timedelta
-from requests.auth import HTTPBasicAuth
-from airflow.models import DAG, Variable
+from airflow.models import Variable
 from airflow.utils.dates import days_ago
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
