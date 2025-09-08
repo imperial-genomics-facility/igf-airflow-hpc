@@ -1,7 +1,7 @@
 import os
 import unittest
-from airflow.models import DagBag, Variable
-from jinja2 import Template, Environment, FileSystemLoader, select_autoescape
+from airflow.models import DagBag
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 class TestAllDagIntegrity(unittest.TestCase):
 

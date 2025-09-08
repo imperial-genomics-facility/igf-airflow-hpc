@@ -1,3 +1,4 @@
+#!/bin/bash
 source /etc/bashrc
 
 module load anaconda3/personal

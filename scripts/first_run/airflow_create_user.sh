@@ -1,3 +1,4 @@
+#!/bin/bash
 docker run -it --rm \
 --env-file /home/igf/airflow_test/secrets/airflow_env \
 -v /home/igf/airflow_test/logs:/rds/general/user/igf/home/data2/airflow_test/logs:z \
