@@ -1,30 +1,17 @@
 import os
 import pendulum
 from datetime import timedelta
-from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
-from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag26_snakemake_rnaseq_utils import (
     change_analysis_seed_status_func,
     prepare_snakemake_inputs_func,
     load_analysis_to_disk_func,
     copy_analysis_to_globus_dir_func,
     send_email_to_user_func)
-
-## ARGS
-# args = {
-#     'owner': 'airflow',
-#     'start_date': pendulum.today('UTC').add(days=2),
-#     'retries': 10,
-#     'retry_delay': timedelta(minutes=5),
-#     'provide_context': True,
-#     'email_on_failure': False,
-#     'email_on_retry': False,
-#     'catchup': False}
 
 ## DAG
 DAG_ID = \

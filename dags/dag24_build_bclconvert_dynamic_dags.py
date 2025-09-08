@@ -4,7 +4,6 @@ from datetime import timedelta
 from airflow.models import Variable
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
-from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import fetch_seqrun_data_from_portal_func
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import format_samplesheet_func
 from igf_airflow.utils.dag24_build_bclconvert_dynamic_dags_utils import generate_dynamic_dag_func

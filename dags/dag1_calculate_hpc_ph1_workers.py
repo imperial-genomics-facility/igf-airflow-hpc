@@ -4,7 +4,7 @@ from datetime import timedelta
 from airflow.models import Variable
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
-from airflow.decorators import dag, task_group
+from airflow.decorators import dag
 from igf_airflow.utils.dag1_calculate_hpc_worker_utils import (
   celery_flower_workers,
   redis_queue_workers,

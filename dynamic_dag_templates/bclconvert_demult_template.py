@@ -1,43 +1,40 @@
 import os
 import pendulum
 from datetime import timedelta
-from datetime import datetime
 from airflow import DAG
-from airflow.utils.dates import days_ago
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.utils.task_group import TaskGroup
-from igf_airflow.utils.dag22_bclconvert_demult_utils import find_seqrun_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import mark_seqrun_status_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import get_samplesheet_from_portal_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import format_and_split_samplesheet_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_qc_page_for_project_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import setup_globus_transfer_for_project_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_lane_jobs
-from igf_airflow.utils.dag22_bclconvert_demult_utils import trigger_ig_jobs
-from igf_airflow.utils.dag22_bclconvert_demult_utils import run_bclconvert_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import bclconvert_report_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import sample_known_qc_factory_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import calculate_fastq_md5_checksum_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import load_fastq_and_qc_to_db_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_run_wrapper_for_known_samples_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqscreen_run_wrapper_for_known_samples_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import merge_single_cell_fastq_files_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import check_output_for_project_lane_index_group_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import collect_qc_reports_for_samples_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_project_lane_index_group_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import copy_qc_to_ftp_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_data_for_project_lane_index_group_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import build_qc_page_for_project_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import load_bclconvert_report_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import fastqc_for_undetermined_reads_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import fastq_screen_for_undetermined_reads_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import multiqc_for_undetermined_reads_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import prepare_globus_copy_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import get_files_and_copy_to_globus_func
-from igf_airflow.utils.dag22_bclconvert_demult_utils import send_email_to_user_for_project_func
+from igf_airflow.utils.dag22_bclconvert_demult_utils import (
+    find_seqrun_func,
+    mark_seqrun_status_func,
+    format_and_split_samplesheet_func,
+    setup_qc_page_for_project_func,
+    setup_globus_transfer_for_project_func,
+    trigger_lane_jobs,
+    trigger_ig_jobs,
+    run_bclconvert_func,
+    bclconvert_report_func,
+    sample_known_qc_factory_func,
+    calculate_fastq_md5_checksum_func,
+    load_fastq_and_qc_to_db_func,
+    fastqc_run_wrapper_for_known_samples_func,
+    fastqscreen_run_wrapper_for_known_samples_func,
+    merge_single_cell_fastq_files_func,
+    check_output_for_project_lane_index_group_func,
+    collect_qc_reports_for_samples_func,
+    multiqc_for_project_lane_index_group_func,
+    copy_qc_to_ftp_func,
+    build_qc_page_data_for_project_lane_index_group_func,
+    build_qc_page_for_project_func,
+    load_bclconvert_report_func,
+    fastqc_for_undetermined_reads_func,
+    fastq_screen_for_undetermined_reads_func,
+    multiqc_for_undetermined_reads_func,
+    prepare_globus_copy_func,
+    get_files_and_copy_to_globus_func,
+    send_email_to_user_for_project_func)
 
 
 ### DYNAMIC DAG DEFINITION

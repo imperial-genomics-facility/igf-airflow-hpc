@@ -2,21 +2,9 @@ import os
 import pendulum
 from datetime import timedelta
 from airflow.models import DAG, Variable
-from airflow.utils.dates import days_ago
-from airflow.operators.bash import BashOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 
-## ARG
-# default_args = {
-#     'owner': 'airflow',
-#     'depends_on_past': False,
-#     'start_date': pendulum.today('UTC').add(days=2),
-#     'email_on_failure': False,
-#     'email_on_retry': False,
-#     'retries': 1,
-#     'retry_delay': timedelta(minutes=5),
-# }
 ## DAG
 DAG_ID = \
     os.path.basename(__file__).\
@@ -81,15 +69,6 @@ with dag:
       queue='hpc_4G',
       command="docker restart airflow_flower_v4")
 
-  ## TASK
-  # restart_portal_flower_server = \
-  #   SSHOperator(
-  #     task_id='restart_portal_flower_server',
-  #     dag=dag,
-  #     ssh_hook=igf_lims_ssh_hook,
-  #     pool='generic_pool',
-  #     queue='hpc_4G',
-  #     command="docker restart celery_flower")
   restart_portal_flower_server = \
     SSHOperator(
       task_id='restart_portal_flower_server',

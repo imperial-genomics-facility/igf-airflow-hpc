@@ -1,11 +1,10 @@
 import os, pendulum
 from airflow.utils.edgemodifier import Label
-from airflow.decorators import dag, task, task_group
+from airflow.decorators import dag, task_group
 from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
     fetch_analysis_design_from_db,
 	send_email_to_user,
-	copy_data_to_globus,
 	mark_analysis_finished,
     create_main_work_dir,
 	mark_analysis_failed)

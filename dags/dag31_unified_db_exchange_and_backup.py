@@ -1,9 +1,7 @@
 import os
 import pendulum
 from datetime import timedelta
-import queue
 from airflow.models import DAG, Variable
-from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
@@ -21,17 +19,6 @@ from igf_airflow.utils.dag20_portal_metadata_utils import (
 from igf_airflow.utils.dag30_register_raw_analysis_to_pipeline_db_utils import (
     fetch_raw_analysis_queue_func,
     process_raw_analysis_queue_func)
-
-
-# args = {
-#     'owner': 'airflow',
-#     'start_date': pendulum.today('UTC').add(days=2),
-#     'retries': 4,
-#     'retry_delay': timedelta(minutes=5),
-#     'provide_context': True,
-#     'email_on_failure': False,
-#     'email_on_retry': False,
-#     'catchup': False}
 
 ## Toggle for switching portal server
 PORTAL_SERVER_MODE = 'PROD'
