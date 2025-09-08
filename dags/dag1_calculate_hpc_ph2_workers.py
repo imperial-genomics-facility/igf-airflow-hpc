@@ -2,7 +2,6 @@ import pendulum
 import os
 from datetime import timedelta
 from airflow.models import Variable
-from airflow.utils.dates import days_ago
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 from airflow.decorators import dag, task_group
