@@ -52,7 +52,7 @@ doc_md_DAG = """
     max_active_runs=1,
     default_view='grid',
     orientation='TB',
-    dagrun_timeout=timedelta(minutes=10),
+    dagrun_timeout=timedelta(minutes=5),
     doc_md=doc_md_DAG,
     tags=['igf-lims', 'wells', 'hpc'])
 def dag1_calculate_hpc_ph1_workers():
