@@ -40,18 +40,6 @@ wells_ssh_hook = \
     username=Variable.get('hpc_user',  default_var=""),
     remote_host=WELLS_SERVER_HOSTNAME)
 
-## ARGS
-# args = {
-#     'owner': 'airflow',
-#     'start_date': pendulum.today('UTC').add(days=2),
-#     'retries': 1,
-#     'retry_delay': timedelta(minutes=5),
-#     'provide_context': True,
-#     'email_on_failure': False,
-#     'email_on_retry': False,
-#     'catchup': False,
-#     'max_active_runs': 1}
-
 ## DAG
 DAG_ID = \
     os.path.basename(__file__).\

@@ -1,12 +1,10 @@
 import pendulum
-import os, json, logging, requests, base64
+import os
 from datetime import timedelta
-from requests.auth import HTTPBasicAuth
-from airflow.models import DAG, Variable
-from airflow.utils.dates import days_ago
+from airflow.models import Variable
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
-from airflow.decorators import dag, task, task_group
+from airflow.decorators import dag
 from igf_airflow.utils.dag1_calculate_hpc_worker_utils import (
   celery_flower_workers,
   redis_queue_workers,
@@ -53,7 +51,7 @@ doc_md_DAG = """
     max_active_runs=1,
     default_view='grid',
     orientation='TB',
-    dagrun_timeout=timedelta(minutes=10),
+    dagrun_timeout=timedelta(minutes=5),
     doc_md=doc_md_DAG,
     tags=['igf-lims', 'wells', 'hpc'])
 def dag1_calculate_hpc_ph2_workers():

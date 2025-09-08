@@ -1,8 +1,8 @@
 import os
 import unittest
 from airflow import DAG
-from airflow.models import DagBag, Variable
-from jinja2 import Template, Environment, FileSystemLoader, select_autoescape
+from airflow.models import DagBag
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 def check_task_dependency(
       source: dict,

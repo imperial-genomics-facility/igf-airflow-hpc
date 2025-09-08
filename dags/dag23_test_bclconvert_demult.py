@@ -5,7 +5,6 @@ from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.empty import EmptyOperator
-from airflow.utils.dates import days_ago
 from igf_airflow.utils.dag23_test_bclconvert_demult_utils import (
     get_samplesheet_from_portal_func,
     mark_seqrun_status_func,
@@ -13,7 +12,6 @@ from igf_airflow.utils.dag23_test_bclconvert_demult_utils import (
     calculate_override_bases_mask_func,
     bcl_convert_run_func,
     generate_report_func,
-    upload_report_to_box_func,
     generate_merged_report_func,
     copy_report_to_rds_func,
     upload_report_to_portal_func)

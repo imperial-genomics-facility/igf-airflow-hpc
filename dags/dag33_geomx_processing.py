@@ -1,12 +1,7 @@
-import json, time, os
+import os
 import pendulum
 from datetime import timedelta
-from airflow.decorators import dag, task, task_group
-from airflow.operators.python import get_current_context
-from airflow import XComArg
-from airflow.operators.python import BranchPythonOperator
-from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator
+from airflow.decorators import dag
 from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
 	fetch_analysis_design_from_db,
