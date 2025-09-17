@@ -220,6 +220,50 @@ with dag:
             queue='hpc_4G',
             bash_command='bash /rds/general/user/igf/home/secret_keys/get_hourly_prod_db_dump.sh ')
     ## TASK
+    insert_raw_pipeline_table_on_portal_db = \
+        SSHOperator(
+            task_id='insert_raw_pipeline_table_on_portal_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_insert.sh ")
+    ## TASK
+    update_raw_pipeline_table_on_portal_db = \
+        SSHOperator(
+            task_id='update_raw_pipeline_table_on_portal_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_update.sh ")
+    ## TASK
+    insert_raw_project_table_on_portal_db = \
+        SSHOperator(
+            task_id='insert_raw_project_table_on_portal_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/dev/portal_db_update_sql/raw_project_table_insert.sh ")
+    ## TASK
+    update_raw_project_table_on_portal_db = \
+        SSHOperator(
+            task_id='update_raw_project_table_on_portal_db',
+            dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igfportal_ssh_hook,
+            queue='hpc_4G',
+            pool='igfportal_ssh_pool',
+            command="bash /home/igf/dev/portal_db_update_sql/raw_project_table_update.sh ")
+    ## TASK
     backup_portal_db = \
         SSHOperator(
             task_id='backup_portal_db',
@@ -459,7 +503,11 @@ with dag:
     fetch_validated_metadata_from_portal_and_load >> backup_prod_db
     process_raw_analysis_queue >> backup_prod_db
     get_metadata_dump_from_pipeline_db >> upload_metadata_to_portal_db
-    backup_prod_db >> backup_portal_db
+    backup_prod_db >> insert_raw_pipeline_table_on_portal_db
+    insert_raw_pipeline_table_on_portal_db >> update_raw_pipeline_table_on_portal_db
+    update_raw_pipeline_table_on_portal_db >> insert_raw_project_table_on_portal_db
+    insert_raw_project_table_on_portal_db >> update_raw_project_table_on_portal_db
+    update_raw_project_table_on_portal_db >> backup_portal_db
     backup_prod_db >> load_data_to_legacy_prod_db >> copy_prod_db_to_igfdata >> update_db_on_igfdata
     backup_portal_db >> copy_portal_backup_to_hpc
     backup_portal_db >> upload_metadata_to_portal_db
