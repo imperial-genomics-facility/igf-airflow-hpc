@@ -37,7 +37,7 @@ services:
       - airflow_network_v4
   airflow_worker_v4:
     image: *airflow-image
-    env_file: *airflow-env-file2
+    env_file: *airflow-env-file
     logging: *common-logging
     user: *common-user
     volumes: *airflow-worker-volumes
