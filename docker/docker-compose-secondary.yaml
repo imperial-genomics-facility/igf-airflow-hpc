@@ -44,5 +44,4 @@ services:
     restart: unless-stopped
     command: celery worker -q generic --celery-hostname wells
     container_name: airflow_worker_v4
-    networks:
-      - airflow_network_v4
+    network_mode: host
