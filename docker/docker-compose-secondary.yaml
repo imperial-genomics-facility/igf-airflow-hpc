@@ -1,0 +1,48 @@
+x-common-logging: &common-logging
+    driver: "json-file"
+    options:
+        max-size: "2048m"
+
+x-user:
+    common-user: &common-user "${AIRFLOW_UID:-50000}:${GID}"
+
+x-airflow-worker-volumes: &airflow-worker-volumes
+    - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
+    - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
+    - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
+    - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
+    - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
+
+x-airflow-env-file: &airflow-env-file
+    - /home/igf/airflow_v4/secrets/airflow_env
+
+x-images:
+    airflow-image: &airflow-image airflow:v2.10.4
+
+networks:
+    airflow_network_v4:
+        driver: bridge
+
+services:
+  airflow_scheduler_v4:
+    image: *airflow-image
+    env_file: *airflow-env-file
+    logging: *common-logging
+    user: *common-user
+    volumes: *airflow-worker-volumes
+    restart: unless-stopped
+    command: scheduler
+    container_name: airflow_scheduler_v4
+    networks:
+      - airflow_network_v4
+  airflow_worker_v4:
+    image: *airflow-image
+    env_file: *airflow-env-file2
+    logging: *common-logging
+    user: *common-user
+    volumes: *airflow-worker-volumes
+    restart: unless-stopped
+    command: celery worker -q generic --celery-hostname wells
+    container_name: airflow_worker_v4
+    networks:
+      - airflow_network_v4
