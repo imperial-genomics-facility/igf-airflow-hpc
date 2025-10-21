@@ -12,6 +12,7 @@ x-airflow-worker-volumes: &airflow-worker-volumes
     - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
     - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
     - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
+    - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
 
 x-airflow-env-file: &airflow-env-file
     - /home/igf/airflow_v4/secrets/airflow_env
