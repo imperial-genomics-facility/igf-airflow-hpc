@@ -211,6 +211,17 @@ with dag:
             python_callable=process_raw_analysis_queue_func
         )
     ## TASK
+    create_prod_db_backup = \
+        SSHOperator(
+             task_id='create_prod_db_backup',
+             dag=dag,
+            retry_delay=timedelta(minutes=5),
+            retries=4,
+            ssh_hook=igflims_ssh_hook,
+            queue='hpc_4G',
+            pool='igf_lims_ssh_pool',
+            command="bash /home/igf/production_database/script/create_prod_db_dump.sh ")
+    ## TASK
     backup_prod_db = \
         BashOperator(
             task_id='backup_prod_db',
@@ -273,7 +284,7 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
-            command="bash /home/igf/dev/backup_cmd.sh ")
+            command="bash /home/igf/scripts/create_backup_for_portal_db.sh ")
     ## TASK
     load_data_to_legacy_prod_db = \
         BashOperator(
@@ -519,9 +530,10 @@ with dag:
     fetch_raw_analysis_queue >> process_raw_analysis_queue
     fetch_validated_metadata_from_portal_and_load >> get_metadata_dump_from_pipeline_db
     process_raw_analysis_queue >> get_metadata_dump_from_pipeline_db
-    fetch_validated_metadata_from_portal_and_load >> backup_prod_db
-    process_raw_analysis_queue >> backup_prod_db
+    fetch_validated_metadata_from_portal_and_load >> create_prod_db_backup
+    process_raw_analysis_queue >> create_prod_db_backup
     get_metadata_dump_from_pipeline_db >> upload_metadata_to_portal_db
+    create_prod_db_backup >> backup_prod_db
     backup_prod_db >> insert_raw_pipeline_table_on_portal_db
     insert_raw_pipeline_table_on_portal_db >> update_raw_pipeline_table_on_portal_db
     update_raw_pipeline_table_on_portal_db >> insert_raw_project_table_on_portal_db
