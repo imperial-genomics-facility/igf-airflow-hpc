@@ -379,7 +379,10 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             queue='hpc_4G',
-            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump_to_igfdata.sh ")
+            bash_command="""
+            echo "NO WORK"
+            #bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump_to_igfdata.sh
+            """)
     ## TASK
     update_tower_db_on_igfdata = \
         SSHOperator(
@@ -392,7 +395,10 @@ with dag:
             pool='igfdata_ssh_pool',
             conn_timeout=300,
             cmd_timeout=300,
-            command="bash /home/igf/superset/test1/db/tower_db_update_script.sh ")
+            command="""
+            echo "NO WORK"
+            #bash /home/igf/superset/test1/db/tower_db_update_script.sh 
+            """)
     ## TASK
     backup_airflow_db = \
         SSHOperator(
@@ -498,7 +504,10 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             queue='hpc_4G',
-            bash_command="bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_dump_to_igfdata.sh ")
+            bash_command="""
+            echo "No WORK"
+            #bash /rds/general/user/igf/home/secret_keys/copy_hourly_portal_dump_to_igfdata.sh 
+            """)
     ## PIPELINE
     copy_quota_xlsx >> create_raw_metadata_for_new_projects
     copy_access_db >> create_raw_metadata_for_new_projects
