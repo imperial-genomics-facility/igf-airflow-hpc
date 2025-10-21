@@ -213,8 +213,8 @@ with dag:
     ## TASK
     create_prod_db_backup = \
         SSHOperator(
-             task_id='create_prod_db_backup',
-             dag=dag,
+            task_id='create_prod_db_backup',
+            dag=dag,
             retry_delay=timedelta(minutes=5),
             retries=4,
             ssh_hook=igflims_ssh_hook,
