@@ -282,7 +282,7 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             queue='hpc_4G',
-            bash_command='bash /rds/general/user/igf/home/secret_keys/update_legacy_prod_db.sh ')
+            bash_command='echo "NO WORK" #bash /rds/general/user/igf/home/secret_keys/update_legacy_prod_db.sh ')
     ## TASK
     copy_prod_db_to_igfdata = \
         BashOperator(
@@ -291,7 +291,7 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             queue='hpc_4G',
-            bash_command='bash /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/copy_prod_db_to_igfdata.sh ')
+            bash_command='echo "NO WORK" #bash /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets/copy_prod_db_to_igfdata.sh ')
     ## TASK
     update_db_on_igfdata = \
         SSHOperator(
@@ -304,7 +304,7 @@ with dag:
             pool='igfdata_ssh_pool',
             conn_timeout=300,
             cmd_timeout=300,
-            command="bash /home/igf/superset/test1/db/db_update_script.sh ")
+            command='echo "NO WORK" #bash /home/igf/superset/test1/db/db_update_script.sh ')
     ## TASK
     copy_portal_backup_to_hpc = \
         BashOperator(
