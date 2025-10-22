@@ -218,6 +218,8 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             ssh_hook=igflims_ssh_hook,
+            conn_timeout=60,
+            cmd_timeout=60,
             queue='hpc_4G',
             pool='igf_lims_ssh_pool',
             command="bash /home/igf/production_database/script/create_prod_db_dump.sh ")
