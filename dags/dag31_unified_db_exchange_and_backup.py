@@ -284,6 +284,8 @@ with dag:
             retry_delay=timedelta(minutes=5),
             retries=4,
             ssh_hook=igfportal_ssh_hook,
+            conn_timeout=60,
+            cmd_timeout=60,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
             command="bash /home/igf/scripts/create_backup_for_portal_db.sh ")
