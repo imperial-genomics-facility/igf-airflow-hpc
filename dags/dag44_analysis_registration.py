@@ -1,6 +1,12 @@
 import os, pendulum
 from airflow.utils.edgemodifier import Label
 from airflow.decorators import dag, task_group, task
+from igf_airflow.utils.dag44_analysis_registration_utils import (
+    find_raw_metadata_id,
+    fetch_raw_metadata_from_portal,
+    check_raw_metadata_in_db,
+    register_raw_metadata_in_db,
+    mark_metadata_synced_on_portal)
 
 ## DAG
 DAG_ID = \
@@ -8,55 +14,7 @@ DAG_ID = \
         replace(".pyc", "").\
         replace(".py", "")
 
-## TASK - find raw metadata id in datrun.conf
-@task(
-    task_id="find_raw_metadata_id"
-    retry_delay=timedelta(minutes=5),
-    retries=4,
-    queue='hpc_4G',
-    multiple_outputs=False)
-def find_raw_metadata_id():
-    return {"raw_metadata_id": 1}
 
-## TASK - fetch raw analysis metadata from portal
-@task(
-    task_id="fetch_raw_metadata_from_portal"
-    retry_delay=timedelta(minutes=5),
-    retries=4,
-    queue='hpc_4G',
-    multiple_outputs=False)
-def fetch_raw_metadata_from_portal(raw_metadata_id):
-    return {"raw_metadata_file": "raw_metadata.json"}
-
-## TASK - check raw metadata in db
-@task(
-    task_id="check_raw_metadata_in_db"
-    retry_delay=timedelta(minutes=5),
-    retries=4,
-    queue='hpc_4G',
-    multiple_outputs=False)
-def check_raw_metadata_in_db(raw_metadata_file):
-    return {"valid_raw_metadata_file": "raw_metadata.json"}
-
-## TASK - register raw metadata in db
-@task(
-    task_id="register_raw_metadata_in_db"
-    retry_delay=timedelta(minutes=5),
-    retries=4,
-    queue='hpc_4G',
-    multiple_outputs=False)
-def register_raw_metadata_in_db(valid_raw_metadata_file):
-    return {"status": True}
-
-## TASK - mark raw metadata as synced on portal
-@task(
-    task_id="mark_metadata_synced_on_portal"
-    retry_delay=timedelta(minutes=5),
-    retries=4,
-    queue='hpc_4G',
-    multiple_outputs=False)
-def mark_metadata_synced_on_portal(raw_metadata_id, registration_status):
-    return {"status": True}
 
 @dag(
     dag_id=DAG_ID,
