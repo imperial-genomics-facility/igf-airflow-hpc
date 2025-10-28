@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master, cosmx_may25 ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -48,11 +48,4 @@ jobs:
         AIRFLOW__CORE__LOAD_EXAMPLES: False
         AIRFLOW__SECRETS__BACKEND: airflow.secrets.local_filesystem.LocalFilesystemBackend
         AIRFLOW__SECRETS__BACKEND_KWARGS: '{"variables_file_path":"airflow_var/var.json","connections_file_path":"airflow_var/conn.json"}'
-    - name: Send custom JSON data to Slack workflow
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        fields: repo,message,author,action,ref,eventName
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: always()
+
