@@ -8,10 +8,11 @@ from igf_airflow.utils.dag44_analysis_registration_utils import (
     mark_metadata_synced_on_portal)
 
 ## DAG
-DAG_ID = \
-    os.path.basename(__file__).\
-        replace(".pyc", "").\
-        replace(".py", "")
+DAG_ID = (
+    os.path.basename(__file__)
+        .replace(".pyc", "")
+        .replace(".py", "")
+)
 
 
 @dag(
