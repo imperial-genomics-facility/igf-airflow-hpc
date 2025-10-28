@@ -41,4 +41,5 @@ def dag44_analysis_registration():
             raw_metadata_id=raw_metadata_info.raw_metadata_id,
             registration_status=registered_metadata.status)
 
+
 dag44_analysis_registration()
