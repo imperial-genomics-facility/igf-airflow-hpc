@@ -14,13 +14,12 @@ DAG_ID = \
         replace(".py", "")
 
 
-
 @dag(
     dag_id=DAG_ID,
-	schedule=None,
-	start_date=pendulum.yesterday(),
-	catchup=False,
-	max_active_runs=1,
+    schedule=None,
+    start_date=pendulum.yesterday(),
+    catchup=False,
+    max_active_runs=1,
     default_view='grid',
     orientation='TB',
     tags=["portal", "analysis", "registration"])
@@ -40,6 +39,5 @@ def dag44_analysis_registration():
         mark_metadata_synced_on_portal(
             raw_metadata_id=raw_metadata_info.raw_metadata_id,
             registration_status=registered_metadata.status)
-    
 
 dag44_analysis_registration()
