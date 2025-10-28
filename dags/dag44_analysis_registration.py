@@ -10,8 +10,8 @@ from igf_airflow.utils.dag44_analysis_registration_utils import (
 ## DAG
 DAG_ID = (
     os.path.basename(__file__)
-        .replace(".pyc", "")
-        .replace(".py", "")
+    .replace(".pyc", "")
+    .replace(".py", "")
 )
 
 
