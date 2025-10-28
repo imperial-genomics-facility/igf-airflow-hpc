@@ -1,6 +1,5 @@
 import os, pendulum
-from airflow.utils.edgemodifier import Label
-from airflow.decorators import dag, task_group, task
+from airflow.decorators import dag
 from igf_airflow.utils.dag44_analysis_registration_utils import (
     find_raw_metadata_id,
     fetch_raw_metadata_from_portal,
@@ -20,7 +19,7 @@ DAG_ID = \
     dag_id=DAG_ID,
 	schedule=None,
 	start_date=pendulum.yesterday(),
-	catchup=True,
+	catchup=False,
 	max_active_runs=1,
     default_view='grid',
     orientation='TB',
@@ -37,7 +36,7 @@ def dag44_analysis_registration():
     registered_metadata = \
         register_raw_metadata_in_db(
             valid_raw_metadata_file=valid_raw_metadata_file_info.valid_raw_metadata_file)
-    sync_info = \
+    _ = \
         mark_metadata_synced_on_portal(
             raw_metadata_id=raw_metadata_info.raw_metadata_id,
             registration_status=registered_metadata.status)
