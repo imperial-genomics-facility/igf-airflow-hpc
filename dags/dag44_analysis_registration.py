@@ -29,17 +29,17 @@ def dag44_analysis_registration():
         find_raw_metadata_id()
     raw_metadata_file_info = \
         fetch_raw_metadata_from_portal(
-            raw_metadata_id=raw_metadata_info.raw_metadata_id)
+            raw_metadata_id=raw_metadata_info["raw_metadata_id"])
     valid_raw_metadata_file_info = \
         check_raw_metadata_in_db(
-            raw_metadata_file=raw_metadata_file_info.raw_metadata_file)
+            raw_metadata_file=raw_metadata_file_info["raw_metadata_file"])
     registered_metadata = \
         register_raw_analysis_metadata_in_db(
-            valid_raw_metadata_file=valid_raw_metadata_file_info.valid_raw_metadata_file)
+            valid_raw_metadata_file=valid_raw_metadata_file_info["valid_raw_metadata_file"])
     _ = \
         mark_metadata_synced_on_portal(
-            raw_metadata_id=raw_metadata_info.raw_metadata_id,
-            registration_status=registered_metadata.status)
+            raw_metadata_id=raw_metadata_info["raw_metadata_id"],
+            registration_status=registered_metadata["status"])
 
 
 dag44_analysis_registration()
