@@ -181,7 +181,7 @@ with dag:
             params={},
             python_callable=fetch_validated_metadata_from_portal_and_load_func
         )
-    ## TASK
+    ## TASK - fetch_raw_analysis_queue_func
     fetch_raw_analysis_queue = \
         PythonOperator(
             task_id="fetch_raw_analysis_queue",
@@ -193,9 +193,9 @@ with dag:
             params={
                 'new_raw_analysis_list_key': 'new_raw_analysis_list'
             },
-            python_callable=fetch_raw_analysis_queue_func
+            python_callable=lambda: True
         )
-    ## TASK
+    ## TASK - process_raw_analysis_queue_func
     process_raw_analysis_queue = \
         PythonOperator(
             task_id="process_raw_analysis_queue",
@@ -208,7 +208,7 @@ with dag:
                 "new_raw_analysis_list_key": "new_raw_analysis_list",
                 "new_raw_analysis_list_task": "fetch_raw_analysis_queue"
             },
-            python_callable=process_raw_analysis_queue_func
+            python_callable=lambda: True
         )
     ## TASK
     create_prod_db_backup = \
