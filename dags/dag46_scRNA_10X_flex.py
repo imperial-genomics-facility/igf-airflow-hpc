@@ -1,0 +1,77 @@
+import os, pendulum
+from airflow.decorators import dag, task
+from igf_airflow.utils.generic_airflow_tasks import (
+	mark_analysis_running,
+    fetch_analysis_design_from_db,
+	send_email_to_user,
+	copy_data_to_globus,
+	mark_analysis_finished,
+    create_main_work_dir,
+    calculate_md5sum_for_main_work_dir,
+    load_analysis_results_to_db,
+	mark_analysis_failed,
+    collect_all_analysis,
+    move_per_sample_analysis_to_main_work_dir)
+
+## DAG
+DAG_ID = (
+    os.path.basename(__file__)
+    .replace(".pyc", "")
+    .replace(".py", "")
+)
+
+
+@dag(
+    dag_id=DAG_ID,
+    schedule=None,
+    start_date=pendulum.yesterday(),
+    catchup=False,
+    max_active_runs=1,
+    default_view='grid',
+    orientation='TB',
+    tags=["scRNA", "analysis", "10XGenomics", "flex"])
+def dag46_scRNA_10X_flex():
+    ## TASK
+    running_analysis = \
+        mark_analysis_running(
+            next_task="fetch_analysis_design",
+            last_task="mark_analysis_failed")
+    ## TASK
+    design = \
+        fetch_analysis_design_from_db()
+    ## TASK
+    work_dir = \
+        create_main_work_dir(
+            task_tag='scRNA_flex_output')
+    ## TASK - Configure Flex Pipeline
+    ## TASK - Execute Flex Pipeline
+    ## TASK - Generate Scanpy QC for all samples
+    ## TASK
+    work_dir_with_md5 = \
+        calculate_md5sum_for_main_work_dir(
+            work_dir)
+    ## TASK
+    loaded_data = \
+        load_analysis_results_to_db(
+            work_dir_with_md5)
+    ## TASK
+    globus_data = \
+        copy_data_to_globus(
+            loaded_data)
+    ## TASK
+    send_email = \
+        send_email_to_user()
+    ## TASK
+    finished_analysis = \
+        mark_analysis_finished()
+    ## TASK
+    failed_analysis = \
+        mark_analysis_failed()
+    ## PIPELINE
+    running_analysis >> design
+    globus_data >> send_email
+    send_email >> finished_analysis
+    send_email >> failed_analysis
+
+
+dag46_scRNA_10X_flex()
