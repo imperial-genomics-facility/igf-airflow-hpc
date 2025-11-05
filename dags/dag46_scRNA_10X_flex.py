@@ -1,5 +1,6 @@
-import os, pendulum
-from airflow.decorators import dag, task
+import os
+import pendulum
+from airflow.decorators import dag
 from igf_airflow.utils.generic_airflow_tasks import (
 	mark_analysis_running,
     fetch_analysis_design_from_db,
@@ -9,9 +10,7 @@ from igf_airflow.utils.generic_airflow_tasks import (
     create_main_work_dir,
     calculate_md5sum_for_main_work_dir,
     load_analysis_results_to_db,
-	mark_analysis_failed,
-    collect_all_analysis,
-    move_per_sample_analysis_to_main_work_dir)
+	mark_analysis_failed)
 
 ## DAG
 DAG_ID = (
