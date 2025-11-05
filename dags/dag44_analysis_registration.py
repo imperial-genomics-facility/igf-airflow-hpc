@@ -25,21 +25,21 @@ DAG_ID = (
     orientation='TB',
     tags=["portal", "analysis", "registration"])
 def dag44_analysis_registration():
-    raw_metadata_info = \
+    raw_metadata_id = \
         find_raw_metadata_id()
-    raw_metadata_file_info = \
+    raw_metadata_file = \
         fetch_raw_metadata_from_portal(
-            raw_analysis_id=raw_metadata_info["raw_analysis_id"])
-    valid_raw_metadata_file_info = \
+            raw_analysis_id=raw_metadata_id)
+    valid_raw_metadata_file = \
         check_raw_metadata_in_db(
-            raw_metadata_file=raw_metadata_file_info["raw_metadata_file"])
-    registered_metadata = \
+            raw_metadata_file=raw_metadata_file)
+    registered_metadata_status = \
         register_raw_analysis_metadata_in_db(
-            valid_raw_metadata_file=valid_raw_metadata_file_info["valid_raw_metadata_file"])
+            valid_raw_metadata_file=valid_raw_metadata_file)
     _ = \
         mark_metadata_synced_on_portal(
-            raw_analysis_id=raw_metadata_info["raw_analysis_id"],
-            registration_status=registered_metadata["status"])
+            raw_analysis_id=raw_metadata_id,
+            registration_status=registered_metadata_status)
 
 
 dag44_analysis_registration()
