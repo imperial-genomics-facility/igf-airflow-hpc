@@ -57,7 +57,7 @@ def dag46_scRNA_10X_flex():
         run_cellranger_script(
             script_dict=analysis_script_info)
     ## TASK - Generate Scanpy QC for all samples
-    scanpy_out = \
+    _ = \
         run_single_sample_scanpy(
             sample_group=analysis_script_info["sample_group"],
             cellranger_output_dir=cellranger_output_dir,
