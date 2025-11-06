@@ -2,15 +2,15 @@ import os
 import pendulum
 from airflow.decorators import dag
 from igf_airflow.utils.generic_airflow_tasks import (
-	mark_analysis_running,
+    mark_analysis_running,
     fetch_analysis_design_from_db,
-	send_email_to_user,
-	copy_data_to_globus,
-	mark_analysis_finished,
+    send_email_to_user,
+    copy_data_to_globus,
+    mark_analysis_finished,
     create_main_work_dir,
     calculate_md5sum_for_main_work_dir,
     load_analysis_results_to_db,
-	mark_analysis_failed)
+    mark_analysis_failed)
 from igf_airflow.utils.dag46_scRNA_10X_flex_utils import (
     prepare_cellranger_flex_script)
 from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
