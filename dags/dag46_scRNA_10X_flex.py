@@ -57,7 +57,7 @@ def dag46_scRNA_10X_flex():
         run_cellranger_script(
             script_dict=analysis_script_info)
     ## TASK - Generate Scanpy QC for all samples
-    _ = \
+    scanpy_output = \
         run_single_sample_scanpy(
             sample_group=analysis_script_info["sample_group"],
             cellranger_output_dir=cellranger_output_dir,
@@ -85,6 +85,7 @@ def dag46_scRNA_10X_flex():
         mark_analysis_failed()
     ## PIPELINE
     running_analysis >> design
+    scanpy_output >> work_dir_with_md5
     globus_data >> send_email
     send_email >> finished_analysis
     send_email >> failed_analysis
