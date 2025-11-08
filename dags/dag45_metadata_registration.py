@@ -10,7 +10,7 @@ DAG_ID = (
     .replace(".pyc", "")
     .replace(".py", "")
 )
-doc_md_DAG = """
+doc_md = """
 ### Description
 
 * This DAG checks for an entry of "raw_metadata_id" in the dag_run.conf
@@ -25,7 +25,7 @@ doc_md_DAG = """
     max_active_runs=1,
     default_view='grid',
     orientation='TB',
-    doc_md=doc_md_DAG,
+    doc_md=doc_md,
     tags=["portal", "metadata", "registration"])
 def dag45_metadata_registration():
     raw_metadata_id = \
