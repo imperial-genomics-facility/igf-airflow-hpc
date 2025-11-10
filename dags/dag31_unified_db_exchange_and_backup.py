@@ -168,7 +168,7 @@ with dag:
             retries=4,
             queue='hpc_4G',
             params={},
-            python_callable=fetch_validated_manual_metadata_from_portal_and_load_func
+            python_callable=lambda: True, #fetch_validated_manual_metadata_from_portal_and_load_func
         )
     ## TASK
     fetch_validated_metadata_from_portal_and_load = \
@@ -179,7 +179,7 @@ with dag:
             retries=4,
             queue='hpc_4G',
             params={},
-            python_callable=fetch_validated_metadata_from_portal_and_load_func
+            python_callable=lambda: True, #fetch_validated_metadata_from_portal_and_load_func
         )
     ## TASK - fetch_raw_analysis_queue_func
     fetch_raw_analysis_queue = \
