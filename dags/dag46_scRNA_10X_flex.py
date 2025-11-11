@@ -61,7 +61,6 @@ def dag46_scRNA_10X_flex():
     sample_list = \
         flex_sample_factory(
             cellranger_output_dir=cellranger_output_dir)
-    
     ## DYNAMIC TASK - Generate Scanpy QC for all samples
     scanpy_output = \
         run_single_sample_scanpy\
