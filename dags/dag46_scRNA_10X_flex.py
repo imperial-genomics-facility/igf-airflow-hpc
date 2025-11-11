@@ -12,7 +12,8 @@ from igf_airflow.utils.generic_airflow_tasks import (
     load_analysis_results_to_db,
     mark_analysis_failed)
 from igf_airflow.utils.dag46_scRNA_10X_flex_utils import (
-    prepare_cellranger_flex_script)
+    prepare_cellranger_flex_script,
+    flex_sample_factory)
 from igf_airflow.utils.dag34_cellranger_multi_scRNA_utils import (
     run_cellranger_script,
     run_single_sample_scanpy)
@@ -56,12 +57,17 @@ def dag46_scRNA_10X_flex():
     cellranger_output_dir = \
         run_cellranger_script(
             script_dict=analysis_script_info)
-    ## TASK - Generate Scanpy QC for all samples
+    ## TASK - fet flex samples
+    sample_list = \
+        flex_sample_factory(
+            cellranger_output_dir=cellranger_output_dir)
+    ## DYNAMIC TASK - Generate Scanpy QC for all samples
     scanpy_output = \
-        run_single_sample_scanpy(
-            sample_group=analysis_script_info["sample_group"],
+        run_single_sample_scanpy\
+        .partial(
             cellranger_output_dir=cellranger_output_dir,
-            design_dict=design)
+            design_dict=design)\
+        .expand(sample_group=sample_list)
     ## TASK
     work_dir_with_md5 = \
         calculate_md5sum_for_main_work_dir(
