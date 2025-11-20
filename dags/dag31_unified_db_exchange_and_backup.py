@@ -242,7 +242,10 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
-            command="bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_insert.sh ")
+            command="""
+            echo "NO WORK"
+            #bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_insert.sh
+            """)
     ## TASK
     update_raw_pipeline_table_on_portal_db = \
         SSHOperator(
@@ -253,7 +256,10 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
-            command="bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_update.sh ")
+            command="""
+            echo "NO WORK"
+            #bash /home/igf/dev/portal_db_update_sql/raw_pipeline_table_update.sh 
+            """)
     ## TASK
     insert_raw_project_table_on_portal_db = \
         SSHOperator(
@@ -264,7 +270,10 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
-            command="bash /home/igf/dev/portal_db_update_sql/raw_project_table_insert.sh ")
+            command="""
+            echo "NO WORK"
+            #bash /home/igf/dev/portal_db_update_sql/raw_project_table_insert.sh 
+            """)
     ## TASK
     update_raw_project_table_on_portal_db = \
         SSHOperator(
@@ -275,7 +284,10 @@ with dag:
             ssh_hook=igfportal_ssh_hook,
             queue='hpc_4G',
             pool='igfportal_ssh_pool',
-            command="bash /home/igf/dev/portal_db_update_sql/raw_project_table_update.sh ")
+            command="""
+            echo "NO WORK"
+            #bash /home/igf/dev/portal_db_update_sql/raw_project_table_update.sh
+            """)
     ## TASK
     backup_portal_db = \
         SSHOperator(
@@ -349,7 +361,8 @@ with dag:
             queue='hpc_4G',
             params={
                 'json_dump_xcom_key': 'json_dump'},
-            python_callable=get_metadata_dump_from_pipeline_db_func)
+            python_callable=lambda: True, #get_metadata_dump_from_pipeline_db_func
+        )
     ## TASK
     upload_metadata_to_portal_db = \
         PythonOperator(
@@ -363,7 +376,8 @@ with dag:
                 "json_dump_xcom_key": "json_dump",
                 "json_dump_xcom_task": "get_metadata_dump_from_pipeline_db",
                 "data_load_url": "/api/v1/metadata/load_metadata"},
-            python_callable=upload_metadata_to_portal_db_func)
+            python_callable=lambda: True #upload_metadata_to_portal_db_func
+        )
     ## TASK
     backup_nf_tower_db = \
         SSHOperator(
@@ -396,7 +410,7 @@ with dag:
             queue='hpc_4G',
             bash_command="""
             echo "NO WORK"
-            #bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump_to_igfdata.sh
+            bash /rds/general/user/igf/home/secret_keys/copy_hourly_nf_dump_to_igfdata.sh
             """)
     ## TASK
     update_tower_db_on_igfdata = \
@@ -412,7 +426,7 @@ with dag:
             cmd_timeout=300,
             command="""
             echo "NO WORK"
-            #bash /home/igf/superset/test1/db/tower_db_update_script.sh 
+            bash /home/igf/superset/test1/db/tower_db_update_script.sh 
             """)
     ## TASK
     backup_airflow_db = \
