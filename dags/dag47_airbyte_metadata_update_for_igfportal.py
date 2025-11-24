@@ -14,7 +14,7 @@ from airflow.providers.common.sql.operators.sql import (
 igfportal_ssh_hook = SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host=Variable.get('igfportal_server_hostname')
+    remote_host=Variable.get('wells_server_hostname')
 )
 ## CONNECTIONS
 AIRBYTE_CONNECTION_ID = Variable.get(
@@ -23,7 +23,7 @@ AIRBYTE_CONNECTION_ID = Variable.get(
 )
 AIRBYTE_SYNC_ID = Variable.get(
     'airbyte_sync_id_for_portal_data_loading',
-    default_var=None
+    default_var="8262f73f-453b-4f72-9919-db4072006229"
 )
 PORTALDB_CONNECTION_ID = Variable.get(
     'portaldb_connection_id_for_data_loading',
@@ -85,7 +85,10 @@ def dag47_airbyte_metadata_update_for_igfportal():
     load_raw_data_to_portal = AirbyteTriggerSyncOperator(
         task_id="load_raw_data_to_portal",
         airbyte_conn_id=AIRBYTE_CONNECTION_ID,
-        connection_id=AIRBYTE_SYNC_ID
+        connection_id=AIRBYTE_SYNC_ID,
+        queue='hpc_4G',
+        pool=IGFPORTAL_POOL,
+        retries=2
     )
     ## TASK - load new project data
     load_new_projects_to_portal = SQLExecuteQueryOperator(
