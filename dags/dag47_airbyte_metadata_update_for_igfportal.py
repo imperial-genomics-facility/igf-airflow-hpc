@@ -7,6 +7,8 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 from airflow.providers.airbyte.operators.airbyte import (
     AirbyteTriggerSyncOperator)
+from airflow.providers.common.sql.operators.sql import (
+    SQLExecuteQueryOperator)
 
 ## SSH HOOK
 igfportal_ssh_hook = SSHHook(
@@ -22,6 +24,10 @@ AIRBYTE_CONNECTION_ID = Variable.get(
 AIRBYTE_SYNC_ID = Variable.get(
     'airbyte_sync_id_for_portal_data_loading',
     default_var=None
+)
+PORTALDB_CONNECTION_ID = Variable.get(
+    'portaldb_connection_id_for_data_loading',
+    default_var="portal_db_conn"
 )
 ## POOLS
 IGFPORTAL_POOL =  Variable.get(
@@ -61,7 +67,6 @@ def dag47_airbyte_metadata_update_for_igfportal():
     ## TASK - stop IGFPortal
     stop_portal_server = SSHOperator(
         task_id='stop_portal_server',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
         retries=2,
         ssh_hook=igfportal_ssh_hook,
@@ -83,119 +88,106 @@ def dag47_airbyte_metadata_update_for_igfportal():
         connection_id=AIRBYTE_SYNC_ID
     )
     ## TASK - load new project data
-    load_new_projects_to_portal = SSHOperator(
+    load_new_projects_to_portal = SQLExecuteQueryOperator(
         task_id='load_new_projects_to_portal',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
         retries=2,
-        ssh_hook=igfportal_ssh_hook,
+        conn_id=PORTALDB_CONNECTION_ID,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
-        command="""
-            docker exec portal_db \
-            bash -c '/usr/bin/mysql -h portal_db \
-                     --user=$MYSQL_USER --password=$MYSQL_PASSWORD \
-                     igfportaldb -e "
-                        INSERT INTO raw_project (
-                            project_id,
-                            project_igf_id,
-                            project_name,
-                            start_timestamp,
-                            description,
-                            status,
-                            deliverable)
-                        SELECT
-                            p.project_id,
-                            p.project_igf_id,
-                            p.project_name,
-                            CAST(REPLACE(p.start_timestamp, \'.000000Z\', \'\') AS DATETIME) AS start_timestamp,
-                            p.description,
-                            p.status,
-                            p.deliverable
-                        FROM project p
-                        WHERE p.project_id > (
-                            SELECT COALESCE(MAX(project_id), 0) FROM raw_project)"'
-        """
+        sql="""
+            INSERT INTO raw_project (
+                project_id,
+                project_igf_id,
+                project_name,
+                start_timestamp,
+                description,
+                status,
+                deliverable)
+            SELECT
+                p.project_id,
+                p.project_igf_id,
+                p.project_name,
+                CAST(REPLACE(p.start_timestamp, '.000000Z', '') AS DATETIME) AS start_timestamp,
+                p.description,
+                p.status,
+                p.deliverable
+            FROM project p
+            WHERE p.project_id > (
+                SELECT COALESCE(MAX(project_id), 0) FROM raw_project)
+        """,
+        split_statements=False,
+        return_last=False
     )
     ## TASK - load new pipeline data
-    load_new_pipelines_to_portal = SSHOperator(
+    load_new_pipelines_to_portal = SQLExecuteQueryOperator(
         task_id='load_new_pipelines_to_portal',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
         retries=2,
-        ssh_hook=igfportal_ssh_hook,
+        conn_id=PORTALDB_CONNECTION_ID,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
-        command="""
-            docker exec portal_db \
-            bash -c '/usr/bin/mysql -h portal_db \
-                     --user=$MYSQL_USER --password=$MYSQL_PASSWORD \
-                     igfportaldb -e "
-                        INSERT INTO raw_pipeline (
-                            pipeline_id,
-                            pipeline_name,
-                            pipeline_db,
-                            pipeline_type,
-                            is_active,
-                            date_stamp)
-                        SELECT 
-                            ps.pipeline_id,
-                            ps.pipeline_name,
-                            ps.pipeline_db,
-                            ps.pipeline_type,
-                            ps.is_active,
-                            CAST(REPLACE(ps.date_stamp, \'.000000Z\', \'\') AS DATETIME) AS date_stamp
-                        FROM pipeline ps
-                        WHERE ps.pipeline_id > (
-                            SELECT COALESCE(MAX(pipeline_id), 0) FROM raw_pipeline)"'
-        """
+        sql="""
+            INSERT INTO raw_pipeline (
+                pipeline_id,
+                pipeline_name,
+                pipeline_db,
+                pipeline_type,
+                is_active,
+                date_stamp)
+            SELECT 
+                ps.pipeline_id,
+                ps.pipeline_name,
+                ps.pipeline_db,
+                ps.pipeline_type,
+                ps.is_active,
+                CAST(REPLACE(ps.date_stamp, '.000000Z', '') AS DATETIME) AS date_stamp
+            FROM pipeline ps
+            WHERE ps.pipeline_id > (
+                SELECT COALESCE(MAX(pipeline_id), 0) FROM raw_pipeline)
+        """,
+        split_statements=False,
+        return_last=False
     )
     ## TASK - update existing project data
-    update_existing_projects_to_portal = SSHOperator(
+    update_existing_projects_to_portal = SQLExecuteQueryOperator(
         task_id='update_existing_projects_to_portal',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
         retries=2,
-        ssh_hook=igfportal_ssh_hook,
+        conn_id=PORTALDB_CONNECTION_ID,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
-        command="""
-            docker exec portal_db \
-            bash -c '/usr/bin/mysql -h portal_db \
-                     --user=$MYSQL_USER --password=$MYSQL_PASSWORD \
-                     igfportaldb -e "
-                        UPDATE raw_project rp
-                        JOIN project p ON p.project_id=rp.project_id
-                        SET rp.status=p.status
-                        WHERE rp.status != p.status"'
-        """
+        sql="""
+            UPDATE raw_project rp
+            JOIN project p ON p.project_id=rp.project_id
+            SET rp.status=p.status
+            WHERE rp.status != p.status
+        """,
+        split_statements=False,
+        return_last=False
     )
     ## TASK - update existing pipeline data
-    update_existing_pipelines_to_portal = SSHOperator(
+    update_existing_pipelines_to_portal = SQLExecuteQueryOperator(
         task_id='update_existing_pipelines_to_portal',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
         retries=2,
-        ssh_hook=igfportal_ssh_hook,
+        conn_id=PORTALDB_CONNECTION_ID,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
-        command="""
-            docker exec portal_db \
-            bash -c '/usr/bin/mysql -h portal_db \
-                     --user=$MYSQL_USER --password=$MYSQL_PASSWORD \
-                     igfportaldb -e "
-                        UPDATE raw_pipeline rp
-                        JOIN pipeline p ON p.pipeline_id=rp.pipeline_id
-                        SET rp.is_active=p.is_active
-                        WHERE rp.is_active != p.is_active"'
-        """
+        sql="""
+            UPDATE raw_pipeline rp
+            JOIN pipeline p ON p.pipeline_id=rp.pipeline_id
+            SET rp.is_active=p.is_active
+            WHERE rp.is_active != p.is_active
+        """,
+        split_statements=False,
+        return_last=False
     )
     ## TASK - start IGFPortal webserver
     start_portal_webserver = SSHOperator(
         task_id='start_portal_webserver',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
-        retries=2,
+        retries=4,
         ssh_hook=igfportal_ssh_hook,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
@@ -211,9 +203,8 @@ def dag47_airbyte_metadata_update_for_igfportal():
     ## TASK - start IGFPortal celery worker
     start_portal_celery_worker = SSHOperator(
         task_id='start_portal_celery_worker',
-        dag=dag,
         retry_delay=timedelta(minutes=2),
-        retries=2,
+        retries=4,
         ssh_hook=igfportal_ssh_hook,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
