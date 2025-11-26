@@ -187,8 +187,8 @@ def dag47_airbyte_metadata_update_for_igfportal():
         return_last=False
     )
     ## TASK - start IGFPortal webserver
-    start_portal_webserver = SSHOperator(
-        task_id='start_portal_webserver',
+    stop_docker_compose = SSHOperator(
+        task_id='stop_docker_compose',
         retry_delay=timedelta(minutes=2),
         retries=4,
         ssh_hook=igfportal_ssh_hook,
@@ -204,8 +204,8 @@ def dag47_airbyte_metadata_update_for_igfportal():
         """
     )
     ## TASK - start IGFPortal celery worker
-    start_portal_celery_worker = SSHOperator(
-        task_id='start_portal_celery_worker',
+    start_docker_compose = SSHOperator(
+        task_id='start_docker_compose',
         retry_delay=timedelta(minutes=2),
         retries=4,
         ssh_hook=igfportal_ssh_hook,
@@ -226,9 +226,9 @@ def dag47_airbyte_metadata_update_for_igfportal():
     load_new_projects_to_portal >> update_existing_projects_to_portal
     load_raw_data_to_portal >> load_new_pipelines_to_portal
     load_new_pipelines_to_portal >> update_existing_pipelines_to_portal
-    update_existing_projects_to_portal >> start_portal_webserver
-    update_existing_pipelines_to_portal >> start_portal_webserver
-    start_portal_webserver >> start_portal_celery_worker
+    update_existing_projects_to_portal >> stop_docker_compose
+    update_existing_pipelines_to_portal >> stop_docker_compose
+    stop_docker_compose >> start_docker_compose
 
 
 dag47_airbyte_metadata_update_for_igfportal()
