@@ -77,7 +77,7 @@ def dag47_airbyte_metadata_update_for_igfportal():
             docker compose \
                 -f IGFPortal/docker-compose-igfportal-prod.yaml \
                 -p igfportal \
-                stop webserver celery_worker1 celery_flower;
+                stop webserver nginx celery_worker1 celery_flower;
             sleep 2
         """
     )
@@ -187,7 +187,7 @@ def dag47_airbyte_metadata_update_for_igfportal():
         return_last=False
     )
     ## TASK - start IGFPortal webserver
-    stop_docker_compose = SSHOperator(
+    start_portal_webserver = SSHOperator(
         task_id='stop_docker_compose',
         retry_delay=timedelta(minutes=2),
         retries=4,
@@ -199,12 +199,12 @@ def dag47_airbyte_metadata_update_for_igfportal():
             docker compose \
                 -f IGFPortal/docker-compose-igfportal-prod.yaml \
                 -p igfportal \
-                down;
+                start webserver nginx;
             sleep 2
         """
     )
     ## TASK - start IGFPortal celery worker
-    start_docker_compose = SSHOperator(
+    start_portal_celery_worker = SSHOperator(
         task_id='start_docker_compose',
         retry_delay=timedelta(minutes=2),
         retries=4,
@@ -216,7 +216,7 @@ def dag47_airbyte_metadata_update_for_igfportal():
             docker compose \
                 -f IGFPortal/docker-compose-igfportal-prod.yaml \
                 -p igfportal \
-                up -d;
+                start celery_worker1 celery_flower;
             sleep 2
         """
     )
@@ -226,9 +226,9 @@ def dag47_airbyte_metadata_update_for_igfportal():
     load_new_projects_to_portal >> update_existing_projects_to_portal
     load_raw_data_to_portal >> load_new_pipelines_to_portal
     load_new_pipelines_to_portal >> update_existing_pipelines_to_portal
-    update_existing_projects_to_portal >> stop_docker_compose
-    update_existing_pipelines_to_portal >> stop_docker_compose
-    stop_docker_compose >> start_docker_compose
+    update_existing_projects_to_portal >> start_portal_webserver
+    update_existing_pipelines_to_portal >> start_portal_webserver
+    start_portal_webserver >> start_portal_celery_worker
 
 
 dag47_airbyte_metadata_update_for_igfportal()
