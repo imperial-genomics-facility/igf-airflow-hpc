@@ -57,8 +57,8 @@ doc_md_DAG = """
     schedule="40 23 * * *", ## run everyday at 23:40
     start_date=pendulum.yesterday(),
     catchup=False,
-    max_active_runs=20,
-    dagrun_timeout=timedelta(minutes=5),
+    max_active_runs=1,
+    dagrun_timeout=timedelta(minutes=20),
     default_view='grid',
     orientation='TB',
     doc_md=doc_md_DAG,
