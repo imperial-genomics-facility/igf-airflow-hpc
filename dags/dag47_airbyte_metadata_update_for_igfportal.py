@@ -199,7 +199,7 @@ def dag47_airbyte_metadata_update_for_igfportal():
             docker compose \
                 -f IGFPortal/docker-compose-igfportal-prod.yaml \
                 -p igfportal \
-                start webserver;
+                down;
             sleep 2
         """
     )
@@ -216,7 +216,7 @@ def dag47_airbyte_metadata_update_for_igfportal():
             docker compose \
                 -f IGFPortal/docker-compose-igfportal-prod.yaml \
                 -p igfportal \
-                start celery_worker1 celery_flower;
+                up -d;
             sleep 2
         """
     )
