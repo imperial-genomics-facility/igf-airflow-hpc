@@ -41,7 +41,7 @@ DAG_ID = (
     .replace(".py", "")
 )
 
-doc_md_DAG = """
+doc_md = """
 ### Description
 
 * This DAG updates the IGFPortal metadata using Airbyte sync
@@ -61,7 +61,7 @@ doc_md_DAG = """
     dagrun_timeout=timedelta(minutes=20),
     default_view='grid',
     orientation='TB',
-    doc_md=doc_md_DAG,
+    doc_md=doc_md,
     tags=["airbyte", "metadata", "igfportal"])
 def dag47_airbyte_metadata_update_for_igfportal():
     ## TASK - stop IGFPortal

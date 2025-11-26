@@ -31,7 +31,7 @@ DAG_ID = \
     os.path.basename(__file__).\
         replace(".pyc", "").\
         replace(".py", "")
-doc_md_DAG = """
+doc_md = """
 ### Description
 
 * This DAG calculates the number of workers for HPC phase 1 cluster
@@ -51,7 +51,7 @@ doc_md_DAG = """
     default_view='grid',
     orientation='TB',
     dagrun_timeout=timedelta(minutes=5),
-    doc_md=doc_md_DAG,
+    doc_md=doc_md,
     tags=['igf-lims', 'wells', 'hpc'])
 def dag1_calculate_hpc_ph1_workers():
     ## TASK
