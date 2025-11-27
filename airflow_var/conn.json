@@ -3,5 +3,7 @@
   "hpc_ph1_conn":"ssh://hpc_conn",
   "hpc_ph2_conn":"ssh://hpc_conn",
   "eliot_conn":"ssh://hpc_conn",
-  "woolf_conn":"ssh://hpc_conn"
+  "woolf_conn":"ssh://hpc_conn",
+  "airbyte_conn": "aitbyte://airbyte_conn",
+  "portal_db_conn": "mysql://portal_db_conn"
 }
