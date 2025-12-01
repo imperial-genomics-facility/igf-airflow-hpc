@@ -23,7 +23,7 @@ AIRBYTE_CONNECTION_ID = Variable.get(
 )
 AIRBYTE_SYNC_ID = Variable.get(
     'airbyte_sync_id_for_portal_data_loading',
-    default_var="8262f73f-453b-4f72-9919-db4072006229"
+    default_var=None
 )
 PORTALDB_CONNECTION_ID = Variable.get(
     'portaldb_connection_id_for_data_loading',
