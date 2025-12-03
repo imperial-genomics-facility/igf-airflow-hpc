@@ -14,7 +14,7 @@ from airflow.providers.common.sql.operators.sql import (
 igfportal_ssh_hook = SSHHook(
     key_file=Variable.get('hpc_ssh_key_file'),
     username=Variable.get('hpc_user'),
-    remote_host=Variable.get('wells_server_hostname')
+    remote_host=Variable.get('igfportal_server_hostname')
 )
 ## CONNECTIONS
 AIRBYTE_CONNECTION_ID = Variable.get(
