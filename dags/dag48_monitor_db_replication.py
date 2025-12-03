@@ -5,7 +5,8 @@ from airflow.decorators import dag
 from airflow.models import Variable
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
-from airflow.providers.standard.operators.empty import EmptyOperator
+#from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.operators.empty import EmptyOperator
 
 ## SSH HOOKS
 igfportal_ssh_hook = SSHHook(
