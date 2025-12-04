@@ -14,9 +14,7 @@ ENV TZ=Europe/London
 RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 USER airflow
 WORKDIR /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/
-RUN git clone https://github.com/imperial-genomics-facility/data-management-python.git && \
-    cd  data-management-python && \
-    git checkout v2.4.1
+RUN git clone -b 'v2.4.1' --single-branch --depth 1 https://github.com/imperial-genomics-facility/data-management-python.git
 WORKDIR /rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
