@@ -39,12 +39,12 @@ doc_md = """
 ### Description
 
 * This DAG monitors the database replication status between igf-portal and igf-data servers
-* The DAG is scheduled to run everyday at 23:00
+* The DAG is scheduled to run everyday at hour
 
 """
 @dag(
     dag_id=DAG_ID,
-    schedule="00 23 * * *", ## run everyday at 23:00
+    schedule="@hourly",
     start_date=pendulum.yesterday(),
     catchup=False,
     max_active_runs=1,
