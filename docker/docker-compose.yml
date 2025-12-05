@@ -9,7 +9,6 @@ x-user:
 x-airflow-worker-volumes: &airflow-worker-volumes
     - /home/igf/airflow_v4/airflow_v4_logs:/rds/general/user/igf/ephemeral/airflow_v4_logs:rw
     - /home/igf/airflow_v4/plugin:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/plugin:ro
-    - /home/igf/airflow_v4/github/data-management-python:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python:ro
     - /home/igf/airflow_v4/github/igf-airflow-hpc:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc:ro
     - /home/igf/airflow_v4/secrets:/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/secrets:ro
     - /home/igf/.ssh/id_rsa:/SSH/id_rsa:ro
@@ -46,7 +45,7 @@ x-airflow-results-db-env-file: &airflow-results-db-env-file
         - /home/igf/airflow_v4/secrets/airflow_results_db_env
 
 x-images:
-    airflow-image: &airflow-image airflow:v2.10.4
+    airflow-image: &airflow-image imperialgenomicsfacility/igf-airflow:v1.4.2
     postgres-image: &postgres-image postgres:16.4
     pgbouncer-image: &pgbouncer-image pgbouncer:v1.19.0
     redis-image: &redis-image redis:7.4
