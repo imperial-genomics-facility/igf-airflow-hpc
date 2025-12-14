@@ -27,6 +27,5 @@ def dag49_cosmx_metadata_registration():
         raw_cosmx_metadata_id=raw_cosmx_metadata_id
     )
 
+
 dag49_cosmx_metadata_registration()
-
-
