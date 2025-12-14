@@ -1,6 +1,6 @@
 import os, pendulum
 from airflow.decorators import dag
-from igf_airflow.utils.dag48_cosmx_metadata_registration_utils import (
+from igf_airflow.utils.dag49_cosmx_metadata_registration_utils import (
     find_raw_metadata_id,
     register_cosmx_metadata
 )
@@ -21,11 +21,11 @@ DAG_ID = (
     orientation='TB',
     tags=["portal", "metadata", "cosmx"]
 )
-def dag48_cosmx_metadata_registration():
+def dag49_cosmx_metadata_registration():
     raw_cosmx_metadata_id = find_raw_metadata_id()
     register_cosmx_metadata(
         raw_cosmx_metadata_id=raw_cosmx_metadata_id
     )
 
-dag48_cosmx_metadata_registration()
+dag49_cosmx_metadata_registration()
 
