@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: imperial-genomics-facility/data-management-python
-        ref: v2.5.0
+        ref: v2.5.1
         path: data-management-python
     - name: Test with pytest
       run: |
