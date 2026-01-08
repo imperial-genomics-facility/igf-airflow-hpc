@@ -152,6 +152,34 @@ def dag47_airbyte_metadata_update_for_igfportal():
         split_statements=False,
         return_last=False
     )
+    ## TASK - load new user data
+    load_new_users_to_portal = SQLExecuteQueryOperator(
+        task_id='load_new_users_to_portal',
+        retry_delay=timedelta(minutes=2),
+        retries=2,
+        conn_id=PORTALDB_CONNECTION_ID,
+        queue='hpc_4G',
+        pool=IGFPORTAL_POOL,
+        sql="""
+            INSERT INTO raw_user (
+                user_id,
+                user_igf_id,
+                name,
+                email_id,
+                status)
+            SELECT 
+                u.user_id,
+                u.user_igf_id,
+                u.name,
+                u.email_id,
+                u.status
+            FROM user u
+            WHERE u.user_id > (
+                SELECT COALESCE(MAX(user_id), 0) FROM raw_user)
+        """,
+        split_statements=False,
+        return_last=False
+    )
     ## TASK - update existing project data
     update_existing_projects_to_portal = SQLExecuteQueryOperator(
         task_id='update_existing_projects_to_portal',
@@ -182,6 +210,23 @@ def dag47_airbyte_metadata_update_for_igfportal():
             JOIN pipeline p ON p.pipeline_id=rp.pipeline_id
             SET rp.is_active=p.is_active
             WHERE rp.is_active != p.is_active
+        """,
+        split_statements=False,
+        return_last=False
+    )
+    ## TASK - update existing user data
+    update_existing_users_to_portal = SQLExecuteQueryOperator(
+        task_id='update_existing_users_to_portal',
+        retry_delay=timedelta(minutes=2),
+        retries=2,
+        conn_id=PORTALDB_CONNECTION_ID,
+        queue='hpc_4G',
+        pool=IGFPORTAL_POOL,
+        sql="""
+            UPDATE raw_user ru
+            JOIN user u ON u.user_id=ru.user_id
+            SET ru.status=u.status
+            WHERE ru.status != u.status
         """,
         split_statements=False,
         return_last=False
@@ -226,8 +271,11 @@ def dag47_airbyte_metadata_update_for_igfportal():
     load_new_projects_to_portal >> update_existing_projects_to_portal
     load_raw_data_to_portal >> load_new_pipelines_to_portal
     load_new_pipelines_to_portal >> update_existing_pipelines_to_portal
+    load_raw_data_to_portal >> load_new_users_to_portal
+    load_new_users_to_portal >> update_existing_users_to_portal
     update_existing_projects_to_portal >> start_portal_webserver
     update_existing_pipelines_to_portal >> start_portal_webserver
+    update_existing_users_to_portal >> start_portal_webserver
     start_portal_webserver >> start_portal_celery_worker
 
 
