@@ -73,23 +73,80 @@ def dag47_airbyte_metadata_update_for_igfportal():
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
         command="""
-            cd $HOME/dev;
-            docker compose \
-                -f IGFPortal/docker-compose-igfportal-prod.yaml \
-                -p igfportal \
-                stop webserver nginx celery_worker1 celery_flower;
-            sleep 2
+           #cd $HOME/dev;
+           #docker compose \
+           #    -f IGFPortal/docker-compose-igfportal-prod.yaml \
+           #    -p igfportal \
+           #    stop webserver nginx celery_worker1 celery_flower;
+            sleep 1
         """
     )
-    ## load raw data
-    load_raw_data_to_portal = AirbyteTriggerSyncOperator(
-        task_id="load_raw_data_to_portal",
-        airbyte_conn_id=AIRBYTE_CONNECTION_ID,
-        connection_id=AIRBYTE_SYNC_ID,
+    ## TASK - load project data
+    load_project_data = SSHOperator(
+        task_id='load_project_data',
+        retry_delay=timedelta(minutes=2),
+        retries=2,
+        ssh_hook=igfportal_ssh_hook,
         queue='hpc_4G',
         pool=IGFPORTAL_POOL,
-        retries=2
+        command="""
+            cd $HOME/dev/data_loading;
+            docker exec -it igfdb bash -c 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD --add-drop-table $MYSQL_DATABASE project > /tmp/project.sql'
+            docker cp igfdb:/tmp/project.sql .
+            docker exec -it igfdb rm -f /tmp/project.sql
+            docker cp project.sql portal_db:/tmp/project.sql
+            docker exec -it portal_db bash -c 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE </tmp/project.sql'
+            docker exec -it portal_db rm -f /tmp/project.sql
+            rm -f project.sql
+        """
     )
+    ## TASK - load user data
+    load_user_data = SSHOperator(
+        task_id='load_user_data',
+        retry_delay=timedelta(minutes=2),
+        retries=2,
+        ssh_hook=igfportal_ssh_hook,
+        queue='hpc_4G',
+        pool=IGFPORTAL_POOL,
+        command="""
+            cd $HOME/dev/data_loading;
+            docker exec -it igfdb bash -c 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD --add-drop-table $MYSQL_DATABASE user > /tmp/user.sql'
+            docker cp igfdb:/tmp/user.sql .
+            docker exec -it igfdb rm -f /tmp/user.sql
+            docker cp user.sql portal_db:/tmp/user.sql
+            docker exec -it portal_db bash -c 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE </tmp/user.sql'
+            docker exec -it portal_db rm -f /tmp/user.sql
+            rm -f user.sql
+        """
+    )
+    ## TASK - load pipeline data
+    load_pipeline_data = SSHOperator(
+        task_id='load_pipeline_data',
+        retry_delay=timedelta(minutes=2),
+        retries=2,
+        ssh_hook=igfportal_ssh_hook,
+        queue='hpc_4G',
+        pool=IGFPORTAL_POOL,
+        command="""
+            cd $HOME/dev/data_loading;
+            docker exec -it igfdb bash -c 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD --add-drop-table $MYSQL_DATABASE pipeline > /tmp/pipeline.sql'
+            docker cp igfdb:/tmp/pipeline.sql .
+            docker exec -it igfdb rm -f /tmp/pipeline.sql
+            docker cp pipeline.sql portal_db:/tmp/pipeline.sql
+            docker exec -it portal_db bash -c 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE </tmp/pipeline.sql'
+            docker exec -it portal_db rm -f /tmp/pipeline.sql
+            rm -f pipeline.sql
+        """
+    )
+    ## TASK - load raw data
+    # load_raw_data_to_portal = AirbyteTriggerSyncOperator(
+    #     task_id="load_raw_data_to_portal",
+    #     airbyte_conn_id=AIRBYTE_CONNECTION_ID,
+    #     connection_id=AIRBYTE_SYNC_ID,
+    #     queue='hpc_4G',
+    #     pool=IGFPORTAL_POOL,
+    #     retries=2
+    # )
     ## TASK - load new project data
     load_new_projects_to_portal = SQLExecuteQueryOperator(
         task_id='load_new_projects_to_portal',
@@ -232,51 +289,53 @@ def dag47_airbyte_metadata_update_for_igfportal():
         return_last=False
     )
     ## TASK - start IGFPortal webserver
-    start_portal_webserver = SSHOperator(
-        task_id='stop_docker_compose',
-        retry_delay=timedelta(minutes=2),
-        retries=4,
-        ssh_hook=igfportal_ssh_hook,
-        queue='hpc_4G',
-        pool=IGFPORTAL_POOL,
-        command="""
-            cd $HOME/dev;
-            docker compose \
-                -f IGFPortal/docker-compose-igfportal-prod.yaml \
-                -p igfportal \
-                start webserver nginx;
-            sleep 2
-        """
-    )
+    # start_portal_webserver = SSHOperator(
+    #     task_id='stop_docker_compose',
+    #     retry_delay=timedelta(minutes=2),
+    #     retries=4,
+    #     ssh_hook=igfportal_ssh_hook,
+    #     queue='hpc_4G',
+    #     pool=IGFPORTAL_POOL,
+    #     command="""
+    #         cd $HOME/dev;
+    #         docker compose \
+    #             -f IGFPortal/docker-compose-igfportal-prod.yaml \
+    #             -p igfportal \
+    #             start webserver nginx;
+    #         sleep 2
+    #     """
+    # )
     ## TASK - start IGFPortal celery worker
-    start_portal_celery_worker = SSHOperator(
-        task_id='start_docker_compose',
-        retry_delay=timedelta(minutes=2),
-        retries=4,
-        ssh_hook=igfportal_ssh_hook,
-        queue='hpc_4G',
-        pool=IGFPORTAL_POOL,
-        command="""
-            cd $HOME/dev;
-            docker compose \
-                -f IGFPortal/docker-compose-igfportal-prod.yaml \
-                -p igfportal \
-                start celery_worker1 celery_flower;
-            sleep 2
-        """
-    )
+    # start_portal_celery_worker = SSHOperator(
+    #     task_id='start_docker_compose',
+    #     retry_delay=timedelta(minutes=2),
+    #     retries=4,
+    #     ssh_hook=igfportal_ssh_hook,
+    #     queue='hpc_4G',
+    #     pool=IGFPORTAL_POOL,
+    #     command="""
+    #         cd $HOME/dev;
+    #         docker compose \
+    #             -f IGFPortal/docker-compose-igfportal-prod.yaml \
+    #             -p igfportal \
+    #             start celery_worker1 celery_flower;
+    #         sleep 2
+    #     """
+    # )
     ## PIPELINE
-    stop_portal_server >> load_raw_data_to_portal
-    load_raw_data_to_portal >> load_new_projects_to_portal
+    stop_portal_server >> load_project_data
+    load_project_data >> load_new_projects_to_portal
     load_new_projects_to_portal >> update_existing_projects_to_portal
-    load_raw_data_to_portal >> load_new_pipelines_to_portal
+    stop_portal_server >> load_pipeline_data
+    load_pipeline_data >> load_new_pipelines_to_portal
     load_new_pipelines_to_portal >> update_existing_pipelines_to_portal
-    load_raw_data_to_portal >> load_new_users_to_portal
+    stop_portal_server >> load_user_data
+    load_user_data >> load_new_users_to_portal
     load_new_users_to_portal >> update_existing_users_to_portal
-    update_existing_projects_to_portal >> start_portal_webserver
-    update_existing_pipelines_to_portal >> start_portal_webserver
-    update_existing_users_to_portal >> start_portal_webserver
-    start_portal_webserver >> start_portal_celery_worker
+    # update_existing_projects_to_portal >> start_portal_webserver
+    # update_existing_pipelines_to_portal >> start_portal_webserver
+    # update_existing_users_to_portal >> start_portal_webserver
+    # start_portal_webserver >> start_portal_celery_worker
 
 
 dag47_airbyte_metadata_update_for_igfportal()
