@@ -5,8 +5,8 @@ from airflow.decorators import dag
 from airflow.models import Variable
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
-from airflow.providers.airbyte.operators.airbyte import (
-    AirbyteTriggerSyncOperator)
+# from airflow.providers.airbyte.operators.airbyte import (
+#     AirbyteTriggerSyncOperator)
 from airflow.providers.common.sql.operators.sql import (
     SQLExecuteQueryOperator)
 
