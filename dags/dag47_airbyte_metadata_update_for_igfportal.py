@@ -91,16 +91,16 @@ def dag47_airbyte_metadata_update_for_igfportal():
         pool=IGFPORTAL_POOL,
         command="""
             cd $HOME/dev/data_loading;
-            docker exec -it igfdb bash -c \
+            docker exec -i igfdb bash -c \
                 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD \
                 --add-drop-table $MYSQL_DATABASE project > /tmp/project.sql'
             docker cp igfdb:/tmp/project.sql .
-            docker exec -it igfdb rm -f /tmp/project.sql
+            docker exec -i igfdb rm -f /tmp/project.sql
             docker cp project.sql portal_db:/tmp/project.sql
-            docker exec -it portal_db bash -c \
+            docker exec -i portal_db bash -c \
                 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE \
                 </tmp/project.sql'
-            docker exec -it portal_db rm -f /tmp/project.sql
+            docker exec -i portal_db rm -f /tmp/project.sql
             rm -f project.sql
         """
     )
@@ -114,16 +114,16 @@ def dag47_airbyte_metadata_update_for_igfportal():
         pool=IGFPORTAL_POOL,
         command="""
             cd $HOME/dev/data_loading;
-            docker exec -it igfdb bash -c \
+            docker exec -i igfdb bash -c \
                 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD \
                 --add-drop-table $MYSQL_DATABASE user > /tmp/user.sql'
             docker cp igfdb:/tmp/user.sql .
-            docker exec -it igfdb rm -f /tmp/user.sql
+            docker exec -i igfdb rm -f /tmp/user.sql
             docker cp user.sql portal_db:/tmp/user.sql
-            docker exec -it portal_db bash -c \
+            docker exec -i portal_db bash -c \
                 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE \
                 </tmp/user.sql'
-            docker exec -it portal_db rm -f /tmp/user.sql
+            docker exec -i portal_db rm -f /tmp/user.sql
             rm -f user.sql
         """
     )
@@ -137,16 +137,16 @@ def dag47_airbyte_metadata_update_for_igfportal():
         pool=IGFPORTAL_POOL,
         command="""
             cd $HOME/dev/data_loading;
-            docker exec -it igfdb bash -c \
+            docker exec -i igfdb bash -c \
                 'mysqldump -h igfdb -u root --password=$MYSQL_ROOT_PASSWORD \
                 --add-drop-table $MYSQL_DATABASE pipeline > /tmp/pipeline.sql'
             docker cp igfdb:/tmp/pipeline.sql .
-            docker exec -it igfdb rm -f /tmp/pipeline.sql
+            docker exec -i igfdb rm -f /tmp/pipeline.sql
             docker cp pipeline.sql portal_db:/tmp/pipeline.sql
-            docker exec -it portal_db bash -c \
+            docker exec -i portal_db bash -c \
                 'mysql -h portal_db -u igfrw -p$MYSQL_PASSWORD $MYSQL_DATABASE \
                 </tmp/pipeline.sql'
-            docker exec -it portal_db rm -f /tmp/pipeline.sql
+            docker exec -i portal_db rm -f /tmp/pipeline.sql
             rm -f pipeline.sql
         """
     )
