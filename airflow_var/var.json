@@ -90,7 +90,7 @@
   "igf_lims_dynamic_dag_dir": "/home/igf/airflow_v4/github/igf-airflow-hpc/dags/dynamic_dags",
   "hpc_dynamic_dag_dir": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc/dags/dynamic_dags/",
   "dynamic_demult_dag_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/igf-airflow-hpc/dynamic_dag_templates/bclconvert_demult_template.py",
-  "scanpy_single_sample_template":"/rds/general/project/genomics-facility-archive-2019/live/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.2.ipynb",
+  "scanpy_single_sample_template":"/rds/general/project/genomics-facility-archive-2019/live/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.4.ipynb",
   "scvelo_single_sample_template":"/rds/general/project/genomics-facility-archive-2019/live/tgu/software/scanpy-notebook-image/templates/scvelo_basic_single_sample_v0.0.2.ipynb",
   "scanpy_notebook_image":"/rds/general/project/genomics-facility-archive-2019/live/tgu/resources/pipeline_resource/singularity_images/scanpy-notebook-image/scanpy-notebook-image_v0.0.4.sif",
   "scirpy_single_sample_template":"/rds/general/project/genomics-facility-archive-2019/live/tgu/software/scirpy-notebook-image/templates/scirpy_basic_v0.0.4.ipynb",
