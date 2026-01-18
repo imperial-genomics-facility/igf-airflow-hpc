@@ -45,7 +45,7 @@ x-airflow-results-db-env-file: &airflow-results-db-env-file
         - /home/igf/airflow_v4/secrets/airflow_results_db_env
 
 x-images:
-    airflow-image: &airflow-image imperialgenomicsfacility/igf-airflow:v1.7.1
+    airflow-image: &airflow-image imperialgenomicsfacility/igf-airflow:v1.7.2
     postgres-image: &postgres-image postgres:16.4
     pgbouncer-image: &pgbouncer-image pgbouncer:v1.19.0
     redis-image: &redis-image redis:7.4
