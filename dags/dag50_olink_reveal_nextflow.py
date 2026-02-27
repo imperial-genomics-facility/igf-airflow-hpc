@@ -12,7 +12,7 @@ from igf_airflow.utils.generic_airflow_tasks import (
     load_analysis_results_to_db,
     mark_analysis_failed
 )
-from igf_airflow.utils.dag50_olink_reveal_nextflow import (
+from igf_airflow.utils.dag50_olink_reveal_nextflow_utils import (
     prepare_olink_nextflow_script,
     run_olink_nextflow_script
 )
@@ -48,13 +48,13 @@ def dag50_olink_reveal_nextflow():
         task_tag='olink_reveal_output'
     )
     ## TASK - Configure olink Pipeline
-    analysis_script_info = prepare_olink_nextflow_script(
+    analysis_script = prepare_olink_nextflow_script(
         design_dict=design,
         work_dir=work_dir
     )
     ## TASK - Execute Olink Pipeline
     olink_exe = run_olink_nextflow_script(
-        script_dict=analysis_script_info
+        script_dict=analysis_script
     )
     ## TASK
     work_dir_with_md5 = calculate_md5sum_for_main_work_dir(
