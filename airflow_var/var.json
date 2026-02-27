@@ -1,4 +1,6 @@
 {
+  "olink_nextflow_conf_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/nextflow_template/olink_nextflow_v0.0.1.conf",
+  "olink_nextflow_runner_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/nextflow_template/olink_nextflow_runner_v0.0.1.sh",
   "airbyte_connection_id_for_portal_data_loading": "airbyte_conn",
   "airbyte_sync_id_for_portal_data_loading": "",
   "portaldb_connection_id_for_data_loading": "portal_db_conn",
