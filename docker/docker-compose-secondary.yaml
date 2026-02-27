@@ -17,7 +17,7 @@ x-airflow-env-file: &airflow-env-file
     - /home/igf/airflow_v4/secrets/airflow_env
 
 x-images:
-    airflow-image: &airflow-image imperialgenomicsfacility/igf-airflow:v1.7.3
+    airflow-image: &airflow-image imperialgenomicsfacility/igf-airflow:v1.8.0
 
 networks:
     airflow_network_v4:
