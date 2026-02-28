@@ -54,6 +54,7 @@
   "email_config": "/rds/general/user/igf/home/secret_keys/email_config.json",
   "seqrun_email_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/seqrun_update_email_template.txt",
   "analysis_email_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/analysis_update_email_template.txt",
+  "cosmx_analysis_email_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/cosmx_analysis_update_email_template.txt",
   "user_account_creation_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/send_new_account_info.txt",
   "project_cleanup_email_notification_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/project_cleanup_notification.txt",
   "project_cleanup_finished_email_notification_template": "/rds/general/project/genomics-facility-archive-2019/live/AIRFLOW/airflow_v4/github/data-management-python/template/email_notification/project_cleanup_finished.txt",
