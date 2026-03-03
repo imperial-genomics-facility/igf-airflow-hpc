@@ -163,12 +163,8 @@ def dag43_cosmx_export_and_qc():
     ## TO DO TASK GROUP EXPAND
     downloaded_data = (
         run_export_task_group
-        .partial(
-            work_dir=work_dir
-        )
-        .expand(
-            run_entry=design_data
-        )
+        .partial(work_dir=work_dir)
+        .expand(run_entry=design_data)
     )
     ## TASK
     all_slides = collect_all_slides(
