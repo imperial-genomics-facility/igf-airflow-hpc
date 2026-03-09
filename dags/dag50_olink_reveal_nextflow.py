@@ -48,13 +48,13 @@ def dag50_olink_reveal_nextflow():
         task_tag='olink_reveal_output'
     )
     ## TASK - Configure olink Pipeline
-    analysis_script = prepare_olink_nextflow_script(
+    analysis_script_conf = prepare_olink_nextflow_script(
         design_dict=design,
         work_dir=work_dir
     )
     ## TASK - Execute Olink Pipeline
     olink_exe = run_olink_nextflow_script(
-        run_script=analysis_script
+        run_script=analysis_script_conf["run_script"]
     )
     ## TASK
     work_dir_with_md5 = calculate_md5sum_for_main_work_dir(
