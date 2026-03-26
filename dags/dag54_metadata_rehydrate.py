@@ -1,9 +1,26 @@
 import os
 import pendulum
+from datetime import timedelta
 from airflow.decorators import dag
-from igf_airflow.utils.dag54_metadata_rehydrate_utils import (
-
+from airflow.models import DAG, Variable
+from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
+from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.ssh.hooks.ssh import SSHHook
+from igf_airflow.utils.dag20_portal_metadata_utils import (
+    copy_remote_file_to_hpc_func,
+    create_raw_metadata_for_new_projects_func,
+    get_formatted_metadata_files_func
 )
+from igf_airflow.utils.dag54_metadata_rehydrate_utils import (
+    get_known_projects_func
+)
+
+HPC_RDS = '/rds/general/project/genomics-facility-archive-2019/live'
+QUOTA_XLSX_FILE_PATH = f'{HPC_RDS}/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Quotes.xlsx'
+ACCESS_DB_PATH = f'{HPC_RDS}/orwell_access_lims/docs/igf/IGF operation/ADMIN/DB tables/Database2_be.accdb'
+
+
 ## DAG
 DAG_ID = (
     os.path.basename(__file__)
@@ -22,7 +39,85 @@ DAG_ID = (
     tags=["metadata", "hpc"]
 )
 def dag54_metadata_rehydrate():
-    pass
+    ## TASK
+    copy_quota_xlsx = PythonOperator(
+        task_id="copy_quota_xlsx",
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_4G',
+        params={
+            'xcom_key': 'quota_xlsx',
+            'hpc_ssh_key_file': None,
+            'source_address': None,
+            'source_user': None,
+            'source_path': QUOTA_XLSX_FILE_PATH
+        },
+        python_callable=copy_remote_file_to_hpc_func
+    )
+    ## TASK
+    copy_access_db = PythonOperator(
+        task_id="copy_access_db",
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_4G',
+        params={
+            'xcom_key': 'access_db',
+            'hpc_ssh_key_file': None,
+            'source_address': None,
+            'source_user': None,
+            'source_path': ACCESS_DB_PATH
+        },
+        python_callable=copy_remote_file_to_hpc_func
+    )
+    ## TASK
+    get_known_projects = PythonOperator(
+        task_id="get_known_projects",
+        dag=dag,
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_4G',
+        params={
+            'xcom_key': 'known_projects'
+        },
+        python_callable=get_known_projects_func
+    )
+    ## TASK
+    create_raw_metadata_for_new_projects = PythonOperator(
+        task_id="create_raw_metadata_for_new_projects",
+        dag=dag,
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_8G8t',
+        params={
+            'xcom_key': 'metadata_dir',
+            'quota_xcom_task': 'copy_quota_xlsx',
+            'quota_xcom_key': 'quota_xlsx',
+            'access_db_xcom_task': 'copy_access_db',
+            'access_db_xcom_key': 'access_db',
+            'known_projects_xcom_task': 'get_known_projects',
+            'known_projects_xcom_key': 'known_projects',
+            'spark_threads': 8,
+            'spark_py_file': '/home/vmuser/LimsMetadataParsing/dist/igfLimsParsing-0.0.1-py3.7.egg',
+            'spark_script_path': '/home/vmuser/LimsMetadataParsing/scripts/parseAccessDbForMetadata.py',
+            'ucanaccess_path': '/home/vmuser/UCanAccess-4.0.4-bin'
+        },
+        python_callable=create_raw_metadata_for_new_projects_func
+    )
+    ## TASK
+    get_formatted_metadata_files = PythonOperator(
+        task_id="get_formatted_metadata_files",
+        dag=dag,
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_4G',
+        params={
+            'xcom_key': 'formatted_metadata',
+            'raw_metadata_xcom_key': 'metadata_dir',
+            'raw_metadata_xcom_task': 'create_raw_metadata_for_new_projects'
+        },
+        python_callable=get_formatted_metadata_files_func
+    )
+    ## TASK
 
 
 dag54_metadata_rehydrate()
