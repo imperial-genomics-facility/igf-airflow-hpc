@@ -10,10 +10,12 @@ from airflow.providers.ssh.hooks.ssh import SSHHook
 from igf_airflow.utils.dag20_portal_metadata_utils import (
     copy_remote_file_to_hpc_func,
     create_raw_metadata_for_new_projects_func,
-    get_formatted_metadata_files_func
+    get_formatted_metadata_files_func,
+    upload_raw_metadata_to_portal_func
 )
 from igf_airflow.utils.dag54_metadata_rehydrate_utils import (
-    get_known_projects_func
+    get_known_projects_func,
+    get_current_metadata_files_func
 )
 
 HPC_RDS = '/rds/general/project/genomics-facility-archive-2019/live'
@@ -70,17 +72,7 @@ def dag54_metadata_rehydrate():
         python_callable=copy_remote_file_to_hpc_func
     )
     ## TASK
-    get_known_projects = PythonOperator(
-        task_id="get_known_projects",
-        dag=dag,
-        retry_delay=timedelta(minutes=5),
-        retries=4,
-        queue='hpc_4G',
-        params={
-            'xcom_key': 'known_projects'
-        },
-        python_callable=get_known_projects_func
-    )
+    get_known_projects = get_known_projects_func()
     ## TASK
     create_raw_metadata_for_new_projects = PythonOperator(
         task_id="create_raw_metadata_for_new_projects",
@@ -104,6 +96,11 @@ def dag54_metadata_rehydrate():
         python_callable=create_raw_metadata_for_new_projects_func
     )
     ## TASK
+    get_current_metadata_files = get_current_metadata_files_func(
+        metadata_dir=create_raw_metadata_for_new_projects["metadata_dir"]
+    )
+    
+    ## TASK
     get_formatted_metadata_files = PythonOperator(
         task_id="get_formatted_metadata_files",
         dag=dag,
@@ -113,11 +110,31 @@ def dag54_metadata_rehydrate():
         params={
             'xcom_key': 'formatted_metadata',
             'raw_metadata_xcom_key': 'metadata_dir',
-            'raw_metadata_xcom_task': 'create_raw_metadata_for_new_projects'
+            'raw_metadata_xcom_task': 'get_current_metadata_files'
         },
         python_callable=get_formatted_metadata_files_func
     )
     ## TASK
+    upload_raw_metadata_to_portal = PythonOperator(
+        task_id="upload_raw_metadata_to_portal",
+        dag=dag,
+        retry_delay=timedelta(minutes=5),
+        retries=4,
+        queue='hpc_4G',
+        pool='igf_portal_pool',
+        params={
+            'formatted_metadata_xcom_key': 'formatted_metadata',
+            'formatted_metadata_xcom_task': 'get_formatted_metadata_files'
+        },
+        python_callable=upload_raw_metadata_to_portal_func
+    )
+    ## PIPELINE
+    copy_quota_xlsx >> create_raw_metadata_for_new_projects
+    copy_access_db >> create_raw_metadata_for_new_projects
+    get_known_projects >> create_raw_metadata_for_new_projects
+    create_raw_metadata_for_new_projects >> get_current_metadata_files
+    get_current_metadata_files >> get_formatted_metadata_files
+    get_formatted_metadata_files >> upload_raw_metadata_to_portal
 
 
 dag54_metadata_rehydrate()
