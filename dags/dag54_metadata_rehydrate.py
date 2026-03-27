@@ -2,11 +2,7 @@ import os
 import pendulum
 from datetime import timedelta
 from airflow.decorators import dag
-from airflow.models import DAG, Variable
 from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
-from airflow.providers.ssh.operators.ssh import SSHOperator
-from airflow.providers.ssh.hooks.ssh import SSHHook
 from igf_airflow.utils.dag20_portal_metadata_utils import (
     copy_remote_file_to_hpc_func,
     create_raw_metadata_for_new_projects_func,
