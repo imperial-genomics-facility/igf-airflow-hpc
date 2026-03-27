@@ -94,7 +94,6 @@ def dag54_metadata_rehydrate():
     get_current_metadata_files = get_current_metadata_files_func(
         metadata_dir=create_raw_metadata_for_new_projects.output["metadata_dir"]
     )
-    
     ## TASK
     get_formatted_metadata_files = PythonOperator(
         task_id="get_formatted_metadata_files",
