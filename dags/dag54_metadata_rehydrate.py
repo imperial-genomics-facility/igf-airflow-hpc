@@ -76,7 +76,6 @@ def dag54_metadata_rehydrate():
     ## TASK
     create_raw_metadata_for_new_projects = PythonOperator(
         task_id="create_raw_metadata_for_new_projects",
-        dag=dag,
         retry_delay=timedelta(minutes=5),
         retries=4,
         queue='hpc_8G8t',
@@ -103,7 +102,6 @@ def dag54_metadata_rehydrate():
     ## TASK
     get_formatted_metadata_files = PythonOperator(
         task_id="get_formatted_metadata_files",
-        dag=dag,
         retry_delay=timedelta(minutes=5),
         retries=4,
         queue='hpc_4G',
@@ -117,7 +115,6 @@ def dag54_metadata_rehydrate():
     ## TASK
     upload_raw_metadata_to_portal = PythonOperator(
         task_id="upload_raw_metadata_to_portal",
-        dag=dag,
         retry_delay=timedelta(minutes=5),
         retries=4,
         queue='hpc_4G',
