@@ -103,7 +103,7 @@ def dag54_metadata_rehydrate():
         params={
             'xcom_key': 'formatted_metadata',
             'raw_metadata_xcom_key': 'metadata_dir',
-            'raw_metadata_xcom_task': 'get_current_metadata_files'
+            'raw_metadata_xcom_task': 'get_current_metadata_files_func'
         },
         python_callable=get_formatted_metadata_files_func
     )
