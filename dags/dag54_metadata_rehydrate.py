@@ -81,7 +81,7 @@ def dag54_metadata_rehydrate():
             'quota_xcom_key': 'quota_xlsx',
             'access_db_xcom_task': 'copy_access_db',
             'access_db_xcom_key': 'access_db',
-            'known_projects_xcom_task': 'get_known_projects',
+            'known_projects_xcom_task': 'get_known_projects_func',
             'known_projects_xcom_key': 'known_projects',
             'spark_threads': 8,
             'spark_py_file': '/home/vmuser/LimsMetadataParsing/dist/igfLimsParsing-0.0.1-py3.7.egg',
