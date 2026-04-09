@@ -160,7 +160,7 @@ with dag:
                 dag=dag,
                 retry_delay=timedelta(minutes=5),
                 retries=1,
-                queue='hpc_16G4t',
+                queue='hpc_32G4t',
                 params={
                     'samplesheet_index': samplesheet_id,
                     'index_column': 'index',
